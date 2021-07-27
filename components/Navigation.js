@@ -3,8 +3,13 @@ import { Button, Text, View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { DiscoverScreen, HomeScreen, ProfileScreen, NotificationsScreen, CreateScreen } from "../screens"
+import HomeScreen from '../screens/HomeScreen'
+import DiscoverScreen from '../screens/DiscoverScreen'
+import CreateScreen from '../screens/CreateScreen'
+import NotificationsScreen from '../screens/NotificationsScreen'
+import ProfileScreen from '../screens/ProfileScreen'
 import Ionicons from "@expo/vector-icons/Ionicons"
+import Colors from '../constants/Colors';
 
 
 const HomeStack = createStackNavigator();
@@ -69,30 +74,29 @@ export default () => {
                         let iconName;
 
                         if (route.name === 'Home') {
-                            iconName = focused ? 'ios-information-circle' : 'ios-information-circle-outline';
+                            iconName = focused ? 'home' : 'home';
                         } else if (route.name === 'Discover') {
-                            iconName = focused ? 'ios-list-box' : 'ios-list';
+                            iconName = focused ? 'search' : 'search';
                         } else if (route.name === 'Create') {
-                            iconName = focused ? 'ios-list-box' : 'ios-list';
+                            iconName = focused ? 'add-circle-outline' : 'add-circle-outline';
                         } else if (route.name === 'Notifications') {
-                            iconName = focused ? 'ios-list-box' : 'ios-list';
+                            iconName = focused ? 'heart' : 'heart';
                         } else if (route.name === 'Profile') {
-                            iconName = focused ? 'ios-list-box' : 'ios-list';
+                            iconName = focused ? 'person' : 'person';
                         }
-
-                        // You can return any component that you like here!
                         return <Ionicons name={iconName} size={size} color={color} />;
                     },
                 })}
                 tabBarOptions={{
-                    activeTintColor: 'tomato',
-                    inactiveTintColor: 'gray',
+                    activeTintColor: Colors.black,
+                    inactiveTintColor: Colors.gray,
+                    showLabel: false,
                 }}
             >
                 <Tab.Screen name="Home" component={HomeStackScreen} />
                 <Tab.Screen name="Discover" component={DiscoverStackScreen} />
                 <Tab.Screen name="Create" component={CreateStackScreen} />
-                <Tab.Screen name="Notifications" component={NotificationsStackScreen} />
+                <Tab.Screen name="Notifications" component={NotificationsStackScreen} options={{tabBarBadge:15}}/>
                 <Tab.Screen name="Profile" component={ProfileStackScreen} />
             </Tab.Navigator>
         </NavigationContainer>
