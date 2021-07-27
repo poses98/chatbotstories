@@ -22,7 +22,6 @@ const styles = StyleSheet.create({
         borderRadius: 5,
         backgroundColor: "transparent",
         height: 35,
-        marginHorizontal: 15,
         justifyContent: "center",
         alignItems: "center",
     },
