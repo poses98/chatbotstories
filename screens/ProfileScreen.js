@@ -1,14 +1,13 @@
-import React, { useLayoutEffect } from 'react';
-import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity } from 'react-native';
+import React, { useLayoutEffect, useState } from 'react';
+import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity,FlatList } from 'react-native';
 import ProfileHeader from '../components/Profile/ProfileHeader';
 import Colors from '../constants/Colors';
-import Button from "../components/Button";
 import Ionicons from "@expo/vector-icons/Ionicons"
 
-const StoryContainer = ({ interactive, title, description, views, time, likes, id }) => {
+const StoryContainer = ({ color, interactive, title, description, views, time, likes, id, onPress }) => {
     return (
-        <TouchableOpacity>
-            <View style={styles.storyContainer}>
+        <TouchableOpacity onPress={onPress}>
+            <View style={[styles.storyContainer, { backgroundColor: `${color}` }]}>
                 <View style={styles.storyBar}>
                     {interactive && (
                         <View style={[styles.storyTag, { backgroundColor: Colors.green }]}>
@@ -21,7 +20,7 @@ const StoryContainer = ({ interactive, title, description, views, time, likes, i
                     <View style={styles.storyTag}>
                         <Text>Drama</Text>
                     </View>
-                    
+
                 </View>
                 <View style={styles.storyMainInfoContainer}>
                     <Text style={styles.storyTitle}>{title}</Text>
@@ -37,16 +36,6 @@ const StoryContainer = ({ interactive, title, description, views, time, likes, i
                             <Ionicons name="time-outline" size={20} color={Colors.black} />
                             <Text>{time} min</Text>
                         </View>
-                        <View style={styles.storyStats}>
-                            <Ionicons name="heart-sharp" size={20} color={Colors.red} />
-                            <Text>{likes}</Text>
-                        </View>
-                        <TouchableOpacity>
-                            <View style={[styles.storyStats,{alignSelf:"flex-end"}]}>
-                                <Ionicons name="bookmark-outline" size={30} color={Colors.black} />
-                            </View>
-                        </TouchableOpacity>
-
                     </View>
                 </View>
             </View >
@@ -56,6 +45,8 @@ const StoryContainer = ({ interactive, title, description, views, time, likes, i
 
 
 export default ({ navigation }) => {
+    const [stories, setStories] = useState([])
+
     return (
         <ScrollView style={styles.container}>
             <ProfileHeader
@@ -68,31 +59,34 @@ export default ({ navigation }) => {
                 navigation={navigation}
             />
 
-            <StoryContainer
-                interactive={true}
-                title="1984"
-                views={1499}
-                likes={106}
-                time={55}
+            <FlatList
+                data={[
+                    { color: Colors.blue, interactive: true, title: "1908", description: "", views: 98, time: 15, likes: 90, id: 0 },
+                    { color: Colors.green, interactive: false, title: "Moby-Dick", description: "", views: 98, time: 15, likes: 90, id: 0 },
+                    { color: Colors.purple, interactive: true, title: "Mac Beth", description: "", views: 98, time: 15, likes: 90, id: 0 },
+                ]}
+                renderItem={({ item: { color, interactive, title, description, views, time, likes, id } }) => {
+                    return (
+                        <StoryContainer
+                            color={color}
+                            interactive={interactive}
+                            title={title}
+                            description={description}
+                            views={views}
+                            time={time}
+                            likes={likes}
+                            id={id}
+                            onPress={() => {
+
+                            }}
+                        />
+                    );
+                }}
             />
-            <StoryContainer
-                interactive={false}
-                title="Mac Beth"
-                views={55456}
-                likes={356}
-                time={30}
-            />
-            <StoryContainer
-                interactive={true}
-                title="Moby-Dick"
-                views={78542}
-                likes={546}
-                time={17.5}
-            />
+
         </ScrollView >
     )
 }
-
 
 const styles = StyleSheet.create({
     container: {
@@ -105,8 +99,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
         height: 230,
         padding: 15,
-        borderTopWidth: 1,
-        borderColor: Colors.gray
+        borderColor: Colors.gray,
     },
     storyBar: {
         alignSelf: "flex-start",

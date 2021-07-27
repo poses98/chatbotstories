@@ -2,14 +2,20 @@ import * as React from 'react';
 import { NavigationContainer, getFocusedRouteNameFromRoute } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+
+import Ionicons from "@expo/vector-icons/Ionicons"
+import Colors from '../constants/Colors';
+
 import HomeScreen from '../screens/HomeScreen'
 import DiscoverScreen from '../screens/DiscoverScreen'
-import CreateScreen from '../screens/CreateScreen'
 import NotificationsScreen from '../screens/NotificationsScreen'
 import ProfileScreen from '../screens/ProfileScreen'
 import ProfileEditScreen from '../screens/ProfileEditScreen'
-import Ionicons from "@expo/vector-icons/Ionicons"
-import Colors from '../constants/Colors';
+import StoryCreateScreen from '../screens/StoryCreateScreen'
+import StoryInfoScreen from '../screens/StoryInfoScreen';
+import ChapterEditScreen from '../screens/ChapterEditScreen'
+import ChapterReadScreen from '../screens/ChapterReadScreen'
+
 
 
 
@@ -46,6 +52,7 @@ const MainTabNavigation = () => {
                         iconName = focused ? 'search' : 'search';
                     } else if (route.name === 'Create') {
                         iconName = focused ? 'add-circle-outline' : 'add-circle-outline';
+                        size=40
                     } else if (route.name === 'Notifications') {
                         iconName = focused ? 'heart' : 'heart';
                     } else if (route.name === 'Profile') {
@@ -62,7 +69,7 @@ const MainTabNavigation = () => {
         >
             <Tab.Screen name="Home" component={HomeScreen} />
             <Tab.Screen name="Discover" component={DiscoverScreen} />
-            <Tab.Screen name="Create" component={CreateScreen} />
+            <Tab.Screen name="Create" component={StoryCreateScreen} />
             <Tab.Screen name="Notifications" component={NotificationsScreen} />
             <Tab.Screen name="Profile" component={ProfileScreen} />
         </Tab.Navigator>
@@ -84,8 +91,17 @@ export default () => {
                     name="ProfileEdit"
                     component={ProfileEditScreen}
                     options={{ title: "Edit profile" }} />
-
+                <HomeStack.Screen
+                name="StoryInfo"
+                component={StoryInfoScreen}
+                options={({ route }) => {
+                    return {
+                        title: route.params.title,
+                    };
+                }}
+            />
             </HomeStack.Navigator>
         </NavigationContainer>
     );
 }
+

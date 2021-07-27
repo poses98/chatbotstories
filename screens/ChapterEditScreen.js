@@ -1,10 +1,10 @@
-import * as React from 'react';
+import React from 'react';
 import { View, Text } from 'react-native';
 
 export default () => {
     return (
         <View>
-            <Text>Feed screen</Text>
+            <Text>Chapter edit screen</Text>
         </View>
     )
 }
