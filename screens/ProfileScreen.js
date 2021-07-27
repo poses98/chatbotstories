@@ -5,13 +5,11 @@ import Colors from '../constants/Colors';
 import Button from "../components/Button";
 import Ionicons from "@expo/vector-icons/Ionicons"
 
-const StoryContainer = ({ interactive, title, description, views, time, likes }) => {
+const StoryContainer = ({ interactive, title, description, views, time, likes, id }) => {
     return (
-        <TouchableOpacity delayPressIn={20}>
+        <TouchableOpacity>
             <View style={styles.storyContainer}>
-                {/** Tag bar */}
                 <View style={styles.storyBar}>
-                    {/** Tags, make another component?*/}
                     {interactive && (
                         <View style={[styles.storyTag, { backgroundColor: Colors.green }]}>
                             <Text>Interactive</Text>
@@ -25,13 +23,11 @@ const StoryContainer = ({ interactive, title, description, views, time, likes })
                     </View>
                     
                 </View>
-                {/** Name & description box */}
                 <View style={styles.storyMainInfoContainer}>
                     <Text style={styles.storyTitle}>{title}</Text>
                     <Text>"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras at condimentum ex, ut tristique magna. Proin vitae ligula eu lectus mollis eleifend non ut dui. Fusce condimentum auctor nunc, in aliquam."</Text>
                 </View>
                 <View style={{ alignSelf: "flex-end" }}>
-                    {/**Left side */}
                     <View style={{ flexDirection: "row", alignItems: "center" }}>
                         <View style={styles.storyStats}>
                             <Ionicons name="eye-outline" size={20} color={Colors.black} />
@@ -60,8 +56,6 @@ const StoryContainer = ({ interactive, title, description, views, time, likes })
 
 
 export default ({ navigation }) => {
-    const interactive = true
-
     return (
         <ScrollView style={styles.container}>
             <ProfileHeader
@@ -105,96 +99,19 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: "#fff",
     },
-    profileInfo: {
-        flex: 0.43,
-        alignItems: 'stretch',
-        flexDirection: 'column',
-    },
-    itemTitle: { fontSize: 24, padding: 5, color: "white" },
-    itemContainer: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-        flex: 1,
-        height: 90,
-        margin: 15,
-    },
-    profilePic: {
-        width: 90,
-        height: 90,
-        borderRadius: 50,
-        marginTop: 15,
-        marginLeft: 15
-    },
-    icon: {
-        padding: 5,
-        fontSize: 24,
-    },
-    centeredView: {
-        justifyContent: "center",
-        alignItems: "center",
-        marginTop: 50,
-    },
-    modalView: {
-        backgroundColor: "white",
-        borderRadius: 20,
-        padding: 35,
-        alignItems: "center",
-        shadowColor: "#000",
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-        elevation: 5,
-    },
-    infoBox: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    textInfo: {
-        fontSize: 14,
-        marginTop: 3
-    },
-    numberInfo: {
-        fontWeight: 'bold',
-        fontSize: 18
-    },
-    bioBox: {
-        flex: 1,
-        paddingHorizontal: 15,
-        paddingVertical: 5
-    },
-    profileName: {
-        fontWeight: "bold",
-        fontSize: 15,
-    },
-    profileWeb: {
-        fontSize: 15,
-    },
-    profileDescription: {
-        fontSize: 15,
-        justifyContent: 'center',
-        alignItems: 'stretch'
-    },
     storyContainer: {
         flexDirection: "column",
         justifyContent: "space-between",
         alignItems: "center",
         height: 230,
-
         padding: 15,
         borderTopWidth: 1,
-
         borderColor: Colors.gray
     },
     storyBar: {
         alignSelf: "flex-start",
         padding: 0,
         flexDirection: 'row',
-        
     },
     storyTag: {
         borderWidth: 1,
@@ -215,5 +132,4 @@ const styles = StyleSheet.create({
         marginRight: 15,
         alignItems: "center"
     }
-
 });
