@@ -1,78 +1,37 @@
-import React, { useState, useLayoutEffect } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView,Alert } from 'react-native';
+import React, { useState, useLayoutEffect, useEffect } from 'react';
+import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { CommonActions } from "@react-navigation/native";
 import Colors from '../constants/Colors';
 import A from 'react-native-a'
 import LabeledInput from '../components/LabeledInput';
 import Ionicons from "@expo/vector-icons/Ionicons"
+import { firestore, auth } from "firebase";
+import { updateDoc } from '../services/collections';
+import { doc, getDoc } from "firebase/firestore";
 
-const renderStackBarIconRight = (navigation) => {
-    return (
-        <View style={{ flexDirection: "row" }}>
-            <TouchableOpacity
-                onPress={() => {
-                    //Push changes to the database
-                    navigation.dispatch(CommonActions.goBack());
-                }}
-                style={{ paddingRight: 5 }}>
-                <Ionicons name="checkmark-outline" size={26} color={Colors.black} />
-            </TouchableOpacity>
 
-        </View>
-    )
-}
-const backButtonProfileEdit = (navigation) => {
-    return (
-        <View style={{ flexDirection: "row" }}>
-            <TouchableOpacity
-                onPress={() => {
-                    changesWillNotBeSavedAlert(navigation)
-                }}
-                style={{ paddingLeft: 10 }}>
-                <Ionicons name="close-outline" size={26} color={Colors.black} />
-            </TouchableOpacity>
-
-        </View>
-    )
-}
-
-const changesWillNotBeSavedAlert = (navigation) =>
-    Alert.alert(
-      "Changes will not be saved",
-      "Are you sure?",
-      [
-        {
-          text: "Cancel",
-          onPress: () => console.log("Cancel Pressed"),
-          style: "cancel"
-        },
-        { text: "OK", onPress: () => {
-            navigation.dispatch(CommonActions.goBack());
-        } },
-        
-      ],{cancelable:true}
-    );
 
 export default ({ navigation }) => {
+    const [data, setdata] = useState({})
+    const [loading, setloading] = useState(true)
+    const docRef = firestore().collection("users")
 
 
-    const [inputName, setInputName] = useState({
-        text: "",
-        errorMessage: ""
-    })
-    const [usernameInput, setUsernameInput] = useState({
-        text: "",
-        errorMessage: ""
-    })
+    useEffect(() => {
+        docRef.doc(auth().currentUser.uid).get().then((doc) => {
+            if (doc.exists) {
+                console.log("Document loaded");
+                setdata(doc.data())
+                setloading(true)
+            } else {
+                // doc.data() will be undefined in this case
+                console.log("No such document!");
+            }
+        }).catch((error) => {
+            console.log("Error getting document:", error);
+        });
+    }, [])
 
-    const [websiteInput, setWebsiteInput] = useState({
-        text: "",
-    })
-
-    const [descriptionInput, setdescriptionInput] = useState({
-        text: "",
-        errorMessage: ""
-    })
 
     useLayoutEffect(() => {
         navigation.setOptions({
@@ -84,65 +43,133 @@ export default ({ navigation }) => {
         })
     })
 
+    const renderStackBarIconRight = (navigation) => {
+        return (
+            <View style={{ flexDirection: "row" }}>
+                <TouchableOpacity
+                    onPress={() => {
+                        updateDoc(docRef, auth().currentUser.uid, data)
+                        navigation.dispatch(CommonActions.goBack());
+                    }}
+                    style={{ paddingRight: 5 }}>
+                    <Ionicons name="checkmark-outline" size={26} color={Colors.black} />
+                </TouchableOpacity>
+
+            </View>
+        )
+    }
+
+    const backButtonProfileEdit = (navigation) => {
+        return (
+            <View style={{ flexDirection: "row" }}>
+                <TouchableOpacity
+                    onPress={() => {
+                        changesWillNotBeSavedAlert(navigation)
+                    }}
+                    style={{ paddingLeft: 10 }}>
+                    <Ionicons name="close-outline" size={26} color={Colors.black} />
+                </TouchableOpacity>
+
+            </View>
+        )
+    }
+
+    const changesWillNotBeSavedAlert = (navigation) =>
+        Alert.alert(
+            "Changes will not be saved",
+            "Are you sure?",
+            [
+                {
+                    text: "Cancel",
+                    onPress: () => console.log("Cancel Pressed"),
+                    style: "cancel"
+                },
+                {
+                    text: "OK", onPress: () => {
+                        navigation.dispatch(CommonActions.goBack());
+                    }
+                },
+
+            ], { cancelable: true }
+        );
+
+
     return (
         <ScrollView style={styles.container}>
-            <Image
-                style={styles.profilePic}
-                source={require("../assets/profilepicplaceholder.png")}
-            />
-            <TouchableOpacity onPress={() => {
-                //Upload new pic function
-            }}>
-                <Text style={styles.changeProfilePicText}>
-                    Change profile picture
-                </Text>
-            </TouchableOpacity>
+            {loading && data && (
+                <View>
+                    <Image
+                        style={styles.profilePic}
+                        source={require("../assets/profilepicplaceholder.png")}
+                    />
+                    <TouchableOpacity onPress={() => {
+                        //Upload new pic function
+                    }}>
+                        <Text style={styles.changeProfilePicText}>
+                            Change profile picture
+                        </Text>
+                    </TouchableOpacity>
 
-            {/**Name */}
-            <LabeledInput
-                label="Name"
-                text={inputName.text}
-                onChangeText={(text) => {
-                    setInputName(text);
-                }}
-                autoCompleteType={"name"}
-                placeholder="Your name"
-                maxLength={30}
-            />
-            {/**User name */}
-            <LabeledInput
-                label="Username"
-                text={inputName.text}
-                onChangeText={(text) => {
-                    setInputName(text);
-                }}
-                placeholder="Your username"
-                maxLength={20}
-            />
-            {/**Web */}
-            <LabeledInput
-                label="Website"
-                text={inputName.text}
-                onChangeText={(text) => {
-                    setInputName(text);
-                }}
-                placeholder="Your personal or professional website"
-                maxLength={60}
-                autoCapitalize="none"
-            />
-            {/**Description */}
-            <LabeledInput
-                label="Description"
-                text={inputName.text}
-                onChangeText={(text) => {
-                    setInputName(text);
-                }}
-                placeholder="Present yourself to other people"
-                maxLength={200}
-            />
-
-
+                    {/**Name */}
+                    <LabeledInput
+                        label="Name"
+                        text={data.name}
+                        onChangeText={(text) => {
+                            setdata({ ...data, name: text })
+                        }}
+                        autoCompleteType={"name"}
+                        placeholder="Your name"
+                        maxLength={30}
+                        defaultValue={data.name}
+                    />
+                    {/**User name */}
+                    <LabeledInput
+                        label="Username"
+                        text={data.username}
+                        onChangeText={(text) => {
+                            setdata({ ...data, username: text })
+                        }}
+                        placeholder="Your username"
+                        maxLength={20}
+                        value={data.username}
+                    />
+                    {/**Web */}
+                    <LabeledInput
+                        label="Website"
+                        text={data.name}
+                        onChangeText={(text) => {
+                            setdata({ ...data, website: text })
+                        }}
+                        placeholder="Your personal or professional website"
+                        maxLength={60}
+                        autoCapitalize="none"
+                        value={data.website}
+                    />
+                    {/**Description */}
+                    <LabeledInput
+                        label="Description"
+                        text={data.description}
+                        onChangeText={(text) => {
+                            setdata({ ...data, description: text })
+                        }}
+                        placeholder="Present yourself to other people"
+                        maxLength={200}
+                        value={data.description}
+                    />
+                </View>
+            )}
+            {!loading && (
+                <View style={{
+                    flex: 1,
+                    backgroundColor: "#fff",
+                    justifyContent: "center",
+                    alignItems: "center",
+                }}>
+                    <Image source={require('../assets/loading.gif')} style={{ width: 200, height: 200 }} />
+                </View>
+            )}
         </ScrollView>
+
     )
 }
 

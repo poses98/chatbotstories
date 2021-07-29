@@ -3,8 +3,20 @@ import { View, Text, StyleSheet, Image } from 'react-native';
 import A from 'react-native-a'
 import Button from '../Button';
 
-export default ({ profilePic, name, web, description, posts, followers, following, ...data }) => {
 
+
+export default ({ profilePic, name, web, description, posts, followers, following, ...data }) => {
+    const EditProfileButton = () => {
+        return (
+            <Button
+                text="Edit profile"
+                textStyle={{ fontWeight: "bold" }}
+                onPress={() => { data.navigation.navigate('ProfileEdit') }}
+                buttonStyle={{ marginTop: 10 }}
+            />
+        )
+    }
+    
     return (
         <View style={styles.profileInfo}>
             {/* Header profile */}
@@ -36,12 +48,7 @@ export default ({ profilePic, name, web, description, posts, followers, followin
                 <A style={styles.profileWeb} href="google.com"><Text>{web}</Text></A>
                 {/* Bio  */}
                 <Text style={styles.profileDescription}>{description}</Text>
-                <Button
-                    text="Edit profile"
-                    textStyle={{ fontWeight: "bold" }}
-                    onPress={() => { data.navigation.navigate('ProfileEdit') }}
-                    buttonStyle={{marginTop:10}}
-                />
+                <EditProfileButton/>
             </View>
 
         </View>
@@ -53,7 +60,7 @@ const styles = StyleSheet.create({
         flex: 0.43,
         alignItems: 'stretch',
         flexDirection: 'column',
-        marginBottom:15
+        marginBottom: 15
     },
     itemContainer: {
         flexDirection: "row",

@@ -1,22 +1,21 @@
-import * as React from 'react';
-import { NavigationContainer, getFocusedRouteNameFromRoute } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import * as React from 'react'
+import { getFocusedRouteNameFromRoute } from '@react-navigation/native'
+import { createStackNavigator } from '@react-navigation/stack'
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 
 import Ionicons from "@expo/vector-icons/Ionicons"
-import Colors from '../constants/Colors';
-
+import Colors from '../constants/Colors'
 import HomeScreen from '../screens/HomeScreen'
 import DiscoverScreen from '../screens/DiscoverScreen'
 import NotificationsScreen from '../screens/NotificationsScreen'
 import ProfileScreen from '../screens/ProfileScreen'
 import ProfileEditScreen from '../screens/ProfileEditScreen'
 import StoryCreateScreen from '../screens/StoryCreateScreen'
-import StoryInfoScreen from '../screens/StoryInfoScreen';
+import StoryInfoScreen from '../screens/StoryInfoScreen'
 import ChapterEditScreen from '../screens/ChapterEditScreen'
 import ChapterReadScreen from '../screens/ChapterReadScreen'
-
-
+import LoginScreen from '../screens/LoginScreen'
+import LoadingScreen from '../screens/LoadingScreen'
 
 
 const getHeaderTitle = (route) => {
@@ -52,7 +51,7 @@ const MainTabNavigation = () => {
                         iconName = focused ? 'search' : 'search';
                     } else if (route.name === 'Create') {
                         iconName = focused ? 'add-circle-outline' : 'add-circle-outline';
-                        size=40
+                        size = 40
                     } else if (route.name === 'Notifications') {
                         iconName = focused ? 'heart' : 'heart';
                     } else if (route.name === 'Profile') {
@@ -76,22 +75,48 @@ const MainTabNavigation = () => {
     )
 }
 
-const HomeStack = createStackNavigator();
-export default () => {
+const LoadingStack = createStackNavigator();
+export const LoadingStackScreen = () => {
     return (
-        <NavigationContainer>
-            <HomeStack.Navigator>
-                <HomeStack.Screen
-                    name="Home"
-                    component={MainTabNavigation}
-                    options={({ route }) => ({
-                        headerTitle: getHeaderTitle(route),
-                    })} />
-                <HomeStack.Screen
-                    name="ProfileEdit"
-                    component={ProfileEditScreen}
-                    options={{ title: "Edit profile" }} />
-                <HomeStack.Screen
+
+        <LoadingStack.Navigator screenOptions={{headerShown: false}}>
+            <LoadingStack.Screen name="Loading" component={LoadingScreen} />
+            <LoadingStack.Screen name="Home" component={HomeStackScreen} />
+            <LoadingStack.Screen name="Login" component={AuthStackScreen} />
+        </LoadingStack.Navigator>
+
+    )
+}
+
+
+
+const AuthStack = createStackNavigator();
+export const AuthStackScreen = () => {
+    return (
+
+        <AuthStack.Navigator>
+            <AuthStack.Screen name="Login" component={LoginScreen} />
+        </AuthStack.Navigator>
+
+    )
+}
+
+
+const RootStack = createStackNavigator();
+export const RootStackScreen = () => {
+    return (
+        <RootStack.Navigator>
+            <RootStack.Screen
+                name="Home"
+                component={MainTabNavigation}
+                options={({ route }) => ({
+                    headerTitle: getHeaderTitle(route),
+                })} />
+            <RootStack.Screen
+                name="ProfileEdit"
+                component={ProfileEditScreen}
+                options={{ title: "Edit profile" }} />
+            <RootStack.Screen
                 name="StoryInfo"
                 component={StoryInfoScreen}
                 options={({ route }) => {
@@ -100,8 +125,8 @@ export default () => {
                     };
                 }}
             />
-            </HomeStack.Navigator>
-        </NavigationContainer>
+        </RootStack.Navigator>
+
     );
 }
 
