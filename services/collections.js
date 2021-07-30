@@ -33,3 +33,24 @@ export const updateDoc = (ref, id, data) => {
             console.log(`Updated item: ${id}`);
         });
 };
+
+export const availableUsername = (ref,id,data) => {
+    ref.
+    doc(data.username).
+    get().
+    then((doc) => {
+        if (doc.exists) {
+            console.log(doc.data())
+            if(doc.data().uid === id){
+                return true;
+            }else{
+                return false;
+            }
+        } else {
+            console.log("No such document!");
+            return true;
+        }
+    }).catch((error) => {
+        console.log("Error getting document:", error);
+    });
+}

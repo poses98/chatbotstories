@@ -6,21 +6,27 @@ import A from 'react-native-a'
 import LabeledInput from '../components/LabeledInput';
 import Ionicons from "@expo/vector-icons/Ionicons"
 import { firestore, auth } from "firebase";
-import { updateDoc } from '../services/collections';
+import { updateDoc,removeDoc } from '../services/collections';
 import { doc, getDoc } from "firebase/firestore";
 
 
 
 export default ({ navigation }) => {
-    const [data, setdata] = useState({})
+    const [data, setdata] = useState({
+        username: {
+            errorMessage: ""
+        }
+    })
+    const [errorMessage, seterrorMessage] = useState("")
     const [loading, setloading] = useState(true)
+    const [oldUsername, setoldUsername] = useState("")
     const docRef = firestore().collection("users")
-
-
+    const userRef = firestore().collection('usernames')
     useEffect(() => {
         docRef.doc(auth().currentUser.uid).get().then((doc) => {
             if (doc.exists) {
                 console.log("Document loaded");
+                setoldUsername(doc.data().username);
                 setdata(doc.data())
                 setloading(true)
             } else {
@@ -48,8 +54,41 @@ export default ({ navigation }) => {
             <View style={{ flexDirection: "row" }}>
                 <TouchableOpacity
                     onPress={() => {
-                        updateDoc(docRef, auth().currentUser.uid, data)
-                        navigation.dispatch(CommonActions.goBack());
+
+                        userRef.doc(data.username).get().then((doc) => {
+                            let available = false;
+                            if (doc.exists) {
+                                console.log(doc.data())
+                                if (doc.data().uid === auth().currentUser.uid) {
+                                    available = true
+                                } else {
+                                    available = false;
+                                }
+                            } else {
+                                available = true;
+                            }
+
+                            if (available) {
+                                console.log(`deleting last username: ${oldUsername}`)
+                                removeDoc(userRef,oldUsername)
+                                console.log("username available, updating object...")
+                                firestore().
+                                    collection('usernames').
+                                    doc(data.username).
+                                    set({ uid: auth().currentUser.uid });
+                                updateDoc(docRef, auth().currentUser.uid, data)
+                                navigation.dispatch(CommonActions.goBack());
+                            } else {
+                                console.log("USERNAME NOT AVAILABLE. PROCEEDING TO HANDLE THIS.")
+
+                                seterrorMessage("Username is not available 💔")
+                            }
+                        }).catch((error) => {
+                            console.log("Error getting document:", error);
+                        });
+
+
+
                     }}
                     style={{ paddingRight: 5 }}>
                     <Ionicons name="checkmark-outline" size={26} color={Colors.black} />
@@ -126,6 +165,7 @@ export default ({ navigation }) => {
                     <LabeledInput
                         label="Username"
                         text={data.username}
+                        errorMessage={errorMessage}
                         onChangeText={(text) => {
                             setdata({ ...data, username: text })
                         }}

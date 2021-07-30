@@ -32,12 +32,14 @@ const login = (email, password) => {
 const createAccount = (email, password, data) => {
     auth().createUserWithEmailAndPassword(email, password)
         .then(({ user }) => {
-
             firestore().
                 collection('users').
                 doc(user.uid).
                 set(data);
-            
+            firestore().
+                collection('usernames').
+                doc(data.username).
+                set(user.uid);
         })
 }
 
