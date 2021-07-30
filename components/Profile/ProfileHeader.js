@@ -45,9 +45,9 @@ export default ({ profilePic, name, web, description, posts, followers, followin
                 {/* Profile name  */}
                 <Text style={styles.profileName}>{name}</Text>
                 {/* Web  */}
-                <A style={styles.profileWeb} href="google.com"><Text>{web}</Text></A>
+                {web != "" && <A style={styles.profileWeb} href="google.com"><Text>{web}</Text></A> }
                 {/* Bio  */}
-                <Text style={styles.profileDescription}>{description}</Text>
+                {description != "" && <Text style={styles.profileDescription}>{description}</Text>}
                 <EditProfileButton/>
             </View>
 

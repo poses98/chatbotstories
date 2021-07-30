@@ -184,7 +184,7 @@ export default () => {
                                 isAllValid = false;
                             }
                             if (isAllValid) {
-                                const data = {name:name.text,username:userName.text,description:""}
+                                const data = {name:name.text,username:userName.text,description:"",website:""}
                                 isCreateMode ? createAccount(emailField.text, passwordField.text, data) : login(emailField.text, passwordField.text);
                             }
                         }}
