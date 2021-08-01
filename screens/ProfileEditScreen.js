@@ -22,13 +22,16 @@ export default ({ navigation }) => {
     const [oldUsername, setoldUsername] = useState("")
     const docRef = firestore().collection("users")
     const userRef = firestore().collection('usernames')
+    /**
+     * Getting the user data to show in the form
+     */
     useEffect(() => {
         docRef.doc(auth().currentUser.uid).get().then((doc) => {
             if (doc.exists) {
                 console.log("Document loaded");
                 setoldUsername(doc.data().username);
                 setdata(doc.data())
-                setloading(true)
+                setloading(false)
             } else {
                 // doc.data() will be undefined in this case
                 console.log("No such document!");
@@ -38,7 +41,9 @@ export default ({ navigation }) => {
         });
     }, [])
 
-
+    /**
+     * This function renders the icons in headerbar 
+     */
     useLayoutEffect(() => {
         navigation.setOptions({
             headerRight: () => renderStackBarIconRight(navigation),
@@ -48,13 +53,15 @@ export default ({ navigation }) => {
             }
         })
     })
-
-    const renderStackBarIconRight = (navigation) => {
+    /**
+     * This function renders the right icon in the stack bar and
+     * updates database when the icon is pressed
+     */
+    const renderStackBarIconRight = () => {
         return (
             <View style={{ flexDirection: "row" }}>
                 <TouchableOpacity
                     onPress={() => {
-
                         userRef.doc(data.username).get().then((doc) => {
                             let available = false;
                             if (doc.exists) {
@@ -97,8 +104,10 @@ export default ({ navigation }) => {
             </View>
         )
     }
-
-    const backButtonProfileEdit = (navigation) => {
+    /**
+     * This function renders the back button in the stack screen
+     */
+    const backButtonProfileEdit = () => {
         return (
             <View style={{ flexDirection: "row" }}>
                 <TouchableOpacity
@@ -112,8 +121,10 @@ export default ({ navigation }) => {
             </View>
         )
     }
-
-    const changesWillNotBeSavedAlert = (navigation) =>
+    /**
+     * This functioin shows an alert box alerting that changes won't be saved
+     */
+    const changesWillNotBeSavedAlert = () =>
         Alert.alert(
             "Changes will not be saved",
             "Are you sure?",
@@ -135,7 +146,7 @@ export default ({ navigation }) => {
 
     return (
         <ScrollView style={styles.container}>
-            {loading && data && (
+            {!loading && data && (
                 <View>
                     <Image
                         style={styles.profilePic}
@@ -198,14 +209,14 @@ export default ({ navigation }) => {
                     />
                 </View>
             )}
-            {!loading && (
+            {loading && (
                 <View style={{
                     flex: 1,
                     backgroundColor: "#fff",
                     justifyContent: "center",
                     alignItems: "center",
                 }}>
-                    <Image source={require('../assets/loading.gif')} style={{ width: 200, height: 200 }} />
+                    <Image source={require('../assets/loading_simple.gif')} style={{ width: 100, height: 100 }} />
                 </View>
             )}
         </ScrollView>

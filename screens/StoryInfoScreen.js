@@ -20,7 +20,7 @@ export default ({ navigation }) => {
                 <TouchableOpacity
                     onPress={() => { }}
                     style={{ paddingRight: 5 }}>
-                    <Ionicons name="pencil-outline" size={26} color={Colors.black} />
+                    <Ionicons name="log-out-outline" size={26} color={Colors.black} />
                 </TouchableOpacity>
             </View >
         )

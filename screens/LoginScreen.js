@@ -29,19 +29,7 @@ const login = (email, password) => {
 
 }
 
-const createAccount = (email, password, data) => {
-    auth().createUserWithEmailAndPassword(email, password)
-        .then(({ user }) => {
-            firestore().
-                collection('users').
-                doc(user.uid).
-                set(data);
-            firestore().
-                collection('usernames').
-                doc(data.username).
-                set(user.uid);
-        })
-}
+
 
 
 export default () => {
@@ -60,12 +48,46 @@ export default () => {
     })
     const [name, setName] = useState({
         text: "",
-        errorMessage:""
+        errorMessage: ""
     })
     const [userName, setUserName] = useState({
-        text:"",
-        errorMessage:""
+        text: "",
+        errorMessage: ""
     })
+    const createAccount = (email, password, data) => {
+
+        const userRef = firestore().collection('usernames')
+        userRef.doc(data.username).get().then((doc) => {
+            let available = false;
+            if (doc.exists) {
+                available = false
+            } else {
+                available = true;
+            }
+    
+            if (available) {
+                auth().createUserWithEmailAndPassword(email, password)
+                .then(({ user }) => {
+                    firestore().
+                        collection('users').
+                        doc(user.uid).
+                        set(data);
+                    firestore().
+                        collection('usernames').
+                        doc(data.username).
+                        set({ uid: auth().currentUser.uid });
+                })
+            } else {
+                console.log("USERNAME NOT AVAILABLE. PROCEEDING TO HANDLE THIS.")
+                userName.errorMessage = "Username not available :(";
+                setUserName({ ...userName });
+            }
+        }).catch((error) => {
+            console.log("Error getting document:", error);
+        });
+    
+       
+    }
     return (
 
         <ScrollView style={{ flex: 1, flexDirection: 'column' }}>
@@ -186,7 +208,7 @@ export default () => {
                                 isAllValid = false;
                             }
                             if (isAllValid) {
-                                const data = {name:name.text,username:userName.text,description:"",website:""}
+                                const data = { name: name.text, username: userName.text, description: "", website: "" }
                                 isCreateMode ? createAccount(emailField.text, passwordField.text, data) : login(emailField.text, passwordField.text);
                             }
                         }}

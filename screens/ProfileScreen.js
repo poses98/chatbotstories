@@ -60,6 +60,31 @@ const StoryContainer = ({ color, interactive, title, description, views, time, i
 export default ({ navigation }) => {
     const [stories, setStories] = useState([])
     const [data, setdata] = useState({})
+    const [loading, setloading] = useState(true)
+
+    /**
+     * Render sign out button (develop only)
+     */
+    useLayoutEffect(() => {
+        navigation.dangerouslyGetParent().setOptions({
+            headerRight: () => renderStackBarIconRight(),
+            headerRightContainerStyle: {
+                paddingRight: 10
+            },
+            title: "hello"
+        })
+    })
+    const renderStackBarIconRight = () => {
+        return (
+            <View style={{ flexDirection: "row" }}>
+                <TouchableOpacity
+                    onPress={() => { auth().signOut() }}
+                    style={{ paddingRight: 5 }}>
+                    <Ionicons name="log-out-outline" size={26} color={Colors.black} />
+                </TouchableOpacity>
+            </View >
+        )
+    }
     //Get user information
     const userRef =
         firestore()
@@ -69,59 +94,72 @@ export default ({ navigation }) => {
         const unsubscribe = firestore().collection("users").doc(auth().currentUser.uid)
             .onSnapshot((doc) => {
                 console.log("Profile data fetched: ", doc.data());
+                setloading(false)
                 setdata(doc.data())
             });
         return unsubscribe;
     }, [])
 
-    useLayoutEffect(() => {
-        navigation.setOptions({
-            title: data.username
-        })
-    })
+
 
 
     return (
+
         <ScrollView style={styles.container}>
-            <ProfileHeader
-                name={data.name}
-                web={data.website}
-                description={data.description}
-                posts="5"
-                followers="673"
-                following="1.965"
-                navigation={navigation}
-                userId={auth().currentUser.uid}
-            />
+            {!loading && (
+                <View>
+                    <ProfileHeader
+                        name={data.name}
+                        web={data.website}
+                        description={data.description}
+                        posts="5"
+                        followers="673"
+                        following="1.965"
+                        navigation={navigation}
+                        userId={auth().currentUser.uid}
+                    />
 
-            <FlatList
-                data={[
-                    { color: Colors.blue, interactive: true, title: "1908", description: "", views: 98, time: 15, likes: 90, id: 0, image: images.drama },
-                    { color: Colors.green, interactive: false, title: "Moby-Dick", description: "", views: 98, time: 15, likes: 90, id: 1, image: images.terror },
-                    { color: Colors.purple, interactive: true, title: "Mac Beth", description: "", views: 98, time: 15, likes: 90, id: 2, image: images.snow },
-                    { color: Colors.purple, interactive: false, title: "Indiana Jones", description: "", views: 140, time: 15, likes: 90, id: 3, image: images.adventure },
-                ]}
-                renderItem={({ item: { color, interactive, title, description, views, time, likes, id, image } }) => {
-                    return (
-                        <StoryContainer
-                            color={color}
-                            interactive={interactive}
-                            title={title}
-                            description={description}
-                            views={views}
-                            time={time}
-                            likes={likes}
-                            id={id}
-                            image={image}
-                            onPress={() => {
-                                navigation.navigate("StoryInfo", { title })
-                            }}
-                        />
-                    );
-                }}
-            />
-
+                    <FlatList
+                        data={[
+                            { color: Colors.blue, interactive: true, title: "1908", description: "", views: 98, time: 15, likes: 90, id: "0", image: images.drama },
+                            { color: Colors.green, interactive: false, title: "Moby-Dick", description: "", views: 98, time: 15, likes: 90, id: "1", image: images.terror },
+                            { color: Colors.purple, interactive: true, title: "Mac Beth", description: "", views: 98, time: 15, likes: 90, id: "2", image: images.snow },
+                            { color: Colors.purple, interactive: false, title: "Indiana Jones", description: "", views: 140, time: 15, likes: 90, id: "3", image: images.adventure },
+                        ]}
+                        renderItem={({ item: { color, interactive, title, description, views, time, likes, id, image } }) => {
+                            return (
+                                <StoryContainer
+                                    color={color}
+                                    interactive={interactive}
+                                    title={title}
+                                    description={description}
+                                    views={views}
+                                    time={time}
+                                    likes={likes}
+                                    id={id}
+                                    image={image}
+                                    onPress={() => {
+                                        navigation.navigate("StoryInfo", { title })
+                                    }}
+                                />
+                            );
+                        }}
+                    />
+                </View>
+            )}
+            {loading && (
+                <View style={{
+                    flex: 1,
+                    backgroundColor: "#fff",
+                    justifyContent: "center",
+                    alignItems: "center",
+                }}>
+                    <Image source={require('../assets/loading.gif')} style={{ width: 100, height: 100 }} />
+                </View>
+            )}
         </ScrollView >
+
+
     )
 }
 
