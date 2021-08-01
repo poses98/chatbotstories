@@ -32,7 +32,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 8,
         margin: 1,
     },
-    labelContainer: { flexDirection: "row", marginBottom: 0,marginLeft:15 },
+    labelContainer: {flex:1, flexDirection: "row", marginBottom: 0,marginLeft:15 },
     error: {
         color: Colors.red,
         fontSize: 12,

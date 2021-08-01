@@ -3,7 +3,6 @@ import { View, TouchableOpacity, StyleSheet, Text } from 'react-native';
 import Ionicons from "@expo/vector-icons/Ionicons"
 import Colors from '../constants/Colors';
 
-
 export default ({ navigation }) => {
     const [isSaved, setIsSaved] = useState(false)
 
@@ -20,7 +19,7 @@ export default ({ navigation }) => {
                 <TouchableOpacity
                     onPress={() => { }}
                     style={{ paddingRight: 5 }}>
-                    <Ionicons name="log-out-outline" size={26} color={Colors.black} />
+                    <Ionicons name="pencil-outline" size={26} color={Colors.black} />
                 </TouchableOpacity>
             </View >
         )
@@ -41,7 +40,8 @@ export default ({ navigation }) => {
             {/** Likes */}
             <View style={styles.storyStats}>
                 <Ionicons name="heart-sharp" size={20} color={Colors.red} />
-                <Text> </Text>
+              
+                
             </View>
             {/**Chapters list */}
         </View>

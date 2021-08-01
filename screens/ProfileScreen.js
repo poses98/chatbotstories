@@ -71,7 +71,7 @@ export default ({ navigation }) => {
             headerRightContainerStyle: {
                 paddingRight: 10
             },
-            title: "hello"
+
         })
     })
     const renderStackBarIconRight = () => {
