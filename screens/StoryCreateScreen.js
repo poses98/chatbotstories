@@ -47,23 +47,23 @@ export default ({ navigation }) => {
     const [status, setstatus] = useState(0)
 
 
-    const createStory = (data) =>{
+    const createStory = (data) => {
         firestore().collection("stories").add(data)
-        .then((docRef) => {
-            console.log("Document written with ID: ", docRef.id);
-            firestore().
-            collection('users').
-            doc(auth().currentUser.uid).
-            collection('stories').
-            doc(docRef.id).set({exists:true}).then(() => {
-                navigation.navigate("ChapterEdit",{title:nameField.text})
+            .then((docRef) => {
+                console.log("Document written with ID: ", docRef.id);
+                firestore().
+                    collection('users').
+                    doc(auth().currentUser.uid).
+                    collection('stories').
+                    doc(docRef.id).set({ exists: true }).then(() => {
+                        navigation.navigate("ChapterEdit", { title: nameField.text })
+                    })
+
             })
-            
-        })
-        .catch((error) => {
-            console.error("Error adding document: ", error);
-        });
-        
+            .catch((error) => {
+                console.error("Error adding document: ", error);
+            });
+
     }
 
     /**
@@ -157,7 +157,7 @@ export default ({ navigation }) => {
                 }}
             />
 
-            <View style={{ flexDirection: "row",marginTop:15 }}>
+            <View style={{ flexDirection: "row", marginTop: 15 }}>
                 <Label text="Will it be interactive?" icon="people-outline" />
                 <Switch
                     trackColor={{ false: "#767577", true: Colors.green }}
@@ -168,11 +168,11 @@ export default ({ navigation }) => {
                     style={{ marginRight: 15 }}
                 />
             </View>
-            <View style={{ flexDirection: "column",marginTop:15 }}>
+            <View style={{ flexDirection: "column", marginTop: 15 }}>
                 <Label text="Story status" icon="list-outline" />
                 <Picker
                     enabled={false}
-                    style={{marginHorizontal:15,color:Colors.lightGray,borderWidth:1,borderColor:Colors.lightGray}}
+                    style={{ marginHorizontal: 15, color: Colors.lightGray, borderWidth: 1, borderColor: Colors.lightGray }}
                     dropdownIconColor={Colors.lightGray}
                     selectedValue={status}
                     onValueChange={(itemValue, itemIndex) =>
@@ -188,31 +188,31 @@ export default ({ navigation }) => {
                 textStyle={{ fontWeight: "bold" }}
                 onPress={() => {
                     let validation = true;
-                    if(nameField.text.length === 0){
+                    if (nameField.text.length === 0) {
                         validation = false;
                         nameField.errorMessage = "Name can't be empty!";
-                        setnameField({...nameField});
+                        setnameField({ ...nameField });
                     }
-                    if(descriptionField.text.length === 0){
+                    if (descriptionField.text.length === 0) {
                         validation = false;
                         descriptionField.errorMessage = "Description can't be empty!";
-                        setdescriptionField({...descriptionField});
+                        setdescriptionField({ ...descriptionField });
                     }
-                    if(validation){
+                    if (validation) {
                         const data = {
-                            name:nameField.text,
-                            description:descriptionField.text,
-                            categoryMain:categoryMain,
-                            createdAt:Date.now(),
-                            createdBy:auth().currentUser.uid,
-                            interactive:interactive,
-                            status:status
+                            name: nameField.text,
+                            description: descriptionField.text,
+                            categoryMain: categoryMain,
+                            createdAt: Date.now(),
+                            createdBy: auth().currentUser.uid,
+                            interactive: interactive,
+                            status: status
                         };
                         createStory(data);
                         console.log(data)
                     }
                 }}
-                buttonStyle={{ marginVertical: 40, marginHorizontal:15,height:45,borderColor:Colors.black }}
+                buttonStyle={{ marginVertical: 40, marginHorizontal: 15, height: 45, borderColor: Colors.black }}
             />
         </ScrollView>
     )
