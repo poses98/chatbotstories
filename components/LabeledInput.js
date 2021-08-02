@@ -29,14 +29,13 @@ export default ({ labelStyle, label, errorMessage, inputStyle, text, onChangeTex
 
 const styles = StyleSheet.create({
     container: {
-        paddingHorizontal: 8,
         margin: 1,
     },
     labelContainer: {flex:1, flexDirection: "row", marginBottom: 0,marginLeft:15 },
     error: {
         color: Colors.red,
         fontSize: 12,
-        marginHorizontal:15
+
     },
     input: {
         backgroundColor:'#f8f8f8',

@@ -1,31 +1,36 @@
 import React, { useLayoutEffect, useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity, FlatList, ImageBackground } from 'react-native';
-import ProfileHeader from '../components/Profile/ProfileHeader';
+import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity, FlatList, Switch } from 'react-native';
 import Colors from '../constants/Colors';
 import Ionicons from "@expo/vector-icons/Ionicons"
 import { firestore, auth } from "firebase"
 import LabeledInput from "../components/LabeledInput"
-import Checkbox from "../components/Checkbox"
 import { Picker } from '@react-native-picker/picker';
+import Button from '../components/Button';
+import { updateDoc, addDoc } from '../services/collections';
 
-const GENRES = {
-    0: "Drama",
-    1: "Fable",
-    2: "Fairy Tale",
-    3: "Fantasy",
-    4: "Fiction",
-    5: "Folklore",
-    6: "Historical Fiction",
-    7: "Horror",
-    8: "Humor",
-    9: "Mystery",
-    10: "Mythology",
-    11: "Realistic Fiction",
-    12: "Science Fiction",
-    13: "Short story",
-    14: "Tall Tale",
-    200: "Select a genre"
+const GENRES = [
+    { genreKey: 0, verboseName: "Drama", image: require("../assets/drama.jpg") },
+    { genreKey: 1, verboseName: "Terror", image: require("../assets/terror.jpg") },
+    { genreKey: 2, verboseName: "Adventure", image: require("../assets/adventure.jpg") },
+    { genreKey: 3, verboseName: "Test", image: require("../assets/snow.jpg") },
+    { genreKey: 4, verboseName: "Test", image: require("../assets/adventure.jpg") },
+]
+const _STATUS_ = {
+    draft: { statusId: 0, verboseName: "Draft" },
+    public: { statusId: 1, verboseName: "Public" },
+    private: { statusId: 2, verboseName: "Private" },
 }
+
+export const Label = ({ text, icon, ...props }) => {
+    return (
+        <View style={[styles.labelContainer, { ...props.labelStyle }]}>
+            <Ionicons name={icon} size={15} color={Colors.gray} />
+            <Text style={[{ color: Colors.black }, { ...props.textStyle }]}> {text}</Text>
+        </View>
+    )
+}
+
+
 
 
 export default ({ navigation }) => {
@@ -33,21 +38,33 @@ export default ({ navigation }) => {
         errorMessage: "",
         text: ""
     })
-    const [categoryMain, setcategoryMain] = useState({
-        errorMessage: "",
-        text: ""
-    })
-    const [categorySecondary, setcategorySecondary] = useState({
-        errorMessage: "",
-        text: ""
-    })
+    const [categoryMain, setcategoryMain] = useState(0)
     const [descriptionField, setdescriptionField] = useState({
         errorMessage: "",
         text: ""
     })
-    const [mainGenre, setmainGenre] = useState(0)
     const [interactive, setinteractive] = useState(false)
-    const [descriptionLength, setdescriptionLength] = useState(0)
+    const [status, setstatus] = useState(0)
+
+
+    const createStory = (data) =>{
+        firestore().collection("stories").add(data)
+        .then((docRef) => {
+            console.log("Document written with ID: ", docRef.id);
+            firestore().
+            collection('users').
+            doc(auth().currentUser.uid).
+            collection('stories').
+            doc(docRef.id).set({exists:true}).then(() => {
+                navigation.navigate("ChapterEdit",{title:nameField.text})
+            })
+            
+        })
+        .catch((error) => {
+            console.error("Error adding document: ", error);
+        });
+        
+    }
 
     /**
      * Render sign out button (develop only)
@@ -67,14 +84,32 @@ export default ({ navigation }) => {
                 <TouchableOpacity
                     onPress={() => { auth().signOut() }}
                     style={{ paddingRight: 5 }}>
-                    <Ionicons name="pencil-outline" size={26} color={Colors.black} />
+                    <Ionicons name="people-outline" size={26} color={Colors.black} />
                 </TouchableOpacity>
             </View >
         )
     }
 
+    const GenreBubble = ({ image, verboseName, genreKey }) => {
+        return (
+            <View style={{ flex: 1, flexDirection: "row", marginHorizontal: 10 }}>
+                <TouchableOpacity style={styles.genreContainer} onPress={() => {
+                    setcategoryMain(genreKey)
+                }}>
+                    <Image
+                        style={genreKey == categoryMain ? styles.genrePicSelected : styles.genrePic}
+                        source={image}
+                    />
+                    <Text style={styles.genreText}>{verboseName}</Text>
+                </TouchableOpacity>
+            </View>
+        )
+    }
 
-    console.log(Date.now())
+
+
+
+
 
     return (
         <ScrollView style={styles.container}>
@@ -84,35 +119,101 @@ export default ({ navigation }) => {
                 onChangeText={(text) => {
                     setnameField({ text })
                 }}
+                errorMessage={nameField.errorMessage}
                 placeholder="The perfect name for your story"
                 maxLength={30}
+                labelStyle={{ color: Colors.black }}
             />
+
             <LabeledInput
                 label={`Description ${descriptionField.text.length}/200`}
+                labelStyle={{ color: Colors.black }}
                 text={descriptionField}
+                errorMessage={descriptionField.errorMessage}
                 onChangeText={(text) => {
                     setdescriptionField({ text })
                 }}
-                placeholder="A catchy description that everybody will love ;)"
+                placeholder="A catchy description that everybody will love"
                 maxLength={200}
                 multiline={true}
-                inputStyle={{ padding: 7.9 }}
+                numberOfLines={6}
+                inputStyle={{ padding: 7.9, textAlignVertical: 'top' }}
             />
-            <Checkbox
-                isChecked={interactive}
-                onChecked={() => { setinteractive(!interactive) }}
-                labelText="Interactive"
-                helpText={`*Specify if the reader will be able to interact with\n the story`}
+
+            <Label text="Choose main category " icon="layers-outline" />
+            <FlatList
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                data={GENRES}
+                keyExtractor={item => item.genreKey.toString()}
+                renderItem={({ item: { image, verboseName, genreKey } }) => {
+                    return (
+                        <GenreBubble
+                            verboseName={verboseName}
+                            image={image}
+                            genreKey={genreKey}
+                        />
+                    );
+                }}
             />
-            <Picker
-                selectedValue={mainGenre}
-                onValueChange={(itemValue, itemIndex) =>
-                    setmainGenre(itemValue)
-                }>
-                
-                <Picker.Item label="Java" value="java" />
-                <Picker.Item label="JavaScript" value="js" />
-            </Picker>
+
+            <View style={{ flexDirection: "row",marginTop:15 }}>
+                <Label text="Will it be interactive?" icon="people-outline" />
+                <Switch
+                    trackColor={{ false: "#767577", true: Colors.green }}
+                    thumbColor={interactive ? "#f4f3f4" : "#f4f3f4"}
+                    ios_backgroundColor="#3e3e3e"
+                    onValueChange={() => { setinteractive(!interactive) }}
+                    value={interactive}
+                    style={{ marginRight: 15 }}
+                />
+            </View>
+            <View style={{ flexDirection: "column",marginTop:15 }}>
+                <Label text="Story status" icon="list-outline" />
+                <Picker
+                    enabled={false}
+                    style={{marginHorizontal:15,color:Colors.lightGray,borderWidth:1,borderColor:Colors.lightGray}}
+                    dropdownIconColor={Colors.lightGray}
+                    selectedValue={status}
+                    onValueChange={(itemValue, itemIndex) =>
+                        setstatus(itemValue)
+                    }>
+                    <Picker.Item label={_STATUS_.draft.verboseName} value={_STATUS_.draft.statusId} />
+                    <Picker.Item label={_STATUS_.public.verboseName} value={_STATUS_.public.statusId} />
+                    <Picker.Item label={_STATUS_.private.verboseName} value={_STATUS_.private.statusId} />
+                </Picker>
+            </View>
+            <Button
+                text="Create story"
+                textStyle={{ fontWeight: "bold" }}
+                onPress={() => {
+                    let validation = true;
+                    if(nameField.text.length === 0){
+                        validation = false;
+                        nameField.errorMessage = "Name can't be empty!";
+                        setnameField({...nameField});
+                    }
+                    if(descriptionField.text.length === 0){
+                        validation = false;
+                        descriptionField.errorMessage = "Description can't be empty!";
+                        setdescriptionField({...descriptionField});
+                    }
+                    if(validation){
+                        const data = {
+                            name:nameField.text,
+                            description:descriptionField.text,
+                            categoryMain:categoryMain,
+                            createdAt:Date.now(),
+                            createdBy:auth().currentUser.uid,
+                            interactive:interactive,
+                            status:status
+                        };
+                        createStory(data);
+                        console.log(data)
+                    }
+                }}
+                buttonStyle={{ marginVertical: 40, marginHorizontal:15,height:45,borderColor:Colors.black }}
+            />
         </ScrollView>
     )
 }
@@ -126,70 +227,32 @@ const styles = StyleSheet.create({
         backgroundColor: "#fff",
         paddingTop: 15
     },
-    profilePic: {
-        width: 90,
-        height: 90,
+
+    genrePic: {
+        width: 70,
+        height: 70,
         borderRadius: 50,
+    },
+    genreContainer: {
         alignItems: 'center',
-        alignSelf: "center",
-        marginTop: 40,
+        paddingVertical: 5,
+        borderRadius: 50
     },
-    changeProfilePicText: {
-        alignSelf: "center",
-        color: Colors.blue,
-        fontSize: 16,
-    },
-    icon: {
-        padding: 5,
-        fontSize: 24,
-    },
-    centeredView: {
-        justifyContent: "center",
-        alignItems: "center",
-        marginTop: 50,
-    },
-    modalView: {
-        backgroundColor: "white",
-        borderRadius: 20,
-        padding: 35,
-        alignItems: "center",
-        shadowColor: "#000",
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-        elevation: 5,
-    },
-    infoBox: {
+    labelContainer: {
         flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
+        flexDirection: "row",
+        paddingLeft: 15,
+        paddingVertical: 10,
+        alignItems: "center"
     },
-    textInfo: {
-        fontSize: 14,
-        marginTop: 3
+    genreText: {
+        fontSize: 12
     },
-    numberInfo: {
-        fontWeight: 'bold',
-        fontSize: 18
-    },
-    bioBox: {
-        flex: 1,
-        paddingHorizontal: 15,
-        paddingVertical: 5
-    },
-    profileName: {
-        fontWeight: "bold",
-        fontSize: 15,
-    },
-    profileWeb: {
-        fontSize: 15,
-    },
-    profileDescription: {
-        fontSize: 15,
-        justifyContent: 'center',
-        alignItems: 'stretch'
+    genrePicSelected: {
+        width: 70,
+        height: 70,
+        borderRadius: 50,
+        borderWidth: 3,
+        borderColor: Colors.teal
     }
 });

@@ -125,6 +125,15 @@ export const RootStackScreen = () => {
                     };
                 }}
             />
+            <RootStack.Screen
+                name="ChapterEdit"
+                component={ChapterEditScreen}
+                options={({ route }) => {
+                    return {
+                        title: route.params.title + " chapter creation",
+                    };
+                }}
+            />
         </RootStack.Navigator>
 
     );
