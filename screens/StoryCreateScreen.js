@@ -78,6 +78,7 @@ export default ({ navigation }) => {
 
         })
     })
+    
     const renderStackBarIconRight = () => {
         return (
             <View style={{ flexDirection: "row" }}>
@@ -106,16 +107,11 @@ export default ({ navigation }) => {
         )
     }
 
-
-
-
-
-
     return (
         <ScrollView style={styles.container}>
             <LabeledInput
                 label="Name"
-                text={nameField}
+                text={nameField.text}
                 onChangeText={(text) => {
                     setnameField({ text })
                 }}
@@ -128,7 +124,7 @@ export default ({ navigation }) => {
             <LabeledInput
                 label={`Description ${descriptionField.text.length}/200`}
                 labelStyle={{ color: Colors.black }}
-                text={descriptionField}
+                text={descriptionField.text}
                 errorMessage={descriptionField.errorMessage}
                 onChangeText={(text) => {
                     setdescriptionField({ text })
@@ -246,7 +242,11 @@ const styles = StyleSheet.create({
         alignItems: "center"
     },
     genreText: {
-        fontSize: 12
+        fontSize: 10,
+        marginTop: 5,
+        textTransform: "uppercase",
+        color:Colors.black,
+        fontWeight:"bold"
     },
     genrePicSelected: {
         width: 70,
