@@ -66,30 +66,6 @@ export default ({ navigation }) => {
 
     }
 
-    /**
-     * Render sign out button (develop only)
-     */
-    useLayoutEffect(() => {
-        navigation.dangerouslyGetParent().setOptions({
-            headerRight: () => renderStackBarIconRight(),
-            headerRightContainerStyle: {
-                paddingRight: 10
-            },
-
-        })
-    })
-    
-    const renderStackBarIconRight = () => {
-        return (
-            <View style={{ flexDirection: "row" }}>
-                <TouchableOpacity
-                    onPress={() => { auth().signOut() }}
-                    style={{ paddingRight: 5 }}>
-                    <Ionicons name="people-outline" size={26} color={Colors.black} />
-                </TouchableOpacity>
-            </View >
-        )
-    }
 
     const GenreBubble = ({ image, verboseName, genreKey }) => {
         return (

@@ -126,6 +126,15 @@ export const RootStackScreen = () => {
                 }}
             />
             <RootStack.Screen
+                name="StoryCreate"
+                component={StoryCreateScreen}
+                options={({ route }) => {
+                    return {
+                        title: "Create story",
+                    };
+                }}
+            />
+            <RootStack.Screen
                 name="ChapterEdit"
                 component={ChapterEditScreen}
                 options={({ route }) => {
