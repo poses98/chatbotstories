@@ -1,25 +1,17 @@
 import React, { useLayoutEffect, useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity, FlatList, Switch } from 'react-native';
-import Colors from '../constants/Colors';
-import Ionicons from "@expo/vector-icons/Ionicons"
 import { firestore, auth } from "firebase"
+import { StackActions } from '@react-navigation/native';
+
+import Colors from '../constants/Colors';
+import GENRES from '../constants/Genres'
+import LANGUAGES from '../constants/Languages'
+
+import Ionicons from "@expo/vector-icons/Ionicons"
 import LabeledInput from "../components/LabeledInput"
 import { Picker } from '@react-native-picker/picker';
 import Button from '../components/Button';
 import { updateDoc, addDoc } from '../services/collections';
-
-const GENRES = [
-    { genreKey: 0, verboseName: "Drama", image: require("../assets/drama.jpg") },
-    { genreKey: 1, verboseName: "Terror", image: require("../assets/terror.jpg") },
-    { genreKey: 2, verboseName: "Adventure", image: require("../assets/adventure.jpg") },
-    { genreKey: 3, verboseName: "Test", image: require("../assets/snow.jpg") },
-    { genreKey: 4, verboseName: "Test", image: require("../assets/adventure.jpg") },
-]
-const _STATUS_ = {
-    draft: { statusId: 0, verboseName: "Draft" },
-    public: { statusId: 1, verboseName: "Public" },
-    private: { statusId: 2, verboseName: "Private" },
-}
 
 export const Label = ({ text, icon, ...props }) => {
     return (
@@ -29,9 +21,6 @@ export const Label = ({ text, icon, ...props }) => {
         </View>
     )
 }
-
-
-
 
 export default ({ navigation }) => {
     const [nameField, setnameField] = useState({
@@ -45,19 +34,31 @@ export default ({ navigation }) => {
     })
     const [interactive, setinteractive] = useState(false)
     const [status, setstatus] = useState(0)
-
+    const [language, setlanguage] = useState(0)
 
     const createStory = (data) => {
-        firestore().collection("stories").add(data)
-            .then((docRef) => {
+        firestore().
+            collection("stories").
+            add(data).
+            then((docRef) => {
+                firestore().collection("stories").doc(docRef.id).update({storyId:docRef.id});
                 console.log("Document written with ID: ", docRef.id);
                 firestore().
                     collection('users').
                     doc(auth().currentUser.uid).
                     collection('stories').
-                    doc(docRef.id).set({ exists: true }).then(() => {
-                        navigation.navigate("ChapterEdit", { title: nameField.text })
+                    doc(docRef.id).set({ date: data.date }).then(() => {
+                        //navigation.navigate("ChapterEdit", { title: nameField.text })
+                        navigation.dispatch(
+                            StackActions.replace('StoryInfo', {
+                                title: nameField.text,
+                                storyId: docRef.id
+                            })
+                        );
                     })
+                    .catch((error) => {
+                        console.error("Error adding document: ", error);
+                    });
 
             })
             .catch((error) => {
@@ -140,7 +141,9 @@ export default ({ navigation }) => {
                     style={{ marginRight: 15 }}
                 />
             </View>
-            <View style={{ flexDirection: "column", marginTop: 15 }}>
+            {/**
+             *  STATUS PICKER, NOT NECESARY IN HERE
+             * <View style={{ flexDirection: "column", marginTop: 15 }}>
                 <Label text="Story status" icon="list-outline" />
                 <Picker
                     enabled={false}
@@ -155,6 +158,24 @@ export default ({ navigation }) => {
                     <Picker.Item label={_STATUS_.private.verboseName} value={_STATUS_.private.statusId} />
                 </Picker>
             </View>
+             */}
+            
+            <View style={{ flexDirection: "column", marginTop: 15 }}>
+                <Label text="Language" icon="list-outline" />
+                <Picker
+                    enabled={true}
+                    style={{ marginHorizontal: 15, color: Colors.black, borderWidth: 1, borderColor: Colors.black }}
+                    dropdownIconColor={Colors.black}
+                    selectedValue={language}
+                    onValueChange={(itemValue, itemIndex) =>
+                        setlanguage(itemValue)
+                    }>
+                    <Picker.Item label={LANGUAGES.en.verboseName} value={LANGUAGES.en.statusId} />
+                    <Picker.Item label={LANGUAGES.es.verboseName} value={LANGUAGES.es.statusId} />
+                </Picker>
+            </View>
+
+
             <Button
                 text="Create story"
                 textStyle={{ fontWeight: "bold" }}
@@ -172,13 +193,14 @@ export default ({ navigation }) => {
                     }
                     if (validation) {
                         const data = {
-                            name: nameField.text,
+                            title: nameField.text,
                             description: descriptionField.text,
                             categoryMain: categoryMain,
-                            createdAt: Date.now(),
-                            createdBy: auth().currentUser.uid,
+                            date: Date.now(),
+                            author: auth().currentUser.uid,
                             interactive: interactive,
-                            status: status
+                            status: status,
+                            language: language
                         };
                         createStory(data);
                         console.log(data)
@@ -221,8 +243,8 @@ const styles = StyleSheet.create({
         fontSize: 10,
         marginTop: 5,
         textTransform: "uppercase",
-        color:Colors.black,
-        fontWeight:"bold"
+        color: Colors.black,
+        fontWeight: "bold"
     },
     genrePicSelected: {
         width: 70,

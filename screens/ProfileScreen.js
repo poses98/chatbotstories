@@ -4,6 +4,7 @@ import ProfileHeader from '../components/Profile/ProfileHeader';
 import Colors from '../constants/Colors';
 import Ionicons from "@expo/vector-icons/Ionicons"
 import { firestore, auth } from "firebase";
+import GENRES from '../constants/Genres'
 
 const images = {
     terror: require("../assets/terror.jpg"),
@@ -12,11 +13,18 @@ const images = {
     snow: require("../assets/snow.jpg")
 }
 
-const StoryContainer = ({ color, interactive, title, description, views, time, image, likes, id, onPress }) => {
+const StoryContainer = ({ interactive, title, description, storyId, onPress, categoryMain }) => {
     const handleError = (e) => { console.log(e.nativeEvent.error); };
     return (
-        <TouchableOpacity onPress={onPress} activeOpacity={0.8} delayPressIn={10}>
-            <ImageBackground source={image} resizeMode="cover" onError={handleError} style={styles.image}>
+        <TouchableOpacity
+            onPress={onPress}
+            activeOpacity={0.8}
+            delayPressIn={10}>
+            <ImageBackground
+                source={GENRES[categoryMain].image}
+                resizeMode="cover"
+                onError={handleError}
+                style={styles.image}>
                 <View style={[styles.storyContainer]}>{/**{ backgroundColor: `${color}` } */}
 
                     <View style={styles.storyBar}>
@@ -26,26 +34,39 @@ const StoryContainer = ({ color, interactive, title, description, views, time, i
                             </View>
                         )}
                         <View style={styles.storyTag}>
-                            <Text style={{ color: Colors.lightGray }}>Terror</Text>
+                            <Text style={{ color: Colors.lightGray }}>
+                                {GENRES[categoryMain].verboseName}
+                            </Text>
                         </View>
-                        <View style={styles.storyTag}>
-                            <Text style={{ color: Colors.lightGray }}>Drama</Text>
-                        </View>
+
 
                     </View>
                     <View style={styles.storyMainInfoContainer}>
-                        <Text style={styles.storyTitle}>{title}</Text>
-                        <Text style={styles.storyDescription}>"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras at condimentum ex, ut tristique magna. Proin vitae ligula eu lectus mollis eleifend non ut dui. Fusce condimentum auctor nunc, in aliquam."</Text>
+                        <Text style={styles.storyTitle}>
+                            {title}
+                        </Text>
+                        <Text style={styles.storyDescription}>
+                            "{description}"
+                        </Text>
                     </View>
                     <View style={{ alignSelf: "flex-end" }}>
-                        <View style={{ flexDirection: "row", alignItems: "center" }}>
+                        <View style={{
+                            flexDirection: "row",
+                            alignItems: "center"
+                        }}>
                             <View style={styles.storyStats}>
-                                <Ionicons name="eye-outline" size={20} color={Colors.lightGray} />
-                                <Text style={{ color: Colors.lightGray }}>{views}</Text>
+                                <Ionicons
+                                    name="eye-outline"
+                                    size={20}
+                                    color={Colors.lightGray} />
+                                <Text style={{ color: Colors.lightGray }}>44</Text>
                             </View>
                             <View style={styles.storyStats}>
-                                <Ionicons name="time-outline" size={20} color={Colors.lightGray} />
-                                <Text style={{ color: Colors.lightGray }}>{time} min</Text>
+                                <Ionicons
+                                    name="heart"
+                                    size={20}
+                                    color={Colors.red} />
+                                <Text style={{ color: Colors.lightGray }}>15</Text>
                             </View>
                         </View>
                     </View>
@@ -62,44 +83,65 @@ export default ({ navigation }) => {
     const [data, setdata] = useState({})
     const [loading, setloading] = useState(true)
 
-    /**
-     * Render sign out button (develop only)
-     */
-    useLayoutEffect(() => {
-        navigation.dangerouslyGetParent().setOptions({
-            headerRight: () => renderStackBarIconRight(),
-            headerRightContainerStyle: {
-                paddingRight: 10
-            },
-
-        })
-    })
-    const renderStackBarIconRight = () => {
-        return (
-            <View style={{ flexDirection: "row" }}>
-                <TouchableOpacity
-                    onPress={() => { auth().signOut() }}
-                    style={{ paddingRight: 5 }}>
-                    <Ionicons name="log-out-outline" size={26} color={Colors.black} />
-                </TouchableOpacity>
-            </View >
-        )
-    }
     //Get user information
     const userRef =
         firestore()
             .collection("users")
-
+    const storyRef =
+        firestore()
+            .collection("stories")
     useEffect(() => {
-        const unsubscribe = firestore().collection("users").doc(auth().currentUser.uid)
+        const unsubscribe = userRef.
+            doc(auth().currentUser.uid) // ESTO HAY QUE CAMBIARLO POR EL ID DE USUARIO!
             .onSnapshot((doc) => {
                 console.log("Profile data fetched: ", doc.data());
-                setloading(false)
                 setdata(doc.data())
             });
         return unsubscribe;
-    }, [])
 
+
+    }, [])
+    useEffect(() => {
+
+        const unsubscribeStories = firestore().
+            collection("users").
+            doc(auth().currentUser.uid).  // ESTO HAY QUE CAMBIARLO POR EL ID DE USUARIO!
+            collection('stories').
+            orderBy("date").
+            limit(4).
+            onSnapshot((querySnapshot) => {
+                var fetchedStories = []
+                if (querySnapshot.size === 0) {
+                    setloading(false)
+                }
+                querySnapshot.forEach((doc) => {
+                    //Fetching every story from DB
+                    storyRef.doc(doc.id).get().then((doc) => {
+                        if (doc.exists) {
+                            fetchedStories.push(doc.data());
+                            console.log("Story loaded with id: ", doc.id)
+                            setStories(fetchedStories)
+                            setloading(false)
+                        } else {
+                            // doc.data() will be undefined in this case
+                            setloading(false)
+                            console.log("No such document!");
+                        }
+                    }).catch((error) => {
+                        console.log("Error getting document:", error);
+                    });
+                });
+
+                console.log(stories)
+
+            },
+                error => {
+                    setloading(false)
+                    console.log(error)
+                });
+
+        return unsubscribeStories;
+    }, [])
 
 
 
@@ -118,33 +160,41 @@ export default ({ navigation }) => {
                         navigation={navigation}
                         userId={auth().currentUser.uid}
                     />
+                    {console.log(stories)}
+                    {!(stories.length == 0) && (
+                        <FlatList
+                            data={stories}
+                            renderItem={({ item: { interactive, title, description, storyId, date, categoryMain } }) => {
+                                return (
+                                    <StoryContainer
+                                        interactive={interactive}
+                                        title={title}
+                                        description={description}
+                                        id={storyId}
+                                        categoryMain={categoryMain}
+                                        date={date}
+                                        onPress={() => {
+                                            navigation.navigate("StoryInfo", { title, storyId })
+                                        }}
+                                    />
+                                );
+                            }}
+                        />
+                    )}
+                    {stories.length == 0 && (
+                        <View style={{
+                            flex: 1,
+                            justifyContent: 'center',
+                            alignContent: 'center',
+                            alignSelf: 'center',
+                            opacity: .5,
+                            alignItems: 'center',
+                            height: 300
+                        }}>
+                            <Text>Write some stories and they will show up here!</Text>
+                        </View>
+                    )}
 
-                    <FlatList
-                        data={[
-                            { color: Colors.blue, interactive: true, title: "1908", description: "", views: 98, time: 15, likes: 90, id: "0", image: images.drama },
-                            { color: Colors.green, interactive: false, title: "Moby-Dick", description: "", views: 98, time: 15, likes: 90, id: "1", image: images.terror },
-                            { color: Colors.purple, interactive: true, title: "Mac Beth", description: "", views: 98, time: 15, likes: 90, id: "2", image: images.snow },
-                            { color: Colors.purple, interactive: false, title: "Indiana Jones", description: "", views: 140, time: 15, likes: 90, id: "3", image: images.adventure },
-                        ]}
-                        renderItem={({ item: { color, interactive, title, description, views, time, likes, id, image } }) => {
-                            return (
-                                <StoryContainer
-                                    color={color}
-                                    interactive={interactive}
-                                    title={title}
-                                    description={description}
-                                    views={views}
-                                    time={time}
-                                    likes={likes}
-                                    id={id}
-                                    image={image}
-                                    onPress={() => {
-                                        navigation.navigate("StoryInfo", { title })
-                                    }}
-                                />
-                            );
-                        }}
-                    />
                 </View>
             )}
             {loading && (

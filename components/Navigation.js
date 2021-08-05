@@ -2,9 +2,11 @@ import * as React from 'react'
 import { getFocusedRouteNameFromRoute } from '@react-navigation/native'
 import { createStackNavigator } from '@react-navigation/stack'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
+import { View, Text, TouchableOpacity } from 'react-native'
 
 import Ionicons from "@expo/vector-icons/Ionicons"
 import Colors from '../constants/Colors'
+
 import HomeScreen from '../screens/HomeScreen'
 import DiscoverScreen from '../screens/DiscoverScreen'
 import NotificationsScreen from '../screens/NotificationsScreen'
@@ -20,7 +22,7 @@ import LoadingScreen from '../screens/LoadingScreen'
 
 const getHeaderTitle = (route) => {
 
-    const routeName = getFocusedRouteNameFromRoute(route) ?? 'Feed';
+    const routeName = getFocusedRouteNameFromRoute(route) ?? 'Home';
 
     switch (routeName) {
         case 'Home':
@@ -34,6 +36,54 @@ const getHeaderTitle = (route) => {
         case 'Create':
             return 'Create new story';
     }
+}
+
+const getHeaderButton = (route, navigation) => {
+
+    const routeName = getFocusedRouteNameFromRoute(route) ?? 'Home';
+
+    switch (routeName) {
+        case 'Home':
+            return (<View></View>);
+        case 'Profile':
+            return (
+                <View>
+                    <TouchableOpacity onPress={() => navigation.navigate("StoryCreate")}>
+                        <Ionicons name="add-circle-outline" size={26} color={Colors.black} />
+                    </TouchableOpacity>
+                </View>
+            );
+        case 'Notifications':
+            return (<View><Text></Text></View>);
+        case 'Discover':
+            return (<View><Text></Text></View>);
+        case 'Create':
+            return (<View><Text></Text></View>);;
+    }
+}
+
+const StoriesStack = createStackNavigator();
+const StoriesStackScreen = () => {
+    return (
+        <StoriesStack.Navigator headerMode='none'>
+            <StoriesStack.Screen name="Create" component={StoryCreateScreen} />
+            <StoriesStack.Screen name="StoryInfo"
+                component={StoryInfoScreen}
+                options={({ route }) => {
+                    return {
+                        title: route.params.title,
+                    };
+                }}
+            />
+            <StoriesStack.Screen name="ChapterEdit"
+                component={ChapterEditScreen}
+                options={({ route }) => {
+                    return {
+                        title: route.params.title + " chapter creation",
+                    };
+                }} />
+        </StoriesStack.Navigator>
+    )
 }
 
 const Tab = createBottomTabNavigator();
@@ -68,18 +118,19 @@ const MainTabNavigation = () => {
         >
             <Tab.Screen name="Home" component={HomeScreen} />
             <Tab.Screen name="Discover" component={DiscoverScreen} />
-            <Tab.Screen name="Create" component={StoryCreateScreen} />
             <Tab.Screen name="Notifications" component={NotificationsScreen} />
             <Tab.Screen name="Profile" component={ProfileScreen} />
         </Tab.Navigator>
     )
 }
 
+
+
 const LoadingStack = createStackNavigator();
 export const LoadingStackScreen = () => {
     return (
 
-        <LoadingStack.Navigator screenOptions={{headerShown: false}}>
+        <LoadingStack.Navigator screenOptions={{ headerShown: false }}>
             <LoadingStack.Screen name="Loading" component={LoadingScreen} />
             <LoadingStack.Screen name="Home" component={HomeStackScreen} />
             <LoadingStack.Screen name="Login" component={AuthStackScreen} />
@@ -109,8 +160,12 @@ export const RootStackScreen = () => {
             <RootStack.Screen
                 name="Home"
                 component={MainTabNavigation}
-                options={({ route }) => ({
+                options={({ route, navigation }) => ({
                     headerTitle: getHeaderTitle(route),
+                    headerRight: () => getHeaderButton(route, navigation),
+                    headerRightContainerStyle: {
+                        paddingRight: 15
+                    },
                 })} />
             <RootStack.Screen
                 name="ProfileEdit"
@@ -122,6 +177,7 @@ export const RootStackScreen = () => {
                 options={({ route }) => {
                     return {
                         title: route.params.title,
+                        storyId: route.params.storyId
                     };
                 }}
             />
