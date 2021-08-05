@@ -13,7 +13,14 @@ const images = {
     snow: require("../assets/snow.jpg")
 }
 
-const StoryContainer = ({ interactive, title, description, storyId, onPress, categoryMain }) => {
+const StoryContainer = ({
+    interactive,
+    title,
+    description,
+    storyId,
+    onPress,
+    categoryMain
+}) => {
     const handleError = (e) => { console.log(e.nativeEvent.error); };
     return (
         <TouchableOpacity
@@ -173,8 +180,9 @@ export default ({ navigation }) => {
                                         id={storyId}
                                         categoryMain={categoryMain}
                                         date={date}
+                                        
                                         onPress={() => {
-                                            navigation.navigate("StoryInfo", { title, storyId })
+                                            navigation.navigate("StoryInfo", { title, storyId,username:data.username })
                                         }}
                                     />
                                 );

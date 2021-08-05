@@ -6,21 +6,33 @@ import { firestore, auth } from "firebase";
 
 import GENRES from '../constants/Genres'
 import LANGUAGES from '../constants/Languages'
+import MONTHS from '../constants/Months'
 import { ScrollView } from 'react-native-gesture-handler';
 
 
 export default ({ navigation, route }) => {
+    /** STATE OBJECTS */
     const [isSaved, setIsSaved] = useState(false)
     const [loading, setloading] = useState(true)
     const [data, setdata] = useState({})
     const [storyId, setstoryId] = useState(route.params.storyId || "")
     const [owned, setowned] = useState(false)
     const [notloaded, setnotloaded] = useState(false)
-    //Get story information
-    const storyRef =
-        firestore()
-            .collection("stories")
+    const [stats, setstats] = useState({})
+    const [canLike, setcanLike] = useState(true)
+    const authorName = route.params.username;
+    //Refs to firestore
+    const storyRef = firestore().collection("stories")
+    const statsRef = firestore().collection("storyStats")
+    const userRef = firestore().collection("users")
 
+    var date = new Date(data.date)
+    var month = date.getMonth();
+    var year = date.getFullYear();
+    var day = date.getDay();
+
+
+    /** Getting the metadata of the story */
     useEffect(() => {
         if (storyId != "") {
             storyRef.doc(storyId).get().then((doc) => {
@@ -33,7 +45,7 @@ export default ({ navigation, route }) => {
                     setloading(false)
                 } else {
                     // doc.data() will be undefined in this case
-                    console.log("No such document!");
+                    console.log("No such document! (METADATA)");
                 }
             }).catch((error) => {
                 console.log("Error getting document:", error);
@@ -44,13 +56,59 @@ export default ({ navigation, route }) => {
         }
     }, [])
 
+    /** Getting the stats of the story */
+    useEffect(() => {
+        if (storyId != "") {
+            statsRef.doc(storyId).get().then((doc) => {
+                if (doc.exists) {
+                    console.log("Story stats loaded: ", doc.data());
+                    setstats(doc.data())
+                    statsRef.doc(storyId).update({ views:  doc.data().views + 1 })
+                    
+                    setloading(false)
+                } else {
+                    // doc.data() will be undefined in this case
+                    console.log("No such document! (STATS)");
+                }
+            }).catch((error) => {
+                console.log("Error getting document:", error);
+            });
+        } else {
+            setnotloaded(true);
+            setloading(false);
+        }
+    }, [])
 
+    /** Finding out if the user has already liked this story to enable the like button */
+    useEffect(() => {
+        if (storyId != "") {
+            userRef.
+                doc(auth().currentUser.uid).
+                collection("likedStories").
+                doc(storyId).
+                get().
+                then((doc) => {
+                    if (doc.exists) {
+                        setcanLike(false)
+                    } else {
+                        // doc.data() will be undefined in this case
+                        console.log("No such document! (USERLIKE)");
+                    }
+                }).catch((error) => {
+                    console.log("Error getting document:", error);
+                });
+        } else {
+            setnotloaded(true);
+            setloading(false);
+        }
+    }, [])
 
+    /** Rendering the top bar icons */
     const renderStackBarIconRight = () => {
         return (
             <View style={{ flexDirection: "row" }}>
                 {/**Only render if it's not owner*/}
-                {!owned && !notloaded && (
+                {!owned && !notloaded && !loading && (
                     <TouchableOpacity
                         onPress={() => {
                             setIsSaved(!isSaved)
@@ -61,7 +119,7 @@ export default ({ navigation, route }) => {
                     </TouchableOpacity>
                 )}
                 {/**Only render if it's owner*/}
-                {owned && !notloaded && (
+                {owned && !notloaded && !loading && (
                     <TouchableOpacity
                         onPress={() => { /** setEditMode */ }}
                         style={{ paddingRight: 5 }}>
@@ -72,7 +130,6 @@ export default ({ navigation, route }) => {
             </View >
         )
     }
-
     useLayoutEffect(() => {
         navigation.setOptions({
             headerRight: () => renderStackBarIconRight(),
@@ -82,34 +139,87 @@ export default ({ navigation, route }) => {
         })
     })
 
+    const likeStory = () => {
+        if (canLike) {
+            stats.likes += 1;
+            statsRef.doc(storyId).update({ likes: stats.likes })
+            userRef.
+                doc(auth().currentUser.uid).
+                collection("likedStories").
+                doc(storyId).
+                set({ liked: true })
+        } else {
+            stats.likes -= 1;
+            statsRef.doc(storyId).update({ likes: stats.likes })
+            userRef.
+                doc(auth().currentUser.uid).
+                collection("likedStories").
+                doc(storyId).delete()
+        }
+        setcanLike(!canLike)
+        setstats({ ...stats })
+    }
+
     return (
         <ScrollView style={styles.container}>
             {!loading && !notloaded && (
                 <View>
-                    {/**Description */}
+                    {/**HEADER */}
                     <ImageBackground source={GENRES[data.categoryMain].image} resizeMode="cover" onError={() => { }} style={styles.image}>
                         <View style={styles.storyContainer}>
+                            {/**STORY NAME */}
                             <Text style={styles.storyTitle}>{data.title}</Text>
+                            {/**STORY AUTHOR */}
+                            <Text style={[styles.storyDescription, { fontStyle: "italic", fontSize: 12, marginBottom: 5 }]}>Written by {authorName}</Text>
+                            {/**STORY STATS */}
+                            <View style={{ flexDirection: "row" }}>
+                                <View style={styles.storyStats}>
+                                    <Ionicons name="eye-outline" size={20} color={Colors.black} />
+                                    <Text style={{ color: Colors.black }}>{stats.views}</Text>
+                                </View>
+                                <View style={styles.storyStats}>
+                                    <Ionicons name="heart" size={20} color={Colors.red} />
+                                    <Text style={{ color: Colors.black }}>{stats.likes}</Text>
+                                </View>
+                            </View>
+                            {/**STORY DESCRIPTION */}
                             <Text style={styles.storyDescription}>"{data.description}"</Text>
                         </View>
                     </ImageBackground>
-                    {/** Likes */}
-                    <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 15 }}>
-                        <View style={styles.storyStats}>
-                            <Ionicons name="eye-outline" size={25} color={Colors.black} />
-                            <Text style={{ color: Colors.black }}>55</Text>
-                        </View>
-                        <View style={styles.storyStats}>
-                            <Ionicons name="heart" size={25} color={Colors.red} />
-                            <Text style={{ color: Colors.black }}>15</Text>
+                    {/** SOCIAL INTERACTIONS  */}
+                    <View style={{flexDirection: "row", flex: 1, alignItems: "center", marginVertical: 10, paddingLeft: 10 }}>
+
+                        {/**LIKE BUTTON */}
+                        <View>
+                            <TouchableOpacity style={styles.storyStats} onPress={likeStory}>
+                                <Ionicons 
+                                name={canLike ? "heart-outline" : "heart"} 
+                                size={35} 
+                                color={canLike ? Colors.black : Colors.red} />
+                            </TouchableOpacity>
                         </View>
 
+                        {/**COMMENT BUTTON */}
+                        <View>
+                            <TouchableOpacity style={[styles.storyStats, { paddingLeft: 5 }]} onPress={() => { }}>
+                                <Ionicons name="chatbox" size={35} color={Colors.black} />
+                            </TouchableOpacity>
+                        </View>
+                        {/**SHARE BUTTON */}
+                        <View>
+                            <TouchableOpacity style={styles.storyStats} onPress={() => { }}>
+                                <Ionicons name="share-social" size={35} color={Colors.black} />
+                            </TouchableOpacity>
+                        </View>
+                        <View style={{flex:1,alignItems:"flex-end",marginHorizontal:10}}>
+                            <Text>{day} {MONTHS[month-1]} {year}</Text>
+                        </View>
                     </View>
                     {/**Chapters list */}
                 </View>
             )}
             {!loading && notloaded && (
-                <View style={{alignItems:'center',flex:1,padding:15,justifyContent: 'center'}}>
+                <View style={{ alignItems: 'center', flex: 1, padding: 15, justifyContent: 'center' }}>
                     <Text>We are sorry!😭</Text>
                     <Text> There has been an error while loading your story😥</Text>
                     <Text> Try again later</Text>
@@ -133,7 +243,7 @@ export default ({ navigation, route }) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        
+
         backgroundColor: "#fff",
     },
     image: {
@@ -179,6 +289,6 @@ const styles = StyleSheet.create({
     storyStats: {
         flexDirection: 'row',
         alignItems: "center",
-
+        paddingHorizontal: 5
     }
 });

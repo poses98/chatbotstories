@@ -41,14 +41,26 @@ export default ({ navigation }) => {
             collection("stories").
             add(data).
             then((docRef) => {
-                firestore().collection("stories").doc(docRef.id).update({storyId:docRef.id});
+                //Creating storyId field in the story doc
+                firestore().
+                    collection("stories").
+                    doc(docRef.id).
+                    update({ storyId: docRef.id });
+                const statsRef = firestore().collection("storyStats")
+                //Creating the story doc in stats collection
+                statsRef.
+                    doc(docRef.id).
+                    set({
+                        views: 0,
+                        likes: 0
+                    })
                 console.log("Document written with ID: ", docRef.id);
+                //Creating reference to the story in user's collection
                 firestore().
                     collection('users').
                     doc(auth().currentUser.uid).
                     collection('stories').
                     doc(docRef.id).set({ date: data.date }).then(() => {
-                        //navigation.navigate("ChapterEdit", { title: nameField.text })
                         navigation.dispatch(
                             StackActions.replace('StoryInfo', {
                                 title: nameField.text,
@@ -159,7 +171,7 @@ export default ({ navigation }) => {
                 </Picker>
             </View>
              */}
-            
+
             <View style={{ flexDirection: "column", marginTop: 15 }}>
                 <Label text="Language" icon="list-outline" />
                 <Picker
