@@ -1,13 +1,13 @@
 import React, { useLayoutEffect, useState, useEffect } from 'react';
-import { View, TouchableOpacity, StyleSheet, Text, Image, ImageBackground } from 'react-native';
+import { View, TouchableOpacity, StyleSheet, Text, Image, ImageBackground, Share } from 'react-native';
 import Ionicons from "@expo/vector-icons/Ionicons"
 import Colors from '../constants/Colors';
 import { firestore, auth } from "firebase";
-
 import GENRES from '../constants/Genres'
 import LANGUAGES from '../constants/Languages'
 import MONTHS from '../constants/Months'
 import { ScrollView } from 'react-native-gesture-handler';
+
 
 
 export default ({ navigation, route }) => {
@@ -63,8 +63,8 @@ export default ({ navigation, route }) => {
                 if (doc.exists) {
                     console.log("Story stats loaded: ", doc.data());
                     setstats(doc.data())
-                    statsRef.doc(storyId).update({ views:  doc.data().views + 1 })
-                    
+                    statsRef.doc(storyId).update({ views: doc.data().views + 1 })
+
                     setloading(false)
                 } else {
                     // doc.data() will be undefined in this case
@@ -160,6 +160,32 @@ export default ({ navigation, route }) => {
         setstats({ ...stats })
     }
 
+
+    const onShare = async () => {
+        try {
+            const result = await Share.share({
+                message:`Hey! I have found ${data.title} in BookCraft and I think you\'re gonna love it!`,
+                url:"",
+                title:`${data.title} in BookCraft`
+            });
+            if (result.action === Share.sharedAction) {
+                if (result.activityType) {
+                    // shared with activity type of result.activityType
+                } else {
+                    // shared
+                }
+            } else if (result.action === Share.dismissedAction) {
+                // dismissed
+            }
+        } catch (error) {
+            console.log(error.message)
+            alert(error.message);
+        }
+    };
+    const ShareStory = () => {
+
+    }
+
     return (
         <ScrollView style={styles.container}>
             {!loading && !notloaded && (
@@ -187,15 +213,15 @@ export default ({ navigation, route }) => {
                         </View>
                     </ImageBackground>
                     {/** SOCIAL INTERACTIONS  */}
-                    <View style={{flexDirection: "row", flex: 1, alignItems: "center", marginVertical: 10, paddingLeft: 10 }}>
+                    <View style={{ flexDirection: "row", flex: 1, alignItems: "center", marginVertical: 10, paddingLeft: 10 }}>
 
                         {/**LIKE BUTTON */}
                         <View>
                             <TouchableOpacity style={styles.storyStats} onPress={likeStory}>
-                                <Ionicons 
-                                name={canLike ? "heart-outline" : "heart"} 
-                                size={35} 
-                                color={canLike ? Colors.black : Colors.red} />
+                                <Ionicons
+                                    name={canLike ? "heart-outline" : "heart"}
+                                    size={35}
+                                    color={canLike ? Colors.black : Colors.red} />
                             </TouchableOpacity>
                         </View>
 
@@ -205,17 +231,20 @@ export default ({ navigation, route }) => {
                                 <Ionicons name="chatbox" size={35} color={Colors.black} />
                             </TouchableOpacity>
                         </View>
+
                         {/**SHARE BUTTON */}
                         <View>
-                            <TouchableOpacity style={styles.storyStats} onPress={() => { }}>
+                            <TouchableOpacity style={styles.storyStats} onPress={onShare()}>
                                 <Ionicons name="share-social" size={35} color={Colors.black} />
                             </TouchableOpacity>
                         </View>
-                        <View style={{flex:1,alignItems:"flex-end",marginHorizontal:10}}>
-                            <Text>{day} {MONTHS[month-1]} {year}</Text>
+                        <View style={{ flex: 1, alignItems: "flex-end", marginHorizontal: 10 }}>
+                            <Text>{day} {MONTHS[month - 1]} {year}</Text>
                         </View>
                     </View>
+
                     {/**Chapters list */}
+
                 </View>
             )}
             {!loading && notloaded && (
