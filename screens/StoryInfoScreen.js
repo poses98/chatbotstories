@@ -4,11 +4,11 @@ import Ionicons from "@expo/vector-icons/Ionicons"
 import Colors from '../constants/Colors';
 import { firestore, auth } from "firebase";
 import GENRES from '../constants/Genres'
+import { ScrollView } from 'react-native-gesture-handler';
+import Button from '../components/Button';
 import LANGUAGES from '../constants/Languages'
 import MONTHS from '../constants/Months'
-import { ScrollView } from 'react-native-gesture-handler';
-
-
+import STORY_STATUS from '../constants/StoryStatus'
 
 export default ({ navigation, route }) => {
     /** STATE OBJECTS */
@@ -21,6 +21,7 @@ export default ({ navigation, route }) => {
     const [stats, setstats] = useState({})
     const [canLike, setcanLike] = useState(true)
     const authorName = route.params.username;
+
     //Refs to firestore
     const storyRef = firestore().collection("stories")
     const statsRef = firestore().collection("storyStats")
@@ -55,7 +56,6 @@ export default ({ navigation, route }) => {
             setloading(false);
         }
     }, [])
-
     /** Getting the stats of the story */
     useEffect(() => {
         if (storyId != "") {
@@ -64,7 +64,6 @@ export default ({ navigation, route }) => {
                     console.log("Story stats loaded: ", doc.data());
                     setstats(doc.data())
                     statsRef.doc(storyId).update({ views: doc.data().views + 1 })
-
                     setloading(false)
                 } else {
                     // doc.data() will be undefined in this case
@@ -78,7 +77,6 @@ export default ({ navigation, route }) => {
             setloading(false);
         }
     }, [])
-
     /** Finding out if the user has already liked this story to enable the like button */
     useEffect(() => {
         if (storyId != "") {
@@ -102,6 +100,8 @@ export default ({ navigation, route }) => {
             setloading(false);
         }
     }, [])
+    /** Fetching the chapter list for this story */
+
 
     /** Rendering the top bar icons */
     const renderStackBarIconRight = () => {
@@ -138,7 +138,7 @@ export default ({ navigation, route }) => {
             }
         })
     })
-
+    /** Likes a story if it is possible, if it is already liked deletes the like */
     const likeStory = () => {
         if (canLike) {
             stats.likes += 1;
@@ -159,14 +159,13 @@ export default ({ navigation, route }) => {
         setcanLike(!canLike)
         setstats({ ...stats })
     }
-
-
+    /** Share function to open share options in phone */
     const onShare = async () => {
         try {
             const result = await Share.share({
-                message:`Hey! I have found ${data.title} in BookCraft and I think you\'re gonna love it!`,
-                url:"",
-                title:`${data.title} in BookCraft`
+                message: `Hey! I have found ${data.title} in BookCraft and I think you\'re gonna love it!`,
+                url: "",
+                title: `${data.title} in BookCraft`
             });
             if (result.action === Share.sharedAction) {
                 if (result.activityType) {
@@ -182,9 +181,6 @@ export default ({ navigation, route }) => {
             alert(error.message);
         }
     };
-    const ShareStory = () => {
-
-    }
 
     return (
         <ScrollView style={styles.container}>
@@ -194,18 +190,21 @@ export default ({ navigation, route }) => {
                     <ImageBackground source={GENRES[data.categoryMain].image} resizeMode="cover" onError={() => { }} style={styles.image}>
                         <View style={styles.storyContainer}>
                             {/**STORY NAME */}
-                            <Text style={styles.storyTitle}>{data.title}</Text>
+                            <Text style={styles.storyTitle}>{data.title} </Text>
                             {/**STORY AUTHOR */}
                             <Text style={[styles.storyDescription, { fontStyle: "italic", fontSize: 12, marginBottom: 5 }]}>Written by {authorName}</Text>
+                            {/**STORY STATUS */}
+
+
                             {/**STORY STATS */}
                             <View style={{ flexDirection: "row" }}>
                                 <View style={styles.storyStats}>
-                                    <Ionicons name="eye-outline" size={20} color={Colors.black} />
-                                    <Text style={{ color: Colors.black }}>{stats.views}</Text>
+                                    <Ionicons name="eye-outline" size={20} color={Colors.lightGray} />
+                                    <Text style={{ color: Colors.lightGray }}>{stats.views}</Text>
                                 </View>
                                 <View style={styles.storyStats}>
                                     <Ionicons name="heart" size={20} color={Colors.red} />
-                                    <Text style={{ color: Colors.black }}>{stats.likes}</Text>
+                                    <Text style={{ color: Colors.lightGray }}>{stats.likes}</Text>
                                 </View>
                             </View>
                             {/**STORY DESCRIPTION */}
@@ -220,31 +219,95 @@ export default ({ navigation, route }) => {
                             <TouchableOpacity style={styles.storyStats} onPress={likeStory}>
                                 <Ionicons
                                     name={canLike ? "heart-outline" : "heart"}
-                                    size={35}
+                                    size={30}
                                     color={canLike ? Colors.black : Colors.red} />
                             </TouchableOpacity>
                         </View>
 
                         {/**COMMENT BUTTON */}
                         <View>
-                            <TouchableOpacity style={[styles.storyStats, { paddingLeft: 5 }]} onPress={() => { }}>
-                                <Ionicons name="chatbox" size={35} color={Colors.black} />
+                            <TouchableOpacity style={[styles.storyStats, { paddingLeft: 8 }]} onPress={() => { }}>
+                                <Ionicons name="chatbox-outline" size={30} color={Colors.black} />
                             </TouchableOpacity>
                         </View>
 
                         {/**SHARE BUTTON */}
                         <View>
-                            <TouchableOpacity style={styles.storyStats} onPress={onShare()}>
-                                <Ionicons name="share-social" size={35} color={Colors.black} />
+                            <TouchableOpacity style={styles.storyStats} onPress={() => { onShare() }}>
+                                <Ionicons name="share-social-outline" size={30} color={Colors.black} />
                             </TouchableOpacity>
                         </View>
+                        {/** DATE */}
                         <View style={{ flex: 1, alignItems: "flex-end", marginHorizontal: 10 }}>
                             <Text>{day} {MONTHS[month - 1]} {year}</Text>
                         </View>
                     </View>
-
+                    {/** CONTINUE/START READING BUTTON */}
+                    <Button
+                        text="Start reading"
+                        textStyle={{ fontWeight: "bold" }}
+                        onPress={() => { }}
+                        buttonStyle={{ marginVertical: 15, marginHorizontal: 15, height: 45, borderColor: Colors.black }}
+                    />
                     {/**Chapters list */}
-
+                    <View style={{
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        marginVertical: 20,
+                        marginHorizontal: 15,
+                        flex: 1,
+                        flexDirection: "row"
+                    }}>
+                        <Text style={{
+                            textTransform: "uppercase",
+                            fontWeight: "normal",
+                            fontSize: 20
+                        }}>
+                            Chapter list
+                            <Text style={[
+                                styles.storyDescription,
+                                {
+                                    fontStyle: "normal",
+                                    fontWeight: "normal",
+                                    fontSize: 10,
+                                    marginBottom: 1,
+                                    color: Colors.black
+                                }
+                            ]}>
+                                ({STORY_STATUS[data.status].verboseName})
+                            </Text>
+                        </Text>
+                        {/** ADD NEW CHAPTER BUTTON */}
+                        {owned && (
+                            <View style={{ flex: 1, alignItems: "flex-end" }}>
+                                <TouchableOpacity style={styles.storyStats} onPress={() => { }}>
+                                    <Ionicons
+                                        name="add-circle-outline"
+                                        size={30}
+                                        color={Colors.black} />
+                                </TouchableOpacity>
+                            </View>
+                        )}
+                    </View>
+                    <TouchableOpacity>
+                        <View style={{
+                            flexDirection: "row",
+                            flex: 1,
+                            alignItems: "center",
+                            paddingVertical: 10,
+                            paddingLeft: 10,
+                            borderBottomWidth: 1,
+                            borderColor: Colors.gray,
+                            marginHorizontal: 20
+                        }}>
+                            <View>
+                                <Text>Chapter name</Text>
+                            </View>
+                            <View style={{ flex: 1, alignItems: "flex-end", marginHorizontal: 10 }}>
+                                {/** <Ionicons name="chevron-forward" size={20} color={Colors.black} /> */}
+                            </View>
+                        </View>
+                    </TouchableOpacity>
                 </View>
             )}
             {!loading && notloaded && (
