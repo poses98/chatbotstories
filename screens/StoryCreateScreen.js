@@ -1,159 +1,186 @@
-import React, { useLayoutEffect, useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity, FlatList, Switch } from 'react-native';
-import { firestore, auth } from "firebase"
-import { StackActions } from '@react-navigation/native';
+import React, { useLayoutEffect, useState, useEffect } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  ScrollView,
+  TouchableOpacity,
+  FlatList,
+  Switch,
+} from "react-native";
+import { firestore, auth } from "firebase";
+import { StackActions } from "@react-navigation/native";
 
-import Colors from '../constants/Colors';
-import GENRES from '../constants/Genres'
-import LANGUAGES from '../constants/Languages'
+import Colors from "../constants/Colors";
+import GENRES from "../constants/Genres";
+import LANGUAGES from "../constants/Languages";
 
-import Ionicons from "@expo/vector-icons/Ionicons"
-import LabeledInput from "../components/LabeledInput"
-import { Picker } from '@react-native-picker/picker';
-import Button from '../components/Button';
-import { updateDoc, addDoc } from '../services/collections';
+import Ionicons from "@expo/vector-icons/Ionicons";
+import LabeledInput from "../components/LabeledInput";
+import { Picker } from "@react-native-picker/picker";
+import Button from "../components/Button";
+import { updateDoc, addDoc } from "../services/collections";
 
 export const Label = ({ text, icon, ...props }) => {
-    return (
-        <View style={[styles.labelContainer, { ...props.labelStyle }]}>
-            <Ionicons name={icon} size={15} color={Colors.gray} />
-            <Text style={[{ color: Colors.black }, { ...props.textStyle }]}> {text}</Text>
-        </View>
-    )
-}
+  return (
+    <View style={[styles.labelContainer, { ...props.labelStyle }]}>
+      <Ionicons name={icon} size={15} color={Colors.gray} />
+      <Text style={[{ color: Colors.black }, { ...props.textStyle }]}>
+        {" "}
+        {text}
+      </Text>
+    </View>
+  );
+};
 
 export default ({ navigation }) => {
-    const [nameField, setnameField] = useState({
-        errorMessage: "",
-        text: ""
-    })
-    const [categoryMain, setcategoryMain] = useState(0)
-    const [descriptionField, setdescriptionField] = useState({
-        errorMessage: "",
-        text: ""
-    })
-    const [interactive, setinteractive] = useState(false)
-    const [status, setstatus] = useState(0)
-    const [language, setlanguage] = useState(0)
+  const [nameField, setnameField] = useState({
+    errorMessage: "",
+    text: "",
+  });
+  const [categoryMain, setcategoryMain] = useState(0);
+  const [descriptionField, setdescriptionField] = useState({
+    errorMessage: "",
+    text: "",
+  });
+  const [interactive, setinteractive] = useState(false);
+  const [status, setstatus] = useState(0);
+  const [language, setlanguage] = useState(0);
 
-    const createStory = (data) => {
-        firestore().
-            collection("stories").
-            add(data).
-            then((docRef) => {
-                //Creating storyId field in the story doc
-                firestore().
-                    collection("stories").
-                    doc(docRef.id).
-                    update({ storyId: docRef.id });
-                const statsRef = firestore().collection("storyStats")
-                //Creating the story doc in stats collection
-                statsRef.
-                    doc(docRef.id).
-                    set({
-                        views: 0,
-                        likes: 0
-                    })
-                console.log("Document written with ID: ", docRef.id);
-                //Creating reference to the story in user's collection
-                firestore().
-                    collection('users').
-                    doc(auth().currentUser.uid).
-                    collection('stories').
-                    doc(docRef.id).set({ date: data.date }).then(() => {
-                        navigation.dispatch(
-                            StackActions.replace('StoryInfo', {
-                                title: nameField.text,
-                                storyId: docRef.id
-                            })
-                        );
-                    })
-                    .catch((error) => {
-                        console.error("Error adding document: ", error);
-                    });
+  const createStory = (data) => {
+    firestore()
+      .collection("stories")
+      .add(data)
+      .then((docRef) => {
+        //Creating storyId field in the story doc
+        firestore()
+          .collection("stories")
+          .doc(docRef.id)
+          .update({ storyId: docRef.id });
+        const statsRef = firestore().collection("storyStats");
+        const categoryRef = firestore().collection("storyCategories");
+        //Creating the story doc in stats collection
+        statsRef.doc(docRef.id).set({
+          views: 0,
+          likes: 0,
+        });
+        //Adding story to the respecting category
+        categoryRef
+          .doc(`${data.categoryMain}`)
+          .collection("stories")
+          .doc(docRef.id)
+          .set({ id: false });
+        console.log("Document written with ID: ", docRef.id);
+        //Creating reference to the story in user's collection
+        firestore()
+          .collection("users")
+          .doc(auth().currentUser.uid)
+          .collection("stories")
+          .doc(docRef.id)
+          .set({ date: data.date })
+          .then(() => {
+            navigation.dispatch(
+              StackActions.replace("StoryInfo", {
+                title: nameField.text,
+                storyId: docRef.id,
+              })
+            );
+          })
+          .catch((error) => {
+            console.error("Error adding document: ", error);
+          });
 
-            })
-            .catch((error) => {
-                console.error("Error adding document: ", error);
-            });
+        
+      })
+      .catch((error) => {
+        console.error("Error adding document: ", error);
+      });
+  };
 
-    }
-
-
-    const GenreBubble = ({ image, verboseName, genreKey }) => {
-        return (
-            <View style={{ flex: 1, flexDirection: "row", marginHorizontal: 10 }}>
-                <TouchableOpacity style={styles.genreContainer} onPress={() => {
-                    setcategoryMain(genreKey)
-                }}>
-                    <Image
-                        style={genreKey == categoryMain ? styles.genrePicSelected : styles.genrePic}
-                        source={image}
-                    />
-                    <Text style={styles.genreText}>{verboseName}</Text>
-                </TouchableOpacity>
-            </View>
-        )
-    }
-
+  const GenreBubble = ({ image, verboseName, genreKey }) => {
     return (
-        <ScrollView style={styles.container}>
-            <LabeledInput
-                label="Name"
-                text={nameField.text}
-                onChangeText={(text) => {
-                    setnameField({ text })
-                }}
-                errorMessage={nameField.errorMessage}
-                placeholder="The perfect name for your story"
-                maxLength={30}
-                labelStyle={{ color: Colors.black }}
-            />
+      <View style={{ flex: 1, flexDirection: "row", marginHorizontal: 10 }}>
+        <TouchableOpacity
+          style={styles.genreContainer}
+          onPress={() => {
+            setcategoryMain(genreKey);
+          }}
+        >
+          <Image
+            style={
+              genreKey == categoryMain
+                ? styles.genrePicSelected
+                : styles.genrePic
+            }
+            source={image}
+          />
+          <Text style={styles.genreText}>{verboseName}</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  };
 
-            <LabeledInput
-                label={`Description ${descriptionField.text.length}/200`}
-                labelStyle={{ color: Colors.black }}
-                text={descriptionField.text}
-                errorMessage={descriptionField.errorMessage}
-                onChangeText={(text) => {
-                    setdescriptionField({ text })
-                }}
-                placeholder="A catchy description that everybody will love"
-                maxLength={200}
-                multiline={true}
-                numberOfLines={6}
-                inputStyle={{ padding: 7.9, textAlignVertical: 'top' }}
-            />
+  return (
+    <ScrollView style={styles.container}>
+      <LabeledInput
+        label="Name"
+        text={nameField.text}
+        onChangeText={(text) => {
+          setnameField({ text });
+        }}
+        errorMessage={nameField.errorMessage}
+        placeholder="The perfect name for your story"
+        maxLength={30}
+        labelStyle={{ color: Colors.black }}
+      />
 
-            <Label text="Choose main category " icon="layers-outline" />
-            <FlatList
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                data={GENRES}
-                keyExtractor={item => item.genreKey.toString()}
-                renderItem={({ item: { image, verboseName, genreKey } }) => {
-                    return (
-                        <GenreBubble
-                            verboseName={verboseName}
-                            image={image}
-                            genreKey={genreKey}
-                        />
-                    );
-                }}
-            />
+      <LabeledInput
+        label={`Description ${descriptionField.text.length}/200`}
+        labelStyle={{ color: Colors.black }}
+        text={descriptionField.text}
+        errorMessage={descriptionField.errorMessage}
+        onChangeText={(text) => {
+          setdescriptionField({ text });
+        }}
+        placeholder="A catchy description that everybody will love"
+        maxLength={200}
+        multiline={true}
+        numberOfLines={6}
+        inputStyle={{ padding: 7.9, textAlignVertical: "top" }}
+      />
 
-            <View style={{ flexDirection: "row", marginTop: 15 }}>
-                <Label text="Will it be interactive?" icon="people-outline" />
-                <Switch
-                    trackColor={{ false: "#767577", true: Colors.green }}
-                    thumbColor={interactive ? "#f4f3f4" : "#f4f3f4"}
-                    ios_backgroundColor="#3e3e3e"
-                    onValueChange={() => { setinteractive(!interactive) }}
-                    value={interactive}
-                    style={{ marginRight: 15 }}
-                />
-            </View>
-            {/**
+      <Label text="Choose main category " icon="layers-outline" />
+      <FlatList
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        data={GENRES}
+        keyExtractor={(item) => item.genreKey.toString()}
+        renderItem={({ item: { image, verboseName, genreKey } }) => {
+          return (
+            <GenreBubble
+              verboseName={verboseName}
+              image={image}
+              genreKey={genreKey}
+            />
+          );
+        }}
+      />
+
+      <View style={{ flexDirection: "row", marginTop: 15 }}>
+        <Label text="Will it be interactive?" icon="people-outline" />
+        <Switch
+          trackColor={{ false: "#767577", true: Colors.green }}
+          thumbColor={interactive ? "#f4f3f4" : "#f4f3f4"}
+          ios_backgroundColor="#3e3e3e"
+          onValueChange={() => {
+            setinteractive(!interactive);
+          }}
+          value={interactive}
+          style={{ marginRight: 15 }}
+        />
+      </View>
+      {/**
              *  STATUS PICKER, NOT NECESARY IN HERE
              * <View style={{ flexDirection: "column", marginTop: 15 }}>
                 <Label text="Story status" icon="list-outline" />
@@ -172,97 +199,108 @@ export default ({ navigation }) => {
             </View>
              */}
 
-            <View style={{ flexDirection: "column", marginTop: 15 }}>
-                <Label text="Language" icon="list-outline" />
-                <Picker
-                    enabled={true}
-                    style={{ marginHorizontal: 15, color: Colors.black, borderWidth: 1, borderColor: Colors.black }}
-                    dropdownIconColor={Colors.black}
-                    selectedValue={language}
-                    onValueChange={(itemValue, itemIndex) =>
-                        setlanguage(itemValue)
-                    }>
-                    <Picker.Item label={LANGUAGES.en.verboseName} value={LANGUAGES.en.statusId} />
-                    <Picker.Item label={LANGUAGES.es.verboseName} value={LANGUAGES.es.statusId} />
-                </Picker>
-            </View>
+      <View style={{ flexDirection: "column", marginTop: 15 }}>
+        <Label text="Language" icon="list-outline" />
+        <Picker
+          enabled={true}
+          style={{
+            marginHorizontal: 15,
+            color: Colors.black,
+            borderWidth: 1,
+            borderColor: Colors.black,
+          }}
+          dropdownIconColor={Colors.black}
+          selectedValue={language}
+          onValueChange={(itemValue, itemIndex) => setlanguage(itemValue)}
+        >
+          <Picker.Item
+            label={LANGUAGES.en.verboseName}
+            value={LANGUAGES.en.statusId}
+          />
+          <Picker.Item
+            label={LANGUAGES.es.verboseName}
+            value={LANGUAGES.es.statusId}
+          />
+        </Picker>
+      </View>
 
-
-            <Button
-                text="Create story"
-                textStyle={{ fontWeight: "bold" }}
-                onPress={() => {
-                    let validation = true;
-                    if (nameField.text.length === 0) {
-                        validation = false;
-                        nameField.errorMessage = "Name can't be empty!";
-                        setnameField({ ...nameField });
-                    }
-                    if (descriptionField.text.length === 0) {
-                        validation = false;
-                        descriptionField.errorMessage = "Description can't be empty!";
-                        setdescriptionField({ ...descriptionField });
-                    }
-                    if (validation) {
-                        const data = {
-                            title: nameField.text,
-                            description: descriptionField.text,
-                            categoryMain: categoryMain,
-                            date: Date.now(),
-                            author: auth().currentUser.uid,
-                            interactive: interactive,
-                            status: status,
-                            language: language
-                        };
-                        createStory(data);
-                        console.log(data)
-                    }
-                }}
-                buttonStyle={{ marginVertical: 40, marginHorizontal: 15, height: 45, borderColor: Colors.black }}
-            />
-        </ScrollView>
-    )
-}
-
-
-
+      <Button
+        text="Create story"
+        textStyle={{ fontWeight: "bold" }}
+        onPress={() => {
+          let validation = true;
+          if (nameField.text.length === 0) {
+            validation = false;
+            nameField.errorMessage = "Name can't be empty!";
+            setnameField({ ...nameField });
+          }
+          if (descriptionField.text.length === 0) {
+            validation = false;
+            descriptionField.errorMessage = "Description can't be empty!";
+            setdescriptionField({ ...descriptionField });
+          }
+          if (validation) {
+            const data = {
+              title: nameField.text,
+              description: descriptionField.text,
+              categoryMain: categoryMain,
+              date: Date.now(),
+              author: auth().currentUser.uid,
+              interactive: interactive,
+              status: status,
+              language: language,
+            };
+            createStory(data);
+            console.log(data);
+          }
+        }}
+        buttonStyle={{
+          marginVertical: 40,
+          marginHorizontal: 15,
+          height: 45,
+          borderColor: Colors.black,
+        }}
+      />
+    </ScrollView>
+  );
+};
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: "#fff",
-        paddingTop: 15
-    },
+  container: {
+    flex: 1,
+    backgroundColor: "#fff",
+    paddingTop: 15,
+  },
 
-    genrePic: {
-        width: 70,
-        height: 70,
-        borderRadius: 50,
-    },
-    genreContainer: {
-        alignItems: 'center',
-        paddingVertical: 5,
-        borderRadius: 50
-    },
-    labelContainer: {
-        flex: 1,
-        flexDirection: "row",
-        paddingLeft: 15,
-        paddingVertical: 10,
-        alignItems: "center"
-    },
-    genreText: {
-        fontSize: 10,
-        marginTop: 5,
-        textTransform: "uppercase",
-        color: Colors.black,
-        fontWeight: "bold"
-    },
-    genrePicSelected: {
-        width: 70,
-        height: 70,
-        borderRadius: 50,
-        borderWidth: 3,
-        borderColor: Colors.teal
-    }
+  genrePic: {
+    width: 70,
+    height: 70,
+    borderRadius: 50,
+  },
+  genreContainer: {
+    alignItems: "center",
+    paddingVertical: 5,
+    borderRadius: 50,
+  },
+  labelContainer: {
+    flex: 1,
+    flexDirection: "row",
+    paddingLeft: 15,
+    paddingVertical: 10,
+    alignItems: "center",
+  },
+  genreText: {
+    fontSize: 10,
+    marginTop: 5,
+    textTransform: "uppercase",
+    color: Colors.black,
+    fontWeight: "bold",
+  },
+  genrePicSelected: {
+    width: 70,
+    height: 70,
+    borderRadius: 50,
+    borderWidth: 3,
+    borderColor: Colors.teal,
+  },
 });
