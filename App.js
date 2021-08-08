@@ -3,7 +3,7 @@ import Expo from 'expo'
 import { NavigationContainer, DarkTheme } from '@react-navigation/native';
 import { AuthStackScreen } from './components/Navigation';
 import firebase from "firebase/app";
-import { firebaseConfig } from "./config";
+//import { firebaseConfig } from "./config";
 import { RootStackScreen } from './components/Navigation';
 import LoadingScreen from './screens/LoadingScreen';
 import * as ScreenOrientation from 'expo-screen-orientation';
@@ -44,6 +44,16 @@ export default function App() {
     </NavigationContainer>
   );
 }
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCpitxa6of07zmFhubpG6AH1o9BcGWI4GQ",
+  authDomain: "chatbotstories.firebaseapp.com",
+  projectId: "chatbotstories",
+  storageBucket: "chatbotstories.appspot.com",
+  messagingSenderId: "355055867626",
+  appId: "1:355055867626:web:b192912fd935da751be993",
+  measurementId: "G-H9MZ3606L3"
+};
 
 if (!firebase.apps.length) {
   firebase.initializeApp(firebaseConfig);

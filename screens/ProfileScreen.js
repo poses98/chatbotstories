@@ -33,7 +33,6 @@ const StoryContainer = ({
                 onError={handleError}
                 style={styles.image}>
                 <View style={[styles.storyContainer]}>{/**{ backgroundColor: `${color}` } */}
-
                     <View style={styles.storyBar}>
                         {interactive && (
                             <View style={[styles.storyTag, { backgroundColor: Colors.green }]}>
@@ -99,7 +98,7 @@ export default ({ navigation }) => {
             .collection("stories")
     useEffect(() => {
         const unsubscribe = userRef.
-            doc(auth().currentUser.uid) // ESTO HAY QUE CAMBIARLO POR EL ID DE USUARIO!
+            doc(auth().currentUser.uid) // TODO ESTO HAY QUE CAMBIARLO POR EL ID DE USUARIO!
             .onSnapshot((doc) => {
                 console.log("Profile data fetched: ", doc.data());
                 setdata(doc.data())
@@ -112,7 +111,7 @@ export default ({ navigation }) => {
 
         const unsubscribeStories = firestore().
             collection("users").
-            doc(auth().currentUser.uid).  // ESTO HAY QUE CAMBIARLO POR EL ID DE USUARIO!
+            doc(auth().currentUser.uid).  // TODO ESTO HAY QUE CAMBIARLO POR EL ID DE USUARIO!
             collection('stories').
             orderBy("date","desc").
             limit(4).
@@ -236,7 +235,6 @@ const styles = StyleSheet.create({
     storyContainer: {
         flexDirection: "column",
         justifyContent: "space-between",
-        alignItems: "center",
         height: 230,
         padding: 15,
         borderColor: Colors.gray,
@@ -249,7 +247,7 @@ const styles = StyleSheet.create({
     },
     storyTag: {
         borderWidth: 1,
-        borderColor: Colors.lightGray,
+        borderColor: "#fafafa", //TODO
         padding: 5,
         borderRadius: 5,
         marginHorizontal: 3
@@ -263,6 +261,10 @@ const styles = StyleSheet.create({
         color: Colors.lightGray,
     },
     storyMainInfoContainer: {
+        flex:1,
+        alignItems:"flex-start",
+        alignContent:"center",
+        justifyContent:"center",
         flexDirection: 'column',
         color: "#fafafa"
 
