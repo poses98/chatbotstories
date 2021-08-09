@@ -62,7 +62,7 @@ export default ({ navigation }) => {
             <View style={{ flexDirection: "row" }}>
                 <TouchableOpacity
                     onPress={() => {
-                        userRef.doc(data.username).get().then((doc) => {
+                        userRef.doc(data.username.toLowerCase()).get().then((doc) => {
                             let available = false;
                             if (doc.exists) {
                                 console.log(doc.data())
@@ -77,11 +77,11 @@ export default ({ navigation }) => {
 
                             if (available) {
                                 console.log(`deleting last username: ${oldUsername}`)
-                                removeDoc(userRef,oldUsername)
+                                removeDoc(userRef,oldUsername.toLowerCase())
                                 console.log("username available, updating object...")
                                 firestore().
                                     collection('usernames').
-                                    doc(data.username).
+                                    doc(data.username.toLowerCase()).
                                     set({ uid: auth().currentUser.uid });
                                 updateDoc(docRef, auth().currentUser.uid, data)
                                 navigation.dispatch(CommonActions.goBack());
@@ -182,6 +182,7 @@ export default ({ navigation }) => {
                         }}
                         placeholder="Your username"
                         maxLength={20}
+                        autoCapitalize="none"
                         value={data.username}
                     />
                     {/**Web */}

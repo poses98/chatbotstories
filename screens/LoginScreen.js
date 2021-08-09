@@ -57,7 +57,7 @@ export default () => {
     const createAccount = (email, password, data) => {
 
         const userRef = firestore().collection('usernames')
-        userRef.doc(data.username).get().then((doc) => {
+        userRef.doc(data.username.toLowerCase()).get().then((doc) => {
             let available = false;
             if (doc.exists) {
                 available = false
@@ -74,11 +74,10 @@ export default () => {
                         set(data);
                     firestore().
                         collection('usernames').
-                        doc(data.username).
+                        doc(data.username.toLowerCase()).
                         set({ uid: auth().currentUser.uid });
                 })
             } else {
-                console.log("USERNAME NOT AVAILABLE. PROCEEDING TO HANDLE THIS.")
                 userName.errorMessage = "Username not available :(";
                 setUserName({ ...userName });
             }
