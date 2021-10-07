@@ -20,6 +20,7 @@ export default ({ navigation, route }) => {
     const [notloaded, setnotloaded] = useState(false)
     const [stats, setstats] = useState({})
     const [canLike, setcanLike] = useState(true)
+    const [editMode, setEditMode] = useState(false)
     const authorName = route.params.username;
 
     //Refs to firestore
@@ -112,7 +113,7 @@ export default ({ navigation, route }) => {
                     <TouchableOpacity
                         onPress={() => {
                             setIsSaved(!isSaved)
-                            /** Save story into user's account */
+                            /**TODO Save story into user's account */
                         }}
                         style={{ paddingRight: 5 }}>
                         <Ionicons name={!isSaved ? "bookmark-outline" : "bookmark"} size={26} color={Colors.black} />
@@ -121,7 +122,9 @@ export default ({ navigation, route }) => {
                 {/**Only render if it's owner*/}
                 {owned && !notloaded && !loading && (
                     <TouchableOpacity
-                        onPress={() => { /** setEditMode */ }}
+                        onPress={() => { /**TODO setEditMode */ 
+                            navigation.navigate('StoryCreate',{storyId: storyId})
+                        }}
                         style={{ paddingRight: 5 }}>
                         <Ionicons name="pencil-outline" size={26} color={Colors.black} />
                     </TouchableOpacity>

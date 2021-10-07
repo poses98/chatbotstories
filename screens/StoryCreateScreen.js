@@ -34,19 +34,58 @@ export const Label = ({ text, icon, ...props }) => {
   );
 };
 
-export default ({ navigation }) => {
-  const [nameField, setnameField] = useState({
+export default ({ route, navigation }) => {
+  /** STORY ID IN CASE IS UPDATE MODE */
+  const [storyId,setStoryId] = useState(route.params ? route.params.storyId : "")
+  /** STATE ATRIBUTTES */
+  const [owned, setowned] = useState(false) // owner of the story
+  const [data, setdata] = useState({}) // metadata of the story
+  const [loading, setloading] = useState(true) // is loading or not
+  const [notloaded, setnotloaded] = useState(false) // couldnt load the data
+  const [nameField, setnameField] = useState({ // story name field
     errorMessage: "",
     text: "",
   });
-  const [categoryMain, setcategoryMain] = useState(0);
-  const [descriptionField, setdescriptionField] = useState({
+  const [categoryMain, setcategoryMain] = useState(0); // category of the story
+  const [descriptionField, setdescriptionField] = useState({ // description of the story
     errorMessage: "",
     text: "",
   });
-  const [interactive, setinteractive] = useState(false);
-  const [status, setstatus] = useState(0);
-  const [language, setlanguage] = useState(0);
+  const [interactive, setinteractive] = useState(false); // interactivity of the story
+  const [status, setstatus] = useState(0); // status of the story
+  const [language, setlanguage] = useState(0); // language of the story
+
+  /** Getting the metadata of the story */
+  useEffect(() => {
+    if (storyId != "") {
+        storyRef.doc(storyId).get().then((doc) => {
+            if (doc.exists) {
+                console.log("Story loaded: ", doc.data());
+                setdata(doc.data())
+                if (doc.data().author === auth().currentUser.uid) {
+                    setowned(true)
+                    setnameField(data.title)
+                    setdescriptionField(data.description)
+                    setcategoryMain(data.categoryMain)
+                    setinteractive(data.interactive)
+                    setlanguage(data.language)
+                    setstatus(data.status)
+                }else{
+                  setStoryId("")
+                }
+                setloading(false)
+            } else {
+                // doc.data() will be undefined in this case
+                setnotloaded(true)
+                console.log("No such document! (METADATA)");
+            }
+        }).catch((error) => {
+            console.log("Error getting document:", error);
+        });
+    } else {
+        setloading(false);
+    }
+}, [])
 
   const createStory = (data) => {
     firestore()
@@ -122,7 +161,10 @@ export default ({ navigation }) => {
   };
 
   return (
+    
     <ScrollView style={styles.container}>
+      {!loading && !notloaded && (
+        <View>
       <LabeledInput
         label="Name"
         text={nameField.text}
@@ -134,7 +176,7 @@ export default ({ navigation }) => {
         maxLength={30}
         labelStyle={{ color: Colors.black }}
       />
-
+      {/** DESCRIPTION FIELD */}
       <LabeledInput
         label={`Description ${descriptionField.text.length}/200`}
         labelStyle={{ color: Colors.black }}
@@ -151,6 +193,7 @@ export default ({ navigation }) => {
       />
 
       <Label text="Choose main category " icon="layers-outline" />
+      {/** GENRE BUBBLES FILLED FROM CONSTANT FILE */}
       <FlatList
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -261,6 +304,9 @@ export default ({ navigation }) => {
           borderColor: Colors.black,
         }}
       />
+      </View>
+      )}
+
     </ScrollView>
   );
 };

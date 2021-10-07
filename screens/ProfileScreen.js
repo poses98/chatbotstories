@@ -114,7 +114,7 @@ export default ({ navigation }) => {
             doc(auth().currentUser.uid).  // TODO ESTO HAY QUE CAMBIARLO POR EL ID DE USUARIO!
             collection('stories').
             orderBy("date","desc").
-            limit(4).
+            limit(6).
             onSnapshot((querySnapshot) => {
                 var fetchedStories = []
                 if (querySnapshot.size === 0) {
