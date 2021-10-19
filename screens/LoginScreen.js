@@ -93,7 +93,7 @@ export default () => {
             <View style={styles.container}>
                 {/* Header */}
                 <View style={styles.headerBox}>
-                    <Text style={styles.header}>ChatBotStories</Text>
+                    <Text style={styles.header}>Bookster</Text>
                 </View>
                 <View style={styles.form}>
                     {isCreateMode && (

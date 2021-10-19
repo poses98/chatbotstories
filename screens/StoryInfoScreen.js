@@ -9,6 +9,7 @@ import Button from '../components/Button';
 import LANGUAGES from '../constants/Languages'
 import MONTHS from '../constants/Months'
 import STORY_STATUS from '../constants/StoryStatus'
+import { StackActions } from "@react-navigation/native";
 
 export default ({ navigation, route }) => {
     /** STATE OBJECTS */
@@ -20,7 +21,6 @@ export default ({ navigation, route }) => {
     const [notloaded, setnotloaded] = useState(false)
     const [stats, setstats] = useState({})
     const [canLike, setcanLike] = useState(true)
-    const [editMode, setEditMode] = useState(false)
     const authorName = route.params.username;
 
     //Refs to firestore
@@ -53,6 +53,7 @@ export default ({ navigation, route }) => {
                 console.log("Error getting document:", error);
             });
         } else {
+            console.log("No storyId associated")
             setnotloaded(true);
             setloading(false);
         }
@@ -64,7 +65,8 @@ export default ({ navigation, route }) => {
                 if (doc.exists) {
                     console.log("Story stats loaded: ", doc.data());
                     setstats(doc.data())
-                    statsRef.doc(storyId).update({ views: doc.data().views + 1 })
+                    // UPDATE VIEW WILL BE IN START READING BUTTON (AD WILL BE SHOWN)
+                    // statsRef.doc(storyId).update({ views: doc.data().views + 1 })
                     setloading(false)
                 } else {
                     // doc.data() will be undefined in this case
@@ -123,7 +125,11 @@ export default ({ navigation, route }) => {
                 {owned && !notloaded && !loading && (
                     <TouchableOpacity
                         onPress={() => { /**TODO setEditMode */ 
-                            navigation.navigate('StoryCreate',{storyId: storyId})
+                            navigation.dispatch(
+                                StackActions.replace("StoryCreate", {
+                                  storyId: storyId,
+                                })
+                              );
                         }}
                         style={{ paddingRight: 5 }}>
                         <Ionicons name="pencil-outline" size={26} color={Colors.black} />
@@ -242,7 +248,7 @@ export default ({ navigation, route }) => {
                         </View>
                         {/** DATE */}
                         <View style={{ flex: 1, alignItems: "flex-end", marginHorizontal: 10 }}>
-                            <Text>{day} {MONTHS[month - 1]} {year}</Text>
+                            <Text>{day} {MONTHS[month]} {year}</Text>
                         </View>
                     </View>
                     {/** CONTINUE/START READING BUTTON */}

@@ -15,7 +15,7 @@ import { StackActions } from "@react-navigation/native";
 import Colors from "../constants/Colors";
 import GENRES from "../constants/Genres";
 import LANGUAGES from "../constants/Languages";
-
+import _STATUS_ from "../constants/StoryStatus";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import LabeledInput from "../components/LabeledInput";
 import { Picker } from "@react-native-picker/picker";
@@ -40,6 +40,7 @@ export default ({ route, navigation }) => {
     route.params ? route.params.storyId : ""
   );
   const [isEditMode, setEditMode] = useState(false);
+  /**  */
   /** STATE ATRIBUTTES */
   const [owned, setowned] = useState(false); // owner of the story
   const [data, setdata] = useState({}); // metadata of the story
@@ -51,6 +52,8 @@ export default ({ route, navigation }) => {
     text: "",
   });
   const [categoryMain, setcategoryMain] = useState(0); // category of the story
+  const [oldCategory, setOldCategory] = useState(0); // category of the story
+
   const [descriptionField, setdescriptionField] = useState({
     // description of the story
     errorMessage: "",
@@ -85,6 +88,7 @@ export default ({ route, navigation }) => {
               descriptionField.text = doc.data().description;
               setdescriptionField({ ...descriptionField });
               setcategoryMain(doc.data().categoryMain);
+              setOldCategory(doc.data().categoryMain);
               setinteractive(doc.data().interactive);
               setlanguage(doc.data().language);
             } else {
@@ -154,34 +158,44 @@ export default ({ route, navigation }) => {
   };
 
   const updateStory = (data) => {
-    updateDoc(storyRef, storyId, data)
-
-        const categoryRef = firestore().collection("storyCategories");
-        //Adding story to the respecting category
+    data.storyId = storyId;
+    setdata({ ...data });
+    updateDoc(storyRef, storyId, data);
+    console.log("old category:",oldCategory)
+    console.log("new category:",categoryMain)
+    if (oldCategory != data.categoryMain) {
+      console.log("proceeding to delete old category")
+      const categoryRef = firestore().collection("storyCategories");
+      //Adding story to the respecting category
+      categoryRef
+        .doc(`${data.categoryMain}`)
+        .collection("stories")
+        .doc(storyId)
+        .set({ id: false });
         categoryRef
-          .doc(`${data.categoryMain}`)
-          .collection("stories")
-          .doc(storyId)
-          .set({ id: false });
-        //Creating reference to the story in user's collection
-        firestore()
-          .collection("users")
-          .doc(auth().currentUser.uid)
-          .collection("stories")
-          .doc(storyId)
-          .set({ date: data.date })
-          .then(() => {
-            navigation.dispatch(
-              StackActions.replace("StoryInfo", {
-                title: nameField.text,
-                storyId: storyId,
-              })
-            );
+        .doc(`${oldCategory}`)
+        .collection("stories")
+        .doc(storyId)
+        .delete();
+    }
+    //Creating reference to the story in user's collection
+    firestore()
+      .collection("users")
+      .doc(auth().currentUser.uid)
+      .collection("stories")
+      .doc(storyId)
+      .set({ date: data.date })
+      .then(() => {
+        navigation.dispatch(
+          StackActions.replace("StoryInfo", {
+            title: nameField.text,
+            storyId: storyId,
           })
-          .catch((error) => {
-            console.error("Error adding document: ", error);
-          });
-
+        );
+      })
+      .catch((error) => {
+        console.error("Error adding document: ", error);
+      });
   };
 
   const GenreBubble = ({ image, verboseName, genreKey }) => {
@@ -269,24 +283,31 @@ export default ({ route, navigation }) => {
               style={{ marginRight: 15 }}
             />
           </View>
-          {/**
-             *  STATUS PICKER, NOT NECESARY IN HERE
-             * <View style={{ flexDirection: "column", marginTop: 15 }}>
-                <Label text="Story status" icon="list-outline" />
-                <Picker
-                    enabled={false}
-                    style={{ marginHorizontal: 15, color: Colors.lightGray, borderWidth: 1, borderColor: Colors.lightGray }}
-                    dropdownIconColor={Colors.lightGray}
-                    selectedValue={status}
-                    onValueChange={(itemValue, itemIndex) =>
-                        setstatus(itemValue)
-                    }>
-                    <Picker.Item label={_STATUS_.draft.verboseName} value={_STATUS_.draft.statusId} />
-                    <Picker.Item label={_STATUS_.public.verboseName} value={_STATUS_.public.statusId} />
-                    <Picker.Item label={_STATUS_.private.verboseName} value={_STATUS_.private.statusId} />
-                </Picker>
-            </View>
-             */}
+
+          <View style={{ flexDirection: "column", marginTop: 15 }}>
+            <Label text="Story status" icon="list-outline" />
+            <Picker
+              enabled={isEditMode}
+              style={{
+                marginHorizontal: 15,
+                color: isEditMode ? Colors.black : Colors.lightGray,
+                borderWidth: 1,
+                borderColor: Colors.lightGray,
+              }}
+              dropdownIconColor={isEditMode ? Colors.black : Colors.lightGray}
+              selectedValue={status}
+              onValueChange={(itemValue, itemIndex) => setstatus(itemValue)}
+            >
+              <Picker.Item
+                label={_STATUS_[0].verboseName}
+                value={_STATUS_[0].statusId}
+              />
+              <Picker.Item
+                label={_STATUS_[1].verboseName}
+                value={_STATUS_[1].statusId}
+              />
+            </Picker>
+          </View>
 
           <View style={{ flexDirection: "column", marginTop: 15 }}>
             <Label text="Language" icon="list-outline" />
@@ -314,7 +335,7 @@ export default ({ route, navigation }) => {
           </View>
           {/** CREATE STORY BUTTON */}
           <Button
-            text={isEditMode ? "Update story" : "Create story"}
+            text={isEditMode ? "Save" : "Create"}
             textStyle={{ fontWeight: "bold" }}
             onPress={() => {
               let validation = true;
