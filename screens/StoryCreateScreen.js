@@ -36,18 +36,23 @@ export const Label = ({ text, icon, ...props }) => {
 
 export default ({ route, navigation }) => {
   /** STORY ID IN CASE IS UPDATE MODE */
-  const [storyId,setStoryId] = useState(route.params ? route.params.storyId : "")
+  const [storyId, setStoryId] = useState(
+    route.params ? route.params.storyId : ""
+  );
+  const [isEditMode, setEditMode] = useState(false);
   /** STATE ATRIBUTTES */
-  const [owned, setowned] = useState(false) // owner of the story
-  const [data, setdata] = useState({}) // metadata of the story
-  const [loading, setloading] = useState(true) // is loading or not
-  const [notloaded, setnotloaded] = useState(false) // couldnt load the data
-  const [nameField, setnameField] = useState({ // story name field
+  const [owned, setowned] = useState(false); // owner of the story
+  const [data, setdata] = useState({}); // metadata of the story
+  const [loading, setloading] = useState(true); // is loading or not
+  const [notloaded, setnotloaded] = useState(false); // couldnt load the data
+  const [nameField, setnameField] = useState({
+    // story name field
     errorMessage: "",
     text: "",
   });
   const [categoryMain, setcategoryMain] = useState(0); // category of the story
-  const [descriptionField, setdescriptionField] = useState({ // description of the story
+  const [descriptionField, setdescriptionField] = useState({
+    // description of the story
     errorMessage: "",
     text: "",
   });
@@ -55,37 +60,50 @@ export default ({ route, navigation }) => {
   const [status, setstatus] = useState(0); // status of the story
   const [language, setlanguage] = useState(0); // language of the story
 
+  const storyRef = firestore().collection("stories");
+
   /** Getting the metadata of the story */
   useEffect(() => {
     if (storyId != "") {
-        storyRef.doc(storyId).get().then((doc) => {
-            if (doc.exists) {
-                console.log("Story loaded: ", doc.data());
-                setdata(doc.data())
-                if (doc.data().author === auth().currentUser.uid) {
-                    setowned(true)
-                    setnameField(data.title)
-                    setdescriptionField(data.description)
-                    setcategoryMain(data.categoryMain)
-                    setinteractive(data.interactive)
-                    setlanguage(data.language)
-                    setstatus(data.status)
-                }else{
-                  setStoryId("")
-                }
-                setloading(false)
+      storyRef
+        .doc(storyId)
+        .get()
+        .then((doc) => {
+          if (doc.exists) {
+            console.log("Story loaded: ", doc.data());
+
+            if (doc.data().author === auth().currentUser.uid) {
+              console.log("edit mode enable");
+              setEditMode(true);
+              console.log("user is owner");
+              setowned(true);
+              console.log("data fetched into state variable:");
+              setdata(doc.data());
+              console.log(data);
+              nameField.text = doc.data().title;
+              setnameField({ ...nameField });
+              descriptionField.text = doc.data().description;
+              setdescriptionField({ ...descriptionField });
+              setcategoryMain(doc.data().categoryMain);
+              setinteractive(doc.data().interactive);
+              setlanguage(doc.data().language);
             } else {
-                // doc.data() will be undefined in this case
-                setnotloaded(true)
-                console.log("No such document! (METADATA)");
+              setStoryId("");
             }
-        }).catch((error) => {
-            console.log("Error getting document:", error);
+            setloading(false);
+          } else {
+            // doc.data() will be undefined in this case
+            setnotloaded(true);
+            console.log("No such document! (METADATA)");
+          }
+        })
+        .catch((error) => {
+          console.log("Error getting document:", error);
         });
     } else {
-        setloading(false);
+      setloading(false);
     }
-}, [])
+  }, []);
 
   const createStory = (data) => {
     firestore()
@@ -129,12 +147,41 @@ export default ({ route, navigation }) => {
           .catch((error) => {
             console.error("Error adding document: ", error);
           });
-
-        
       })
       .catch((error) => {
         console.error("Error adding document: ", error);
       });
+  };
+
+  const updateStory = (data) => {
+    updateDoc(storyRef, storyId, data)
+
+        const categoryRef = firestore().collection("storyCategories");
+        //Adding story to the respecting category
+        categoryRef
+          .doc(`${data.categoryMain}`)
+          .collection("stories")
+          .doc(storyId)
+          .set({ id: false });
+        //Creating reference to the story in user's collection
+        firestore()
+          .collection("users")
+          .doc(auth().currentUser.uid)
+          .collection("stories")
+          .doc(storyId)
+          .set({ date: data.date })
+          .then(() => {
+            navigation.dispatch(
+              StackActions.replace("StoryInfo", {
+                title: nameField.text,
+                storyId: storyId,
+              })
+            );
+          })
+          .catch((error) => {
+            console.error("Error adding document: ", error);
+          });
+
   };
 
   const GenreBubble = ({ image, verboseName, genreKey }) => {
@@ -161,69 +208,68 @@ export default ({ route, navigation }) => {
   };
 
   return (
-    
     <ScrollView style={styles.container}>
       {!loading && !notloaded && (
         <View>
-      <LabeledInput
-        label="Name"
-        text={nameField.text}
-        onChangeText={(text) => {
-          setnameField({ text });
-        }}
-        errorMessage={nameField.errorMessage}
-        placeholder="The perfect name for your story"
-        maxLength={30}
-        labelStyle={{ color: Colors.black }}
-      />
-      {/** DESCRIPTION FIELD */}
-      <LabeledInput
-        label={`Description ${descriptionField.text.length}/200`}
-        labelStyle={{ color: Colors.black }}
-        text={descriptionField.text}
-        errorMessage={descriptionField.errorMessage}
-        onChangeText={(text) => {
-          setdescriptionField({ text });
-        }}
-        placeholder="A catchy description that everybody will love"
-        maxLength={200}
-        multiline={true}
-        numberOfLines={6}
-        inputStyle={{ padding: 7.9, textAlignVertical: "top" }}
-      />
+          <LabeledInput
+            label="Name"
+            text={nameField.text}
+            onChangeText={(text) => {
+              setnameField({ text });
+            }}
+            errorMessage={nameField.errorMessage}
+            placeholder="The perfect name for your story"
+            maxLength={30}
+            labelStyle={{ color: Colors.black }}
+          />
+          {/** DESCRIPTION FIELD */}
+          <LabeledInput
+            label={`Description ${descriptionField.text.length}/200`}
+            labelStyle={{ color: Colors.black }}
+            text={descriptionField.text}
+            errorMessage={descriptionField.errorMessage}
+            onChangeText={(text) => {
+              setdescriptionField({ text });
+            }}
+            placeholder="A catchy description that everybody will love"
+            maxLength={200}
+            multiline={true}
+            numberOfLines={6}
+            inputStyle={{ padding: 7.9, textAlignVertical: "top" }}
+          />
 
-      <Label text="Choose main category " icon="layers-outline" />
-      {/** GENRE BUBBLES FILLED FROM CONSTANT FILE */}
-      <FlatList
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        data={GENRES}
-        keyExtractor={(item) => item.genreKey.toString()}
-        renderItem={({ item: { image, verboseName, genreKey } }) => {
-          return (
-            <GenreBubble
-              verboseName={verboseName}
-              image={image}
-              genreKey={genreKey}
+          <Label text="Choose main category " icon="layers-outline" />
+          {/** GENRE BUBBLES FILLED FROM CONSTANT FILE */}
+          <FlatList
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            data={GENRES}
+            keyExtractor={(item) => item.genreKey.toString()}
+            renderItem={({ item: { image, verboseName, genreKey } }) => {
+              return (
+                <GenreBubble
+                  verboseName={verboseName}
+                  image={image}
+                  genreKey={genreKey}
+                />
+              );
+            }}
+          />
+
+          <View style={{ flexDirection: "row", marginTop: 15 }}>
+            <Label text="Will it be interactive?" icon="people-outline" />
+            <Switch
+              trackColor={{ false: "#767577", true: Colors.green }}
+              thumbColor={interactive ? "#f4f3f4" : "#f4f3f4"}
+              ios_backgroundColor="#3e3e3e"
+              onValueChange={() => {
+                setinteractive(!interactive);
+              }}
+              value={interactive}
+              style={{ marginRight: 15 }}
             />
-          );
-        }}
-      />
-
-      <View style={{ flexDirection: "row", marginTop: 15 }}>
-        <Label text="Will it be interactive?" icon="people-outline" />
-        <Switch
-          trackColor={{ false: "#767577", true: Colors.green }}
-          thumbColor={interactive ? "#f4f3f4" : "#f4f3f4"}
-          ios_backgroundColor="#3e3e3e"
-          onValueChange={() => {
-            setinteractive(!interactive);
-          }}
-          value={interactive}
-          style={{ marginRight: 15 }}
-        />
-      </View>
-      {/**
+          </View>
+          {/**
              *  STATUS PICKER, NOT NECESARY IN HERE
              * <View style={{ flexDirection: "column", marginTop: 15 }}>
                 <Label text="Story status" icon="list-outline" />
@@ -242,71 +288,76 @@ export default ({ route, navigation }) => {
             </View>
              */}
 
-      <View style={{ flexDirection: "column", marginTop: 15 }}>
-        <Label text="Language" icon="list-outline" />
-        <Picker
-          enabled={true}
-          style={{
-            marginHorizontal: 15,
-            color: Colors.black,
-            borderWidth: 1,
-            borderColor: Colors.black,
-          }}
-          dropdownIconColor={Colors.black}
-          selectedValue={language}
-          onValueChange={(itemValue, itemIndex) => setlanguage(itemValue)}
-        >
-          <Picker.Item
-            label={LANGUAGES.en.verboseName}
-            value={LANGUAGES.en.statusId}
+          <View style={{ flexDirection: "column", marginTop: 15 }}>
+            <Label text="Language" icon="list-outline" />
+            <Picker
+              enabled={true}
+              style={{
+                marginHorizontal: 15,
+                color: Colors.black,
+                borderWidth: 1,
+                borderColor: Colors.black,
+              }}
+              dropdownIconColor={Colors.black}
+              selectedValue={language}
+              onValueChange={(itemValue, itemIndex) => setlanguage(itemValue)}
+            >
+              <Picker.Item
+                label={LANGUAGES.en.verboseName}
+                value={LANGUAGES.en.statusId}
+              />
+              <Picker.Item
+                label={LANGUAGES.es.verboseName}
+                value={LANGUAGES.es.statusId}
+              />
+            </Picker>
+          </View>
+          {/** CREATE STORY BUTTON */}
+          <Button
+            text={isEditMode ? "Update story" : "Create story"}
+            textStyle={{ fontWeight: "bold" }}
+            onPress={() => {
+              let validation = true;
+              if (nameField.text.length === 0) {
+                validation = false;
+                nameField.errorMessage = "Name can't be empty!";
+                setnameField({ ...nameField });
+              }
+              if (descriptionField.text.length === 0) {
+                validation = false;
+                descriptionField.errorMessage = "Description can't be empty!";
+                setdescriptionField({ ...descriptionField });
+              }
+              if (validation) {
+                const data = {
+                  title: nameField.text,
+                  description: descriptionField.text,
+                  categoryMain: categoryMain,
+                  date: Date.now(),
+                  author: auth().currentUser.uid,
+                  interactive: interactive,
+                  status: status,
+                  language: language,
+                };
+                if (!isEditMode) {
+                  //create story
+                  createStory(data);
+                  console.log("Creating new story! : " + data);
+                } else if (isEditMode) {
+                  updateStory(data);
+                  console.log("Updating an existing story! : " + data);
+                }
+              }
+            }}
+            buttonStyle={{
+              marginVertical: 40,
+              marginHorizontal: 15,
+              height: 45,
+              borderColor: Colors.black,
+            }}
           />
-          <Picker.Item
-            label={LANGUAGES.es.verboseName}
-            value={LANGUAGES.es.statusId}
-          />
-        </Picker>
-      </View>
-
-      <Button
-        text="Create story"
-        textStyle={{ fontWeight: "bold" }}
-        onPress={() => {
-          let validation = true;
-          if (nameField.text.length === 0) {
-            validation = false;
-            nameField.errorMessage = "Name can't be empty!";
-            setnameField({ ...nameField });
-          }
-          if (descriptionField.text.length === 0) {
-            validation = false;
-            descriptionField.errorMessage = "Description can't be empty!";
-            setdescriptionField({ ...descriptionField });
-          }
-          if (validation) {
-            const data = {
-              title: nameField.text,
-              description: descriptionField.text,
-              categoryMain: categoryMain,
-              date: Date.now(),
-              author: auth().currentUser.uid,
-              interactive: interactive,
-              status: status,
-              language: language,
-            };
-            createStory(data);
-            console.log(data);
-          }
-        }}
-        buttonStyle={{
-          marginVertical: 40,
-          marginHorizontal: 15,
-          height: 45,
-          borderColor: Colors.black,
-        }}
-      />
-      </View>
+        </View>
       )}
-
     </ScrollView>
   );
 };
