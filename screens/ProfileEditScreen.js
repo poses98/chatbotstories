@@ -62,6 +62,8 @@ export default ({ navigation }) => {
             <View style={{ flexDirection: "row" }}>
                 <TouchableOpacity
                     onPress={() => {
+                        data.description = data.description.replace(/\r?\n|\r/, '').trim()
+                        setdata({ ...data})
                         userRef.doc(data.username.toLowerCase()).get().then((doc) => {
                             let available = false;
                             if (doc.exists) {
@@ -83,6 +85,7 @@ export default ({ navigation }) => {
                                     collection('usernames').
                                     doc(data.username.toLowerCase()).
                                     set({ uid: auth().currentUser.uid });
+                                
                                 updateDoc(docRef, auth().currentUser.uid, data)
                                 navigation.dispatch(CommonActions.goBack());
                             } else {
@@ -199,7 +202,7 @@ export default ({ navigation }) => {
                     />
                     {/**Description */}
                     <LabeledInput
-                        label="Description"
+                        label={`Description ${data.description.length}/200`}
                         text={data.description}
                         onChangeText={(text) => {
                             setdata({ ...data, description: text })
@@ -207,6 +210,10 @@ export default ({ navigation }) => {
                         placeholder="Present yourself to other people"
                         maxLength={200}
                         value={data.description}
+                        multiline={true}
+                        numberOfLines={6}
+                        maxHeight={60}
+                        inputStyle={{ padding: 7.9, textAlignVertical: "top" }}
                     />
                 </View>
             )}
@@ -236,12 +243,13 @@ const styles = StyleSheet.create({
         borderRadius: 50,
         alignItems: 'center',
         alignSelf: "center",
-        marginTop: 40,
+        marginVertical: 15,
     },
     changeProfilePicText: {
         alignSelf: "center",
         color: Colors.blue,
         fontSize: 16,
+        marginBottom: 15
     },
     icon: {
         padding: 5,

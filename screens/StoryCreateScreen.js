@@ -249,6 +249,8 @@ export default ({ route, navigation }) => {
             maxLength={200}
             multiline={true}
             numberOfLines={6}
+            maxLines={6}
+            maxHeight={60}
             inputStyle={{ padding: 7.9, textAlignVertical: "top" }}
           />
 
@@ -352,7 +354,7 @@ export default ({ route, navigation }) => {
               if (validation) {
                 const data = {
                   title: nameField.text,
-                  description: descriptionField.text,
+                  description: descriptionField.text.replace(/(\r\n|\n|\r)/gm, ""),
                   categoryMain: categoryMain,
                   date: Date.now(),
                   author: auth().currentUser.uid,
