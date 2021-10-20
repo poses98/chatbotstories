@@ -39,8 +39,9 @@ export default ({ navigation, route }) => {
   var date = new Date(data.date);
   var month = date.getMonth();
   var year = date.getFullYear();
-  var day = date.getDay();
+  var day = date.getDate();
 
+    
   /** Getting the metadata of the story */
   useEffect(() => {
     if (storyId != "") {
@@ -106,9 +107,10 @@ export default ({ navigation, route }) => {
         .then((doc) => {
           if (doc.exists) {
             setcanLike(false);
+            console.log("Story has been liked by the user")
+
           } else {
             // doc.data() will be undefined in this case
-            console.log("No such document! (USERLIKE)");
           }
         })
         .catch((error) => {
@@ -130,9 +132,9 @@ export default ({ navigation, route }) => {
         .then((doc) => {
           if (doc.exists) {
             setIsSaved(true);
+            console.log("Story has been saved by the user")
           } else {
             // doc.data() will be undefined in this case
-            console.log("No such document! (USERLIKE)");
           }
         })
         .catch((error) => {
@@ -321,7 +323,9 @@ export default ({ navigation, route }) => {
             <View>
               <TouchableOpacity
                 style={[styles.storyStats, { paddingLeft: 8 }]}
-                onPress={() => {}}
+                onPress={() => {
+                    /** TODO go to comment section */
+                }}
               >
                 <Ionicons
                   name="chatbox-outline"
