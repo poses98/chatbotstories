@@ -34,6 +34,7 @@ export default ({ navigation }) => {
   //Get user information
   const userRef = firestore().collection("users");
   const storyRef = firestore().collection("stories");
+  
   useEffect(() => {
     const unsubscribe = userRef
       .doc(auth().currentUser.uid) // TODO ESTO HAY QUE CAMBIARLO POR EL ID DE USUARIO!
@@ -44,46 +45,7 @@ export default ({ navigation }) => {
       });
     return unsubscribe;
   }, []);
-  async function downloadImage(userId) {
-    const ref = firebase
-      .storage()
-      .ref()
-      .child("profilePictures/" + userId);
-
-    await ref
-      .getDownloadURL()
-      .then(function (url) {
-        setImage(url);
-        setloading(false);
-      })
-      .catch(function (error) {
-        setloading(false);
-        // A full list of error codes is available at
-        // https://firebase.google.com/docs/storage/web/handle-errors
-        switch (error.code) {
-          case "storage/object-not-found":
-            console.log("ERROR GETTING IMAGE: Storage doesn't exist");
-            break;
-
-          case "storage/unauthorized":
-            // User doesn't have permission to access the object
-            console.log(
-              "ERROR GETTING IMAGE: User doesn't have permission to access the file."
-            );
-            break;
-
-          case "storage/canceled":
-            // User canceled the upload
-            console.log("ERROR GETTING IMAGE: User cancelled operation");
-            break;
-
-          case "storage/unknown":
-            // Unknown error occurred, inspect the server response
-            console.log("ERROR GETTING IMAGE: Unkwon error occurred");
-            break;
-        }
-      });
-  }
+  
   useEffect(() => {
     const unsubscribeStories = firestore()
       .collection("users")
@@ -129,6 +91,48 @@ export default ({ navigation }) => {
 
     return unsubscribeStories;
   }, []);
+  
+  async function downloadImage(userId) {
+    const ref = firebase
+      .storage()
+      .ref()
+      .child("profilePictures/" + userId);
+
+    await ref
+      .getDownloadURL()
+      .then(function (url) {
+        setImage(url);
+        setloading(false);
+      })
+      .catch(function (error) {
+        setloading(false);
+        // A full list of error codes is available at
+        // https://firebase.google.com/docs/storage/web/handle-errors
+        switch (error.code) {
+          case "storage/object-not-found":
+            console.log("ERROR GETTING IMAGE: Storage doesn't exist");
+            break;
+
+          case "storage/unauthorized":
+            // User doesn't have permission to access the object
+            console.log(
+              "ERROR GETTING IMAGE: User doesn't have permission to access the file."
+            );
+            break;
+
+          case "storage/canceled":
+            // User canceled the upload
+            console.log("ERROR GETTING IMAGE: User cancelled operation");
+            break;
+
+          case "storage/unknown":
+            // Unknown error occurred, inspect the server response
+            console.log("ERROR GETTING IMAGE: Unkwon error occurred");
+            break;
+        }
+      });
+  }
+  
 
   return (
     <ScrollView style={styles.container}>
