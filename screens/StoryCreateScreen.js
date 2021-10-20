@@ -292,8 +292,7 @@ export default ({ route, navigation }) => {
             maxLength={200}
             multiline={true}
             numberOfLines={6}
-            maxLines={6}
-            maxHeight={60}
+            maxHeight={120}
             inputStyle={{ padding: 7.9, textAlignVertical: "top" }}
           />
 
