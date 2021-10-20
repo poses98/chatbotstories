@@ -13,7 +13,7 @@ import Colors from "../constants/Colors";
 import A from "react-native-a";
 import LabeledInput from "../components/LabeledInput";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { firestore, auth,storage } from "firebase";
+import { firestore, auth, storage } from "firebase";
 import { updateDoc, removeDoc } from "../services/collections";
 import { doc, getDoc } from "firebase/firestore";
 import * as ImagePicker from "expo-image-picker";
@@ -44,7 +44,7 @@ export default ({ navigation }) => {
           console.log("Document loaded");
           setoldUsername(doc.data().username);
           setdata(doc.data());
-          setloading(false);
+          downloadImage(auth().currentUser.uid);
         } else {
           // doc.data() will be undefined in this case
           console.log("No such document!");
@@ -102,7 +102,9 @@ export default ({ navigation }) => {
                     .doc(data.username.toLowerCase())
                     .set({ uid: auth().currentUser.uid });
 
+                  
                   updateDoc(docRef, auth().currentUser.uid, data);
+                  
                   uploadImage();
                 } else {
                   console.log(
@@ -197,23 +199,86 @@ export default ({ navigation }) => {
       setHasBeenChanges(true);
     }
   };
+
   const uploadImage = () => {
-    storage
-    .ref()
-    .child("images/" + auth().currentUser.uid).putFile(image)
-
-     
-    task.on("state_changed", (taskSnapshot) => {
-      console.log(
-        `${taskSnapshot.bytesTransferred} transferred out of ${taskSnapshot.totalBytes}`
-      );
-    });
-
-    task.then(() => {
-      console.log("Image uploaded to the bucket!");
-      navigation.dispatch(CommonActions.goBack());
-    });
+    uploadImageAsync(image, auth().currentUser.uid);
+    navigation.dispatch(CommonActions.goBack());
   };
+
+  async function uploadImageAsync(uri, name) {
+    // Why are we using XMLHttpRequest? See:
+    // https://github.com/expo/expo/issues/2402#issuecomment-443726662
+    const blob = await new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.onload = function () {
+        resolve(xhr.response);
+      };
+      xhr.onerror = function (e) {
+        console.log(e);
+        reject(new TypeError("Network request failed"));
+      };
+      xhr.responseType = "blob";
+      xhr.open("GET", uri, true);
+      xhr.send(null);
+    });
+
+    const ref = firebase
+      .storage()
+      .ref()
+      .child("profilePictures/" + name);
+    const snapshot = await ref.put(blob);
+
+    console.log("state: " + snapshot.state);
+    firestore()
+      .collection("users")
+      .doc(auth().currentUser.uid)
+      .set({ lastUpdate: Date.now() },{merge: true});
+    // We're done with the blob, close and release it
+    blob.close();
+
+    return await snapshot.ref.getDownloadURL();
+  }
+
+  async function downloadImage(userId) {
+    const ref = firebase
+      .storage()
+      .ref()
+      .child("profilePictures/" + userId);
+
+    await ref
+      .getDownloadURL()
+      .then(function (url) {
+        setImage(url);
+        setloading(false);
+      })
+      .catch(function (error) {
+        setloading(false);
+        // A full list of error codes is available at
+        // https://firebase.google.com/docs/storage/web/handle-errors
+        switch (error.code) {
+          case "storage/object-not-found":
+            console.log("ERROR GETTING IMAGE: Storage doesn't exist");
+            break;
+
+          case "storage/unauthorized":
+            // User doesn't have permission to access the object
+            console.log(
+              "ERROR GETTING IMAGE: User doesn't have permission to access the file."
+            );
+            break;
+
+          case "storage/canceled":
+            // User canceled the upload
+            console.log("ERROR GETTING IMAGE: User cancelled operation");
+            break;
+
+          case "storage/unknown":
+            // Unknown error occurred, inspect the server response
+            console.log("ERROR GETTING IMAGE: Unkwon error occurred");
+            break;
+        }
+      });
+  }
   return (
     <ScrollView style={styles.container}>
       {!loading && data && (
@@ -304,7 +369,7 @@ export default ({ navigation }) => {
           }}
         >
           <Image
-            source={require("../assets/loading_simple.gif")}
+            source={require("../assets/loading.gif")}
             style={{ width: 100, height: 100 }}
           />
         </View>

@@ -11,6 +11,7 @@ export default ({
   posts,
   followers,
   following,
+  image,
   ...data
 }) => {
   const EditProfileButton = () => {
@@ -38,7 +39,11 @@ export default ({
       >
         <Image
           style={styles.profilePic}
-          source={require("../../assets/profilepicplaceholder.png")}
+          source={
+            image
+              ? { uri: image }
+              : require("../../assets/profilepicplaceholder.png")
+          }
         />
       </View>
       <View style={styles.itemContainer}>
@@ -92,7 +97,7 @@ const styles = StyleSheet.create({
     width: 90,
     height: 90,
     borderRadius: 50,
-    marginVertical: 15
+    marginVertical: 15,
   },
   infoBox: {
     flex: 1,
