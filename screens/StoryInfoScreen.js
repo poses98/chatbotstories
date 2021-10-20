@@ -163,7 +163,7 @@ export default ({ navigation, route }) => {
                   .doc(auth().currentUser.uid)
                   .collection("savedStories")
                   .doc(storyId)
-                  .set({ saved: true });
+                  .set({ date: Date.now() });
               } else if (isSaved) {
                 firestore()
                   .collection("users")

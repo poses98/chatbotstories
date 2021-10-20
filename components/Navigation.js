@@ -9,7 +9,7 @@ import Colors from '../constants/Colors'
 
 import HomeScreen from '../screens/HomeScreen'
 import DiscoverScreen from '../screens/DiscoverScreen'
-import NotificationsScreen from '../screens/NotificationsScreen'
+import SavedStoriesScreen from '../screens/SavedStoriesScreen'
 import ProfileScreen from '../screens/ProfileScreen'
 import ProfileEditScreen from '../screens/ProfileEditScreen'
 import StoryCreateScreen from '../screens/StoryCreateScreen'
@@ -29,8 +29,8 @@ const getHeaderTitle = (route) => {
             return 'News feed';
         case 'Profile':
             return 'My profile';
-        case 'Notifications':
-            return 'Notifications';
+        case 'SavedStories':
+            return 'Saved Stories';
         case 'Discover':
             return 'Discover';
         case 'Create':
@@ -53,7 +53,7 @@ const getHeaderButton = (route, navigation) => {
                     </TouchableOpacity>
                 </View>
             );
-        case 'Notifications':
+        case 'SavedStories':
             return (<View><Text></Text></View>);
         case 'Discover':
             return (<View><Text></Text></View>);
@@ -102,7 +102,7 @@ const MainTabNavigation = () => {
                     } else if (route.name === 'Create') {
                         iconName = focused ? 'add-circle-outline' : 'add-circle-outline';
                         size = 40
-                    } else if (route.name === 'Notifications') {
+                    } else if (route.name === 'SavedStories') {
                         iconName = focused ? 'heart' : 'heart';
                     } else if (route.name === 'Profile') {
                         iconName = focused ? 'person' : 'person';
@@ -118,7 +118,7 @@ const MainTabNavigation = () => {
         >
             <Tab.Screen name="Home" component={HomeScreen} />
             <Tab.Screen name="Discover" component={DiscoverScreen} />
-            <Tab.Screen name="Notifications" component={NotificationsScreen} />
+            <Tab.Screen name="SavedStories" component={SavedStoriesScreen} />
             <Tab.Screen name="Profile" component={ProfileScreen} />
         </Tab.Navigator>
     )
