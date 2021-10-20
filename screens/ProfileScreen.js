@@ -10,6 +10,7 @@ import {
   ImageBackground,
 } from "react-native";
 import ProfileHeader from "../components/Profile/ProfileHeader";
+import StoryContainer from "../components/StoryContainer";
 import Colors from "../constants/Colors";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { firestore, auth } from "firebase";
@@ -24,71 +25,6 @@ const images = {
   snow: require("../assets/snow.jpg"),
 };
 
-const StoryContainer = ({
-  interactive,
-  title,
-  description,
-  storyId,
-  onPress,
-  categoryMain,
-}) => {
-  const handleError = (e) => {
-    console.log(e.nativeEvent.error);
-  };
-  return (
-    <TouchableOpacity onPress={onPress} activeOpacity={0.8} delayPressIn={10}>
-      <ImageBackground
-        source={GENRES[categoryMain].image}
-        resizeMode="cover"
-        onError={handleError}
-        style={styles.image}
-      >
-        <View style={[styles.storyContainer]}>
-          {/**{ backgroundColor: `${color}` } */}
-          <View style={styles.storyBar}>
-            {interactive && (
-              <View
-                style={[styles.storyTag, { backgroundColor: Colors.green }]}
-              >
-                <Text style={{ color: Colors.lightGray }}>Interactive</Text>
-              </View>
-            )}
-            <View style={styles.storyTag}>
-              <Text style={{ color: Colors.lightGray }}>
-                {GENRES[categoryMain].verboseName}
-              </Text>
-            </View>
-          </View>
-          <View style={styles.storyMainInfoContainer}>
-            <Text style={styles.storyTitle}>{title}</Text>
-            <Text style={styles.storyDescription}>"{description}"</Text>
-          </View>
-          <View style={{ alignSelf: "flex-end" }}>
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-              }}
-            >
-              <View style={styles.storyStats}>
-                <Ionicons
-                  name="eye-outline"
-                  size={20}
-                  color={Colors.lightGray}
-                />
-                <Text style={{ color: Colors.lightGray }}>44</Text>
-              </View>
-              <View style={styles.storyStats}>
-                <Ionicons name="heart" size={20} color={Colors.red} />
-                <Text style={{ color: Colors.lightGray }}>15</Text>
-              </View>
-            </View>
-          </View>
-        </View>
-      </ImageBackground>
-    </TouchableOpacity>
-  );
-};
 
 export default ({ navigation }) => {
   const [stories, setStories] = useState([]);
