@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import { firestore, auth } from "firebase";
 import { StackActions } from "@react-navigation/native";
-
+import { CommonActions } from "@react-navigation/native";
 import Colors from "../constants/Colors";
 import GENRES from "../constants/Genres";
 import LANGUAGES from "../constants/Languages";
@@ -217,12 +217,7 @@ export default ({ route, navigation }) => {
       .doc(storyId)
       .set({ date: data.date })
       .then(() => {
-        navigation.dispatch(
-          StackActions.replace("StoryInfo", {
-            title: nameField.text,
-            storyId: storyId,
-          })
-        );
+        navigation.dispatch(CommonActions.goBack());
       })
       .catch((error) => {
         console.error("Error adding document: ", error);

@@ -184,12 +184,13 @@ export default ({ navigation, route }) => {
         {owned && !notloaded && !loading && (
           <TouchableOpacity
             onPress={() => {
-              /**TODO setEditMode */
+              /**TODO setEditMode 
               navigation.dispatch(
                 StackActions.replace("StoryCreate", {
                   storyId: storyId,
                 })
-              );
+              );*/
+              navigation.navigate("StorySettings",{storyId:storyId})
             }}
             style={{ paddingRight: 5 }}
           >
