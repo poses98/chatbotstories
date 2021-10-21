@@ -35,6 +35,11 @@ export default ({ navigation, route }) => {
         }}
         style={styles.settingsButton}
       >
+        <Ionicons
+            name="options-outline"
+            size={29}
+            color={Colors.black}
+          />
         <Text style={styles.buttonText}>Story details</Text>
       </TouchableOpacity>
       <TouchableOpacity onPress={() =>{
@@ -45,7 +50,12 @@ export default ({ navigation, route }) => {
       }}
       style={styles.settingsButton}
       >
-        <Text style={styles.buttonText}>Chapter details</Text>
+          <Ionicons
+            name="list-outline"
+            size={29}
+            color={Colors.black}
+          />
+        <Text style={styles.buttonText}>Chapters</Text>
       </TouchableOpacity>
     </ScrollView>
   );
@@ -94,10 +104,14 @@ const styles = StyleSheet.create({
       minHeight: 30,
       paddingHorizontal: 15,
       fontSize:20,
-      marginVertical:5
+      marginVertical:5,
+      flexDirection:"row",
+      justifyContent:"flex-start",
+      alignItems:"center"
   },
   buttonText : {
       fontSize: 17,
-      fontWeight: "normal"
+      fontWeight: "normal",
+      paddingLeft: 15
   }
 });
