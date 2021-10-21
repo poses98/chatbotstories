@@ -94,6 +94,7 @@ export default ({ route, navigation }) => {
               setinteractive(doc.data().interactive);
               setOldInteractive(doc.data().interactive);
               setlanguage(doc.data().language);
+              setstatus(doc.data().status)
             } else {
               setStoryId("");
             }
@@ -302,10 +303,8 @@ export default ({ route, navigation }) => {
       </View>
     );
   };
-  /** MEMBER INPUT */
+  /**TODO SPAWN MEMBER INPUTS */
 
-    
-  
   return (
     <ScrollView style={styles.container}>
       {!loading && !notloaded && (
@@ -321,6 +320,7 @@ export default ({ route, navigation }) => {
             placeholder="The perfect name for your story"
             maxLength={30}
             labelStyle={{ color: Colors.black }}
+            inputStyle={{ color: Colors.black }}
           />
           {/** DESCRIPTION FIELD */}
           <LabeledInput
@@ -336,7 +336,11 @@ export default ({ route, navigation }) => {
             multiline={true}
             numberOfLines={6}
             maxHeight={120}
-            inputStyle={{ padding: 7.9, textAlignVertical: "top" }}
+            inputStyle={{
+              padding: 7.9,
+              textAlignVertical: "top",
+              color: Colors.black,
+            }}
           />
           <Label text="Choose main category " icon="layers-outline" />
           {/** GENRE BUBBLES FILLED FROM CONSTANT FILE */}
@@ -355,45 +359,143 @@ export default ({ route, navigation }) => {
               );
             }}
           />
-          {/** INTERACTIVE SWITCH */}
-          <View style={{ flexDirection: "row", marginTop: 15 }}>
-            <Label text="Will it be interactive?" icon="people-outline" />
-            <Switch
-              trackColor={{ false: "#767577", true: Colors.green }}
-              thumbColor={interactive ? "#f4f3f4" : "#f4f3f4"}
-              ios_backgroundColor="#3e3e3e"
-              onValueChange={() => {
-                setinteractive(!interactive);
-              }}
-              value={interactive}
-              style={{ marginRight: 15 }}
-            />
-          </View>
-          {/** PICKER FOR STATUS */}
-          <View style={{ flexDirection: "column", marginTop: 15 }}>
-            <Label text="Story status" icon="list-outline" />
-            <Picker
-              enabled={isEditMode}
+          {/** INTERACTIVE BUTTON SELECTOR */}
+          <View style={{ flex: 1, marginTop: 15 }}>
+            <Label text="Is it interactive?" icon="git-network-outline" />
+            <View
               style={{
-                marginHorizontal: 15,
-                color: isEditMode ? Colors.black : Colors.lightGray,
-                borderWidth: 1,
-                borderColor: Colors.lightGray,
+                flex: 1,
+                flexDirection: "row",
+                justifyContent: "space-between",
               }}
-              dropdownIconColor={isEditMode ? Colors.black : Colors.lightGray}
-              selectedValue={status}
-              onValueChange={(itemValue, itemIndex) => setstatus(itemValue)}
             >
-              <Picker.Item
-                label={_STATUS_[0].verboseName}
-                value={_STATUS_[0].statusId}
+              <Button
+                text="YES"
+                textStyle={{ fontWeight: "bold" }}
+                onPress={() => {
+                  setinteractive(true);
+                }}
+                buttonStyle={{
+                  flex: 0.5,
+                  marginTop: 15,
+                  marginHorizontal: 15,
+                  height: 45,
+                  backgroundColor: interactive ? Colors.green : "transparent",
+                  borderColor: interactive ? "#fafafa" : Colors.gray,
+                }}
+                textStyle={{
+                  color: interactive ? "#fafafa" : Colors.gray,
+                }}
               />
-              <Picker.Item
-                label={_STATUS_[1].verboseName}
-                value={_STATUS_[1].statusId}
+              <Button
+                text="NO"
+                textStyle={{ fontWeight: "bold" }}
+                onPress={() => {
+                  setinteractive(false);
+                }}
+                buttonStyle={{
+                  flex: 0.5,
+                  marginTop: 15,
+                  marginHorizontal: 15,
+                  height: 45,
+                  backgroundColor: !interactive ? Colors.red : "transparent",
+                  borderColor: !interactive ? "#fafafa" : Colors.gray,
+                }}
+                textStyle={{
+                  color: !interactive ? "#fafafa" : Colors.gray,
+                }}
               />
-            </Picker>
+            </View>
           </View>
+          {/** (EDITMODE ONLY) BUTTON SELECTOR FOR STATUS  */}
+          {isEditMode && (
+            <View>
+              <View style={{ flexDirection: "column", marginTop: 15 }}>
+                <Label text="Story status" icon="list-outline" />
+                <Button
+                  text={_STATUS_[0].verboseName}
+                  textStyle={{ fontWeight: "bold" }}
+                  onPress={() => {
+                    setstatus(_STATUS_[0].statusId);
+                    console.log(
+                      "State of the story has changed: ",
+                      _STATUS_[0].verboseName
+                    );
+                  }}
+                  buttonStyle={{
+                    flex: 0.5,
+                    marginTop: 15,
+                    marginHorizontal: 15,
+                    height: 45,
+                    backgroundColor:
+                      status === _STATUS_[0].statusId
+                        ? Colors.yellow
+                        : "transparent",
+                    borderColor:
+                      status === _STATUS_[0].statusId ? "#fafafa" : Colors.gray,
+                  }}
+                  textStyle={{
+                    color:
+                      status === _STATUS_[0].statusId ? "#fafafa" : Colors.gray,
+                  }}
+                />
+                <Button
+                  text={_STATUS_[1].verboseName}
+                  textStyle={{ fontWeight: "bold" }}
+                  onPress={() => {
+                    setstatus(_STATUS_[1].statusId);
+                    console.log(
+                      "State of the story has changed: ",
+                      _STATUS_[1].verboseName
+                    );
+                  }}
+                  buttonStyle={{
+                    flex: 0.5,
+                    marginTop: 15,
+                    marginHorizontal: 15,
+                    height: 45,
+                    backgroundColor:
+                      status === _STATUS_[1].statusId
+                        ? Colors.red
+                        : "transparent",
+                    borderColor:
+                      status === _STATUS_[1].statusId ? "#fafafa" : Colors.gray,
+                  }}
+                  textStyle={{
+                    color:
+                      status === _STATUS_[1].statusId ? "#fafafa" : Colors.gray,
+                  }}
+                />
+                <Button
+                  text={_STATUS_[2].verboseName}
+                  textStyle={{ fontWeight: "bold" }}
+                  onPress={() => {
+                    setstatus(_STATUS_[2].statusId);
+                    console.log(
+                      "State of the story has changed: ",
+                      _STATUS_[2].verboseName
+                    );
+                  }}
+                  buttonStyle={{
+                    flex: 0.5,
+                    marginTop: 15,
+                    marginHorizontal: 15,
+                    height: 45,
+                    backgroundColor:
+                      status === _STATUS_[2].statusId
+                        ? Colors.green
+                        : "transparent",
+                    borderColor:
+                      status === _STATUS_[2].statusId ? "#fafafa" : Colors.gray,
+                  }}
+                  textStyle={{
+                    color:
+                      status === _STATUS_[2].statusId ? "#fafafa" : Colors.gray,
+                  }}
+                />
+              </View>
+            </View>
+          )}
           {/** PICKER FOR LANGUAGE */}
           <View style={{ flexDirection: "column", marginTop: 15 }}>
             <Label text="Language" icon="list-outline" />
@@ -420,9 +522,12 @@ export default ({ route, navigation }) => {
             </Picker>
           </View>
           {/** NUMBER OF MEMBERS OF THE CONVERSATION */}
-          <Label text="Number of participants " icon="people-outline" labelStyle={{marginTop:15}}/>
+          <Label
+            text="Number of participants "
+            icon="people-outline"
+            labelStyle={{ marginTop: 15 }}
+          />
           <MemberAddComponent />
-          
           {/** CREATE STORY BUTTON */}
           <Button
             text={isEditMode ? "Save" : "Create"}

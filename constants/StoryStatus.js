@@ -1,4 +1,5 @@
 export default [
-    { statusId: 0, verboseName: "Private" },
-    { statusId: 1, verboseName: "Public" },
+    { statusId: 0, verboseName: "Draft" },
+    { statusId: 1, verboseName: "Private" },
+    { statusId: 2, verboseName: "Public" },
 ]
