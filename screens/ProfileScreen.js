@@ -27,6 +27,9 @@ const images = {
 
 
 export default ({ navigation }) => {
+  const testId = "dOS86iiJmcPbVKi4nP9m8BAUr0g2"
+  const TEST = false;
+  const [owned, setOwned] = useState(false)
   const [stories, setStories] = useState([]);
   const [data, setdata] = useState({});
   const [loading, setloading] = useState(true);
@@ -37,11 +40,11 @@ export default ({ navigation }) => {
   
   useEffect(() => {
     const unsubscribe = userRef
-      .doc(auth().currentUser.uid) // TODO ESTO HAY QUE CAMBIARLO POR EL ID DE USUARIO!
+      .doc(TEST ? testId : auth().currentUser.uid) // TODO ESTO HAY QUE CAMBIARLO POR EL ID DE USUARIO!
       .onSnapshot((doc) => {
         console.log("Profile data fetched: ", doc.data());
         setdata(doc.data());
-        downloadImage(auth().currentUser.uid);
+        downloadImage(TEST ? testId : auth().currentUser.uid);
       });
     return unsubscribe;
   }, []);
@@ -49,7 +52,7 @@ export default ({ navigation }) => {
   useEffect(() => {
     const unsubscribeStories = firestore()
       .collection("users")
-      .doc(auth().currentUser.uid) // TODO ESTO HAY QUE CAMBIARLO POR EL ID DE USUARIO!
+      .doc(TEST ? testId : auth().currentUser.uid) // TODO ESTO HAY QUE CAMBIARLO POR EL ID DE USUARIO!
       .collection("stories")
       .orderBy("date", "desc")
       .limit(6)
