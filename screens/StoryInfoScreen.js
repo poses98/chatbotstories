@@ -20,7 +20,6 @@ import STORY_STATUS from "../constants/StoryStatus";
 import { StackActions } from "@react-navigation/native";
 
 export default ({ navigation, route }) => {
-  
   /** STATE OBJECTS */
   const [isSaved, setIsSaved] = useState(false);
   const [loading, setloading] = useState(true);
@@ -42,7 +41,6 @@ export default ({ navigation, route }) => {
   var year = date.getFullYear();
   var day = date.getDate();
 
-    
   /** Getting the metadata of the story */
   useEffect(() => {
     if (storyId != "") {
@@ -108,8 +106,7 @@ export default ({ navigation, route }) => {
         .then((doc) => {
           if (doc.exists) {
             setcanLike(false);
-            console.log("Story has been liked by the user")
-
+            console.log("Story has been liked by the user");
           } else {
             // doc.data() will be undefined in this case
           }
@@ -133,7 +130,7 @@ export default ({ navigation, route }) => {
         .then((doc) => {
           if (doc.exists) {
             setIsSaved(true);
-            console.log("Story has been saved by the user")
+            console.log("Story has been saved by the user");
           } else {
             // doc.data() will be undefined in this case
           }
@@ -325,7 +322,7 @@ export default ({ navigation, route }) => {
               <TouchableOpacity
                 style={[styles.storyStats, { paddingLeft: 8 }]}
                 onPress={() => {
-                    /** TODO go to comment section */
+                  /** TODO go to comment section */
                 }}
               >
                 <Ionicons
@@ -409,7 +406,14 @@ export default ({ navigation, route }) => {
             {/** ADD NEW CHAPTER BUTTON */}
             {owned && (
               <View style={{ flex: 1, alignItems: "flex-end" }}>
-                <TouchableOpacity style={styles.storyStats} onPress={() => {}}>
+                <TouchableOpacity
+                  style={styles.storyStats}
+                  onPress={() => {
+                    navigation.navigate("ChapterEdit",{
+                      storyId: storyId,
+                    });
+                  }}
+                >
                   <Ionicons
                     name="add-circle-outline"
                     size={30}

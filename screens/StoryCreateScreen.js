@@ -20,19 +20,8 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import LabeledInput from "../components/LabeledInput";
 import { Picker } from "@react-native-picker/picker";
 import Button from "../components/Button";
+import { Label } from "../components/Label";
 import { updateDoc, addDoc } from "../services/collections";
-
-export const Label = ({ text, icon, ...props }) => {
-  return (
-    <View style={[styles.labelContainer, { ...props.labelStyle }]}>
-      <Ionicons name={icon} size={15} color={Colors.gray} />
-      <Text style={[{ color: Colors.black }, { ...props.textStyle }]}>
-        {" "}
-        {text}
-      </Text>
-    </View>
-  );
-};
 
 export default ({ route, navigation }) => {
   /** STORY ID IN CASE IS UPDATE MODE */
@@ -262,49 +251,7 @@ export default ({ route, navigation }) => {
       </View>
     );
   };
-  /** MEMBER ADD COMPONENT WITH +/- ICONS */
-  const MemberAddComponent = () => {
-    return (
-      <View
-        style={{
-          flex: 1,
-          flexDirection: "row",
-          marginHorizontal: 50,
-          justifyContent: "space-between",
-          marginVertical: 10,
-        }}
-      >
-        {/**MINUS BUTTON */}
-        <TouchableOpacity
-          onPress={() => {
-            //Sum 1 to the active members
-            if (memberNumber > 2) {
-              setMemberNumber(memberNumber - 1);
-            }
-          }}
-        >
-          <Ionicons
-            name="remove-circle-outline"
-            size={40}
-            color={Colors.black}
-          />
-        </TouchableOpacity>
-        {/**NUMBER */}
-        <Text style={{ fontSize: 35 }}>{memberNumber}</Text>
-        {/**PLUS BUTTON */}
-        <TouchableOpacity
-          onPress={() => {
-            //Sum 1 to the active members
-            if (memberNumber < 8) {
-              setMemberNumber(memberNumber + 1);
-            }
-          }}
-        >
-          <Ionicons name="add-circle-outline" size={40} color={Colors.black} />
-        </TouchableOpacity>
-      </View>
-    );
-  };
+
   /**TODO SPAWN MEMBER INPUTS */
 
   return (
@@ -523,13 +470,7 @@ export default ({ route, navigation }) => {
               />
             </Picker>
           </View>
-          {/** NUMBER OF MEMBERS OF THE CONVERSATION */}
-          <Label
-            text="Number of participants "
-            icon="people-outline"
-            labelStyle={{ marginTop: 15 }}
-          />
-          <MemberAddComponent />
+          
           {/** CREATE STORY BUTTON */}
           <Button
             text={isEditMode ? "Save" : "Create"}

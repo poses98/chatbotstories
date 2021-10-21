@@ -195,7 +195,7 @@ export const RootStackScreen = () => {
                 component={ChapterEditScreen}
                 options={({ route }) => {
                     return {
-                        title: route.params.title + " chapter creation",
+                        title: "Chapter creation",
                     };
                 }}
             />
