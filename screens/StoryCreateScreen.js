@@ -40,7 +40,7 @@ export default ({ route, navigation }) => {
     route.params ? route.params.storyId : ""
   );
   const [isEditMode, setEditMode] = useState(false);
-  /**  */
+
   /** STATE ATRIBUTTES */
   const [owned, setowned] = useState(false); // owner of the story
   const [data, setdata] = useState({}); // metadata of the story
@@ -63,6 +63,7 @@ export default ({ route, navigation }) => {
   const [oldInteractive, setOldInteractive] = useState(false); //check variable for old interactivity
   const [status, setstatus] = useState(0); // status of the story
   const [language, setlanguage] = useState(0); // language of the story
+  const [memberNumber, setMemberNumber] = useState(2); //number of the members of the story
 
   const storyRef = firestore().collection("stories");
 
@@ -211,11 +212,7 @@ export default ({ route, navigation }) => {
           .doc(storyId)
           .set({ id: false });
       } else if (!data.interactive) {
-        categoryRef
-          .doc("i")
-          .collection("stories")
-          .doc(storyId)
-          .delete();
+        categoryRef.doc("i").collection("stories").doc(storyId).delete();
       } else {
         console.log("Unexpected input.");
       }
@@ -262,7 +259,53 @@ export default ({ route, navigation }) => {
       </View>
     );
   };
+  /** MEMBER ADD COMPONENT WITH +/- ICONS */
+  const MemberAddComponent = () => {
+    return (
+      <View
+        style={{
+          flex: 1,
+          flexDirection: "row",
+          marginHorizontal: 50,
+          justifyContent: "space-between",
+          marginVertical: 10,
+        }}
+      >
+        {/**MINUS BUTTON */}
+        <TouchableOpacity
+          onPress={() => {
+            //Sum 1 to the active members
+            if (memberNumber > 2) {
+              setMemberNumber(memberNumber - 1);
+            }
+          }}
+        >
+          <Ionicons
+            name="remove-circle-outline"
+            size={40}
+            color={Colors.black}
+          />
+        </TouchableOpacity>
+        {/**NUMBER */}
+        <Text style={{ fontSize: 35 }}>{memberNumber}</Text>
+        {/**PLUS BUTTON */}
+        <TouchableOpacity
+          onPress={() => {
+            //Sum 1 to the active members
+            if (memberNumber < 8) {
+              setMemberNumber(memberNumber + 1);
+            }
+          }}
+        >
+          <Ionicons name="add-circle-outline" size={40} color={Colors.black} />
+        </TouchableOpacity>
+      </View>
+    );
+  };
+  /** MEMBER INPUT */
 
+    
+  
   return (
     <ScrollView style={styles.container}>
       {!loading && !notloaded && (
@@ -295,7 +338,6 @@ export default ({ route, navigation }) => {
             maxHeight={120}
             inputStyle={{ padding: 7.9, textAlignVertical: "top" }}
           />
-
           <Label text="Choose main category " icon="layers-outline" />
           {/** GENRE BUBBLES FILLED FROM CONSTANT FILE */}
           <FlatList
@@ -377,6 +419,10 @@ export default ({ route, navigation }) => {
               />
             </Picker>
           </View>
+          {/** NUMBER OF MEMBERS OF THE CONVERSATION */}
+          <Label text="Number of participants " icon="people-outline" labelStyle={{marginTop:15}}/>
+          <MemberAddComponent />
+          
           {/** CREATE STORY BUTTON */}
           <Button
             text={isEditMode ? "Save" : "Create"}

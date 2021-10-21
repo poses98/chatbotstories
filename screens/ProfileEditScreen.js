@@ -331,7 +331,7 @@ export default ({ navigation }) => {
           {/**Web */}
           <LabeledInput
             label="Website"
-            text={data.name}
+            text={data.website}
             onChangeText={(text) => {
               setdata({ ...data, website: text });
               setHasBeenChanges(true);

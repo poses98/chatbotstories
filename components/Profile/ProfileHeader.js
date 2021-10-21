@@ -65,7 +65,7 @@ export default ({
         <Text style={styles.profileName}>{name}</Text>
         {/* Web  */}
         {web != "" && (
-          <A style={styles.profileWeb} href="google.com">
+          <A style={styles.profileWeb} href={web}>
             <Text>{web}</Text>
           </A>
         )}

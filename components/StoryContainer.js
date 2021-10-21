@@ -1,5 +1,5 @@
 import React from "react";
-import { Appearance } from 'react-native'
+import { Appearance } from "react-native";
 import {
   View,
   Text,
@@ -11,7 +11,6 @@ import Colors from "../constants/Colors";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import GENRES from "../constants/Genres";
 
-
 export default StoryContainer = ({
   interactive,
   title,
@@ -19,6 +18,7 @@ export default StoryContainer = ({
   storyId,
   onPress,
   categoryMain,
+  readStatus, //for saved stories view
 }) => {
   const handleError = (e) => {
     console.log(e.nativeEvent.error);
@@ -32,7 +32,7 @@ export default StoryContainer = ({
         style={styles.image}
       >
         <View style={[styles.storyContainer]}>
-          {/**{ backgroundColor: `${color}` } */}
+          {/**CATEGORIES */}
           <View style={styles.storyBar}>
             {interactive && (
               <View
@@ -47,10 +47,13 @@ export default StoryContainer = ({
               </Text>
             </View>
           </View>
+          {/**STORY TITLE & DESCRIPTION */}
           <View style={styles.storyMainInfoContainer}>
+            {/**<Text style={styles.readStatusText}>{/**readStatus*In progress</Text>}*/}
             <Text style={styles.storyTitle}>{title}</Text>
             <Text style={styles.storyDescription}>"{description}"</Text>
           </View>
+          {/**STATS */}
           <View style={{ alignSelf: "flex-end" }}>
             <View
               style={{
@@ -72,6 +75,7 @@ export default StoryContainer = ({
               </View>
             </View>
           </View>
+          {/**TODO --> STATUS BAND */}
         </View>
       </ImageBackground>
     </TouchableOpacity>
@@ -130,4 +134,8 @@ const styles = StyleSheet.create({
     marginRight: 15,
     alignItems: "center",
   },
+  readStatusText : {
+    fontSize: 12,
+    color:Colors.lightGray
+  }
 });
