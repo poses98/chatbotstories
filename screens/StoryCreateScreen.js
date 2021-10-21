@@ -40,7 +40,10 @@ export default ({ route, navigation }) => {
     route.params ? route.params.storyId : ""
   );
   const [isEditMode, setEditMode] = useState(false);
-
+  
+    navigation.setOptions({title: storyId ? "Story detail" : "Create story"})
+  
+  
   /** STATE ATRIBUTTES */
   const [owned, setowned] = useState(false); // owner of the story
   const [data, setdata] = useState({}); // metadata of the story
@@ -76,7 +79,6 @@ export default ({ route, navigation }) => {
         .then((doc) => {
           if (doc.exists) {
             console.log("Story loaded: ", doc.data());
-
             if (doc.data().author === auth().currentUser.uid) {
               console.log("edit mode enable");
               setEditMode(true);
@@ -370,7 +372,7 @@ export default ({ route, navigation }) => {
               }}
             >
               <Button
-                text="YES"
+                text="Yes"
                 textStyle={{ fontWeight: "bold" }}
                 onPress={() => {
                   setinteractive(true);
@@ -388,7 +390,7 @@ export default ({ route, navigation }) => {
                 }}
               />
               <Button
-                text="NO"
+                text="No"
                 textStyle={{ fontWeight: "bold" }}
                 onPress={() => {
                   setinteractive(false);
@@ -414,7 +416,7 @@ export default ({ route, navigation }) => {
                 <Label text="Story status" icon="list-outline" />
                 <Button
                   text={_STATUS_[0].verboseName}
-                  textStyle={{ fontWeight: "bold" }}
+                  textStyle={{ fontWeight: "bold", textTransform:"uppercase" }}
                   onPress={() => {
                     setstatus(_STATUS_[0].statusId);
                     console.log(
@@ -574,6 +576,21 @@ export default ({ route, navigation }) => {
               height: 45,
               borderColor: Colors.black,
             }}
+          />
+        </View>
+      )}
+      {loading && (
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: "#fff",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <Image
+            source={require("../assets/loading.gif")}
+            style={{ width: 100, height: 100 }}
           />
         </View>
       )}

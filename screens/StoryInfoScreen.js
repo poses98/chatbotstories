@@ -20,6 +20,7 @@ import STORY_STATUS from "../constants/StoryStatus";
 import { StackActions } from "@react-navigation/native";
 
 export default ({ navigation, route }) => {
+  
   /** STATE OBJECTS */
   const [isSaved, setIsSaved] = useState(false);
   const [loading, setloading] = useState(true);
@@ -195,7 +196,7 @@ export default ({ navigation, route }) => {
             }}
             style={{ paddingRight: 5 }}
           >
-            <Ionicons name="pencil-outline" size={26} color={Colors.black} />
+            <Ionicons name="settings-outline" size={26} color={Colors.black} />
           </TouchableOpacity>
         )}
       </View>

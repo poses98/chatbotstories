@@ -186,7 +186,7 @@ export const RootStackScreen = () => {
                 component={StoryCreateScreen}
                 options={({ route }) => {
                     return {
-                        title: "Create story",
+                        title: "",
                     };
                 }}
             />
