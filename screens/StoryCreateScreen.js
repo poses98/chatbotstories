@@ -59,6 +59,10 @@ export default ({ route, navigation }) => {
 
   const storyRef = firestore().collection("stories");
 
+
+  const updateStatus = (value) => {
+    setstatus(value)
+  }
   /** Getting the metadata of the story */
   useEffect(() => {
     if (storyId != "") {
@@ -360,7 +364,7 @@ export default ({ route, navigation }) => {
                   text={_STATUS_[0].verboseName}
                   textStyle={{ fontWeight: "bold", textTransform:"uppercase" }}
                   onPress={() => {
-                    setstatus(_STATUS_[0].statusId);
+                    updateStatus(_STATUS_[0].statusId);
                     console.log(
                       "State of the story has changed: ",
                       _STATUS_[0].verboseName
@@ -387,7 +391,7 @@ export default ({ route, navigation }) => {
                   text={_STATUS_[1].verboseName}
                   textStyle={{ fontWeight: "bold" }}
                   onPress={() => {
-                    setstatus(_STATUS_[1].statusId);
+                    updateStatus(_STATUS_[1].statusId);
                     console.log(
                       "State of the story has changed: ",
                       _STATUS_[1].verboseName
@@ -414,7 +418,7 @@ export default ({ route, navigation }) => {
                   text={_STATUS_[2].verboseName}
                   textStyle={{ fontWeight: "bold" }}
                   onPress={() => {
-                    setstatus(_STATUS_[2].statusId);
+                    updateStatus(_STATUS_[2].statusId);
                     console.log(
                       "State of the story has changed: ",
                       _STATUS_[2].verboseName

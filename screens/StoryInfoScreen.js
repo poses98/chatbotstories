@@ -171,7 +171,7 @@ export default ({ navigation, route }) => {
                   .delete();
               }
             }}
-            style={{ paddingRight: 5 }}
+            style={{ paddingRight: 8 }}
           >
             <Ionicons
               name={!isSaved ? "bookmark-outline" : "bookmark"}
@@ -192,7 +192,7 @@ export default ({ navigation, route }) => {
               );*/
               navigation.navigate("StorySettings",{storyId:storyId})
             }}
-            style={{ paddingRight: 5 }}
+            style={{ paddingRight: 8 }}
           >
             <Ionicons name="settings-outline" size={26} color={Colors.black} />
           </TouchableOpacity>
