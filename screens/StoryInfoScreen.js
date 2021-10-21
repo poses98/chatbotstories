@@ -383,6 +383,7 @@ export default ({ navigation, route }) => {
         >
           <Text>We are sorry!😭</Text>
           <Text> There has been an error while loading your story😥</Text>
+          <Text> We hope to fix it as soon as possible</Text>
           <Text> Try again later</Text>
         </View>
       )}
