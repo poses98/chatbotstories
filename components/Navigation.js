@@ -113,16 +113,16 @@ const MainTabNavigation = () => {
           let iconName;
 
           if (route.name === "Home") {
-            iconName = focused ? "home" : "home";
+            iconName = focused ? "home" : "home-outline";
           } else if (route.name === "Discover") {
-            iconName = focused ? "search" : "search";
+            iconName = focused ? "search" : "search-outline";
           } else if (route.name === "Create") {
             iconName = focused ? "add-circle-outline" : "add-circle-outline";
             size = 40;
           } else if (route.name === "SavedStories") {
-            iconName = focused ? "heart" : "heart";
+            iconName = focused ? "library" : "library-outline";
           } else if (route.name === "Profile") {
-            iconName = focused ? "person" : "person";
+            iconName = focused ? "person" : "person-outline";
           }
           return <Ionicons name={iconName} size={size} color={color} />;
         },
