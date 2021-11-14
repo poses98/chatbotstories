@@ -6,8 +6,7 @@ import _STATUS_ from "../constants/StoryStatus";
 import LabeledInput from "../components/LabeledInput";
 import Button from "../components/Button";
 import { StatusSelector } from "../components/StatusSelector";
-import { updateDoc, addDoc } from "../services/collections";
-import { Label } from "../components/Label";
+import { CommonActions } from "@react-navigation/native";
 
 export default ({ route, navigation }) => {
   const [Owned, setOwned] = useState(false);
@@ -108,7 +107,6 @@ export default ({ route, navigation }) => {
             };
             
             if (!isEditMode) {
-              console.log(data)
               route.params.saveChanges(data)
               navigation.dispatch(CommonActions.goBack());
             } else if (isEditMode) {

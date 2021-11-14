@@ -14,7 +14,7 @@ import ProfileScreen from "../screens/ProfileScreen";
 import ProfileEditScreen from "../screens/ProfileEditScreen";
 import StoryCreateScreen from "../screens/StoryCreateScreen";
 import StoryInfoScreen from "../screens/StoryInfoScreen";
-import ChapterSettingsScreen from "../screens/ChapterSettingsScreen";
+import ChapterDetailsScreen from "../screens/ChapterDetailsScreen";
 import ChapterReadScreen from "../screens/ChapterReadScreen";
 import LoginScreen from "../screens/LoginScreen";
 import LoadingScreen from "../screens/LoadingScreen";
@@ -213,11 +213,11 @@ export const RootStackScreen = () => {
         }}
       />
       <RootStack.Screen
-        name="ChapterSettings"
-        component={ChapterSettingsScreen}
+        name="ChapterDetails"
+        component={ChapterDetailsScreen}
         options={({ route }) => { 
           return {
-            title: "Chapter settings",
+            title: "Chapter details",
           };
         }}
       />
