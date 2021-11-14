@@ -35,9 +35,9 @@ const renderStackBarIconRight = (navigation, addItemToLists) => {
     <View style={{ flexDirection: "row" }}>
       <TouchableOpacity
         onPress={() => {
-            navigation.navigate("ChapterSettings", {
-                saveChanges: addItemToLists,
-              });
+          navigation.navigate("ChapterSettings", {
+            saveChanges: addItemToLists,
+          });
         }}
         style={{ paddingRight: 5 }}
       >
@@ -48,7 +48,6 @@ const renderStackBarIconRight = (navigation, addItemToLists) => {
 };
 
 export default ({ navigation, route }) => {
-  let [toDoItems, setToDoItems] = useState([]);
   const [newItem, setNewItem] = useState();
   const [chapterList, setChapterList] = useState([]);
   const chapterListRef = firestore()
@@ -85,7 +84,18 @@ export default ({ navigation, route }) => {
     status,
     author,
   }) => {
-    const index = lists.length > 1 ? lists[lists.length - 1].index + 1 : 0;
+    const index =
+      chapterList.length >= 1
+        ? chapterList[chapterList.length -1 ].index + 1
+        : 0;
+        console.log("Chapter list length: " + chapterList.length)
+    console.log(title,
+      description,
+      lastUpdate,
+      status,
+      author,
+      index);
+
     addDoc(chapterListRef, {
       title,
       description,
@@ -106,7 +116,7 @@ export default ({ navigation, route }) => {
 
   useLayoutEffect(() => {
     navigation.setOptions({
-      headerRight: () => renderStackBarIconRight(navigation),
+      headerRight: () => renderStackBarIconRight(navigation, addItemToLists),
       headerRightContainerStyle: {
         paddingRight: 10,
       },
@@ -114,7 +124,7 @@ export default ({ navigation, route }) => {
   });
 
   if (newItem) {
-    toDoItems = [newItem, ...toDoItems];
+    chapterList = [newItem, ...chapterList];
   }
 
   return (

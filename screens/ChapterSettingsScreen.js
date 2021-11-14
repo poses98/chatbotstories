@@ -106,8 +106,11 @@ export default ({ route, navigation }) => {
               author: auth().currentUser.uid,
               status: status
             };
+            
             if (!isEditMode) {
-              route.params.saveChanges(data.title,data.description,data.lastUpdate,data.author,data.status)
+              console.log(data)
+              route.params.saveChanges(data)
+              navigation.dispatch(CommonActions.goBack());
             } else if (isEditMode) {
               //update chapter
             }
