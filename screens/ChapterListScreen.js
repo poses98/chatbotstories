@@ -35,7 +35,7 @@ const renderStackBarIconRight = (navigation, addItemToLists) => {
     <View style={{ flexDirection: "row" }}>
       <TouchableOpacity
         onPress={() => {
-          navigation.navigate("ChapterSettings", {
+          navigation.navigate("ChapterDetails", {
             saveChanges: addItemToLists,
           });
         }}
@@ -136,7 +136,7 @@ export default ({ navigation, route }) => {
             <ChapterItem
               title={title}
               onPress={() => {
-                navigation.navigate("ChapterSettings", {
+                navigation.navigate("ChapterDetails", {
                   chapterId: id,
                   saveChanges: addItemToLists,
                 });
