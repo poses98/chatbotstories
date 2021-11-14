@@ -27,10 +27,12 @@ const images = {
 
 
 export default ({ navigation }) => {
+  // TODO loading for every single item from DB to be totally loaded!
   const testId = "dOS86iiJmcPbVKi4nP9m8BAUr0g2"
   const TEST = false;
   const [owned, setOwned] = useState(false)
   const [stories, setStories] = useState([]);
+  const [storyCont, setStoryCont] = useState(0)
   const [data, setdata] = useState({});
   const [loading, setloading] = useState(true);
   const [image, setImage] = useState(null);
@@ -55,12 +57,14 @@ export default ({ navigation }) => {
       .doc(TEST ? testId : auth().currentUser.uid) // TODO ESTO HAY QUE CAMBIARLO POR EL ID DE USUARIO!
       .collection("stories")
       .orderBy("date", "desc")
-      .limit(6)
+      .limit(100)
       .onSnapshot(
         (querySnapshot) => {
           var fetchedStories = [];
           if (querySnapshot.size === 0) {
             setloading(false);
+          }else{
+            setStoryCont(querySnapshot.size)
           }
           querySnapshot.forEach((doc) => {
             //Fetching every story from DB
@@ -145,14 +149,14 @@ export default ({ navigation }) => {
             name={data.name}
             web={data.website}
             description={data.description}
-            posts="5"
+            posts={storyCont}
             followers="673"
             following="1.965"
             navigation={navigation}
             userId={auth().currentUser.uid}
             image={image}
           />
-          {console.log(stories)}
+          {console.log(stories.length)}
           {!(stories.length == 0) && (
             <FlatList
               data={stories}
@@ -204,6 +208,7 @@ export default ({ navigation }) => {
         </View>
       )}
       {loading && (
+        
         <View
           style={{
             flex: 1,
@@ -212,6 +217,7 @@ export default ({ navigation }) => {
             alignItems: "center",
           }}
         >
+          {/** TODO Change loading to loading bars */}
           <Image
             source={require("../assets/loading.gif")}
             style={{ width: 100, height: 100 }}
