@@ -22,6 +22,7 @@ import { Picker } from "@react-native-picker/picker";
 import Button from "../components/Button";
 import { Label } from "../components/Label";
 import { updateDoc, addDoc } from "../services/collections";
+import { StatusSelector } from "../components/StatusSelector";
 
 export default ({ route, navigation }) => {
   /** STORY ID IN CASE IS UPDATE MODE */
@@ -29,10 +30,9 @@ export default ({ route, navigation }) => {
     route.params ? route.params.storyId : ""
   );
   const [isEditMode, setEditMode] = useState(false);
-  
-    navigation.setOptions({title: storyId ? "Story detail" : "Create story"})
-  
-  
+
+  navigation.setOptions({ title: storyId ? "Story detail" : "Create story" });
+
   /** STATE ATRIBUTTES */
   const [owned, setowned] = useState(false); // owner of the story
   const [data, setdata] = useState({}); // metadata of the story
@@ -59,10 +59,9 @@ export default ({ route, navigation }) => {
 
   const storyRef = firestore().collection("stories");
 
-
   const updateStatus = (value) => {
-    setstatus(value)
-  }
+    setstatus(value);
+  };
   /** Getting the metadata of the story */
   useEffect(() => {
     if (storyId != "") {
@@ -89,7 +88,7 @@ export default ({ route, navigation }) => {
               setinteractive(doc.data().interactive);
               setOldInteractive(doc.data().interactive);
               setlanguage(doc.data().language);
-              setstatus(doc.data().status)
+              setstatus(doc.data().status);
             } else {
               setStoryId("");
             }
@@ -357,92 +356,11 @@ export default ({ route, navigation }) => {
           </View>
           {/** (EDITMODE ONLY) BUTTON SELECTOR FOR STATUS  */}
           {isEditMode && (
-            <View>
-              <View style={{ flexDirection: "column", marginTop: 15 }}>
-                <Label text="Story status" icon="list-outline" />
-                <Button
-                  text={_STATUS_[0].verboseName}
-                  textStyle={{ fontWeight: "bold", textTransform:"uppercase" }}
-                  onPress={() => {
-                    updateStatus(_STATUS_[0].statusId);
-                    console.log(
-                      "State of the story has changed: ",
-                      _STATUS_[0].verboseName
-                    );
-                  }}
-                  buttonStyle={{
-                    flex: 0.5,
-                    marginTop: 15,
-                    marginHorizontal: 15,
-                    height: 45,
-                    backgroundColor:
-                      status === _STATUS_[0].statusId
-                        ? Colors.yellow
-                        : "transparent",
-                    borderColor:
-                      status === _STATUS_[0].statusId ? "#fafafa" : Colors.gray,
-                  }}
-                  textStyle={{
-                    color:
-                      status === _STATUS_[0].statusId ? "#fafafa" : Colors.gray,
-                  }}
-                />
-                <Button
-                  text={_STATUS_[1].verboseName}
-                  textStyle={{ fontWeight: "bold" }}
-                  onPress={() => {
-                    updateStatus(_STATUS_[1].statusId);
-                    console.log(
-                      "State of the story has changed: ",
-                      _STATUS_[1].verboseName
-                    );
-                  }}
-                  buttonStyle={{
-                    flex: 0.5,
-                    marginTop: 15,
-                    marginHorizontal: 15,
-                    height: 45,
-                    backgroundColor:
-                      status === _STATUS_[1].statusId
-                        ? Colors.red
-                        : "transparent",
-                    borderColor:
-                      status === _STATUS_[1].statusId ? "#fafafa" : Colors.gray,
-                  }}
-                  textStyle={{
-                    color:
-                      status === _STATUS_[1].statusId ? "#fafafa" : Colors.gray,
-                  }}
-                />
-                <Button
-                  text={_STATUS_[2].verboseName}
-                  textStyle={{ fontWeight: "bold" }}
-                  onPress={() => {
-                    updateStatus(_STATUS_[2].statusId);
-                    console.log(
-                      "State of the story has changed: ",
-                      _STATUS_[2].verboseName
-                    );
-                  }}
-                  buttonStyle={{
-                    flex: 0.5,
-                    marginTop: 15,
-                    marginHorizontal: 15,
-                    height: 45,
-                    backgroundColor:
-                      status === _STATUS_[2].statusId
-                        ? Colors.green
-                        : "transparent",
-                    borderColor:
-                      status === _STATUS_[2].statusId ? "#fafafa" : Colors.gray,
-                  }}
-                  textStyle={{
-                    color:
-                      status === _STATUS_[2].statusId ? "#fafafa" : Colors.gray,
-                  }}
-                />
-              </View>
-            </View>
+            <StatusSelector
+              status={status}
+              updateStatus={updateStatus}
+              text="Story status"
+            />
           )}
           {/** PICKER FOR LANGUAGE */}
           <View style={{ flexDirection: "column", marginTop: 15 }}>
@@ -469,7 +387,7 @@ export default ({ route, navigation }) => {
               />
             </Picker>
           </View>
-          
+
           {/** CREATE STORY BUTTON */}
           <Button
             text={isEditMode ? "Save" : "Create"}

@@ -1,25 +1,11 @@
-import React, { useLayoutEffect, useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  Image,
-  ScrollView,
-  TouchableOpacity,
-  FlatList,
-  Switch,
-} from "react-native";
+import React, { useState } from "react";
+import { StyleSheet, ScrollView } from "react-native";
 import { firestore, auth } from "firebase";
-import { StackActions } from "@react-navigation/native";
-
 import Colors from "../constants/Colors";
-import GENRES from "../constants/Genres";
-import LANGUAGES from "../constants/Languages";
 import _STATUS_ from "../constants/StoryStatus";
-import Ionicons from "@expo/vector-icons/Ionicons";
 import LabeledInput from "../components/LabeledInput";
-import { Picker } from "@react-native-picker/picker";
 import Button from "../components/Button";
+import { StatusSelector } from "../components/StatusSelector";
 import { updateDoc, addDoc } from "../services/collections";
 import { Label } from "../components/Label";
 
@@ -42,66 +28,18 @@ export default ({ route, navigation }) => {
   });
   const [memberNumber, setMemberNumber] = useState(2);
   const [index, setIndex] = useState(0);
-
+  const [status, setstatus] = useState(0); // status of the chapter
+  const updateStatus = (value) => {
+    setstatus(value);
+  };
   const chaptersRef = firestore()
     .collection("stories")
     .doc(storyId)
     .collection("chapters");
-  /**CHECKING IF THIS IS FIRST CHAPTER */
-  useEffect(() => {
-    chaptersRef.onSnapshot((querySnapshot) => {
-      if (querySnapshot) {
-        console.log("Number of chapters: " + querySnapshot.size);
-        return querySnapshot.size;
-      }
-    });
-  }, []);
-  /** MEMBER ADD COMPONENT WITH +/- ICONS */
-  const MemberAddComponent = () => {
-    return (
-      <View
-        style={{
-          flex: 1,
-          flexDirection: "row",
-          marginHorizontal: 50,
-          justifyContent: "space-between",
-          marginVertical: 10,
-        }}
-      >
-        {/**MINUS BUTTON */}
-        <TouchableOpacity
-          onPress={() => {
-            //Sum 1 to the active members
-            if (memberNumber > 2) {
-              setMemberNumber(memberNumber - 1);
-            }
-          }}
-        >
-          <Ionicons
-            name="remove-circle-outline"
-            size={40}
-            color={Colors.black}
-          />
-        </TouchableOpacity>
-        {/**NUMBER */}
-        <Text style={{ fontSize: 35 }}>{memberNumber}</Text>
-        {/**PLUS BUTTON */}
-        <TouchableOpacity
-          onPress={() => {
-            //Sum 1 to the active members
-            if (memberNumber < 8) {
-              setMemberNumber(memberNumber + 1);
-            }
-          }}
-        >
-          <Ionicons name="add-circle-outline" size={40} color={Colors.black} />
-        </TouchableOpacity>
-      </View>
-    );
-  };
+
   /** SEND CHAPTER TO FIRESTORE */
   const createChapter = (data) => {
-    addDoc(chaptersRef, { data });
+    addDoc(chaptersRef, data);
   };
   return (
     <ScrollView style={styles.container}>
@@ -138,14 +76,12 @@ export default ({ route, navigation }) => {
           color: Colors.black,
         }}
       />
-      {/** NUMBER OF MEMBERS OF THE CHAPTER */}
-      <Label
-        text="Number of participants "
-        icon="people-outline"
-        labelStyle={{}}
+      {/**STATUS SELECTOR */}
+      <StatusSelector
+        status={status}
+        updateStatus={updateStatus}
+        text="Chapter status"
       />
-      <MemberAddComponent />
-      {/**INPUT POPULATED FROM THE NUMBER */}
       {/**CREATE CHAPTER BUTTON */}
       <Button
         text={isEditMode ? "Save" : "Create"}
@@ -166,11 +102,12 @@ export default ({ route, navigation }) => {
             const data = {
               title: nameField.text,
               description: descriptionField.text.replace(/(\r\n|\n|\r)/gm, ""),
-              date: Date.now(),
+              lastUpdate: Date.now(),
               author: auth().currentUser.uid,
+              status: status
             };
             if (!isEditMode) {
-              createChapter(data);
+              route.params.saveChanges(data.title,data.description,data.lastUpdate,data.author,data.status)
             } else if (isEditMode) {
               //update chapter
             }

@@ -14,11 +14,12 @@ import ProfileScreen from "../screens/ProfileScreen";
 import ProfileEditScreen from "../screens/ProfileEditScreen";
 import StoryCreateScreen from "../screens/StoryCreateScreen";
 import StoryInfoScreen from "../screens/StoryInfoScreen";
-import ChapterEditScreen from "../screens/ChapterEditScreen";
+import ChapterSettingsScreen from "../screens/ChapterSettingsScreen";
 import ChapterReadScreen from "../screens/ChapterReadScreen";
 import LoginScreen from "../screens/LoginScreen";
 import LoadingScreen from "../screens/LoadingScreen";
 import StorySettingsScreen from "../screens/StorySettingsScreen";
+import ChapterListScreen from "../screens/ChapterListScreen";
 
 const getHeaderTitle = (route) => {
   const routeName = getFocusedRouteNameFromRoute(route) ?? "Home";
@@ -73,6 +74,7 @@ const getHeaderButton = (route, navigation) => {
           <Text></Text>
         </View>
       );
+    
   }
 };
 
@@ -91,8 +93,8 @@ const StoriesStackScreen = () => {
         }}
       />
       <StoriesStack.Screen
-        name="ChapterEdit"
-        component={ChapterEditScreen}
+        name="ChapterList"
+        component={ChapterListScreen}
         options={({ route }) => {
           return {
             title: route.params.title + " chapter creation",
@@ -210,13 +212,21 @@ export const RootStackScreen = () => {
           };
         }}
       />
-
       <RootStack.Screen
-        name="ChapterEdit"
-        component={ChapterEditScreen}
-        options={({ route }) => {
+        name="ChapterSettings"
+        component={ChapterSettingsScreen}
+        options={({ route }) => { 
           return {
-            title: "Chapter creation",
+            title: "Chapter settings",
+          };
+        }}
+      />
+      <RootStack.Screen
+        name="ChapterList"
+        component={ChapterListScreen}
+        options={({ route }) => { 
+          return {
+            title: "Chapter list",
           };
         }}
       />

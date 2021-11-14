@@ -30,31 +30,23 @@ export default ({ navigation, route }) => {
       <TouchableOpacity
         onPress={() => {
           navigation.navigate("StoryCreate", {
-              storyId: storyId,
+            storyId: storyId,
           });
         }}
         style={styles.settingsButton}
       >
-        <Ionicons
-            name="options-outline"
-            size={29}
-            color={Colors.black}
-          />
+        <Ionicons name="options-outline" size={29} color={Colors.black} />
         <Text style={styles.buttonText}>Story details</Text>
       </TouchableOpacity>
-      <TouchableOpacity onPress={() =>{
-          navigation.navigate("ChapterEdit", {
-              storyId: storyId,
-            })
-          
-      }}
-      style={styles.settingsButton}
+      <TouchableOpacity
+        onPress={() => {
+          navigation.navigate("ChapterList", {
+            storyId: storyId,
+          });
+        }}
+        style={styles.settingsButton}
       >
-          <Ionicons
-            name="list-outline"
-            size={29}
-            color={Colors.black}
-          />
+        <Ionicons name="list-outline" size={29} color={Colors.black} />
         <Text style={styles.buttonText}>Chapters</Text>
       </TouchableOpacity>
     </ScrollView>
@@ -100,18 +92,18 @@ const styles = StyleSheet.create({
     borderColor: Colors.teal,
   },
   settingsButton: {
-      flex: 1,
-      minHeight: 30,
-      paddingHorizontal: 15,
-      fontSize:20,
-      marginVertical:5,
-      flexDirection:"row",
-      justifyContent:"flex-start",
-      alignItems:"center"
+    flex: 1,
+    minHeight: 30,
+    paddingHorizontal: 15,
+    fontSize: 20,
+    marginVertical: 5,
+    flexDirection: "row",
+    justifyContent: "flex-start",
+    alignItems: "center",
   },
-  buttonText : {
-      fontSize: 17,
-      fontWeight: "normal",
-      paddingLeft: 15
-  }
+  buttonText: {
+    fontSize: 17,
+    fontWeight: "normal",
+    paddingLeft: 15,
+  },
 });
