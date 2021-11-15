@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect, useRef } from "react";
 import { GiftedChat } from "react-native-gifted-chat";
 import { moderateScale } from "react-native-size-matters";
 import Svg, { Path } from "react-native-svg";
@@ -38,53 +38,134 @@ import { NavigationContainer } from "@react-navigation/native";
   */
 
 const AuthorButtonSelector = ({ _id, onPress, color, selectedId, name }) => {
+  let selected = selectedId === _id;
   return (
     <TouchableOpacity
       style={{
         borderWidth: 1,
         borderRadius: 15,
-        padding: 5,
+        paddingVertical: 5,
+        paddingHorizontal: 8,
         borderColor: color ? color : Colors.blue,
         marginVertical: 5,
-        marginHorizontal:5
+        marginHorizontal: 5,
+        backgroundColor: selected ? color : "#fafafa",
       }}
       onPress={onPress}
     >
-      <Text style={{color: color ? color : Colors.blue}}>{name}</Text>
+      <Text style={{ color: selected ? "#fafafa" : color }}>{name}</Text>
     </TouchableOpacity>
   );
 };
 
-export default ({navigation, route}) => {
+export default ({ navigation, route }) => {
   const [messages, setMessages] = useState([]);
+  const [characterList, setCharacterList] = useState([]);
+  const [senderId, setSenderId] = useState("");
+  const [messageEdit, setMessageEdit] = useState("");
+  /**Firestore references */
+  const characterListRef = firestore()
+    .collection("stories")
+    .doc(route.params.storyId)
+    .collection("characters");
+  const messageListRef = firestore()
+    .collection("stories")
+    .doc(route.params.storyId)
+    .collection("chapters")
+    .doc(route.params.chapterId)
+    .collection("messages");
+  const scrollViewRef = useRef();
 
+  /**Getting the characters from the db */
   useEffect(() => {
-    setMessages([
-      {
-        _index: 1,
-        text: "Hello developer",
-        user: {
-          _id: 2,
-          name: "React Native",
-        },
+    onSnapshot(
+      characterListRef,
+      (newLists) => {
+        setCharacterList(newLists);
+        setSenderId(newLists[0].id);
       },
-    ]);
-  }, []);
+      {
+        sort: (a, b) => {
+          if (a.index < b.index) {
+            return -1;
+          }
 
-  const PopulateMessages = ({ messageBody, sender, color }) => {};
+          if (a.index > b.index) {
+            return 1;
+          }
 
-  const onSend = useCallback((messages = []) => {
-    setMessages((previousMessages) =>
-      GiftedChat.append(previousMessages, messages)
+          return 0;
+        },
+      }
     );
   }, []);
 
+  /**Getting the messages from the db */
+  useEffect(() => {
+    onSnapshot(
+      messageListRef,
+      (newLists) => {
+        setMessages(newLists);
+      },
+      {
+        sort: (a, b) => {
+          if (a.index < b.index) {
+            return -1;
+          }
+
+          if (a.index > b.index) {
+            return 1;
+          }
+
+          return 0;
+        },
+      }
+    );
+  }, []);
+
+  const updateCharacterList = ({ id, name, color }) => {
+    updateDoc(characterListRef, id, { name, color });
+  };
+
+  const addCharacterToList = ({ name, color }) => {
+    const index =
+      characterList.length >= 1
+        ? characterList[characterList.length - 1].index + 1
+        : 0;
+    addDoc(characterListRef, { name, color });
+  };
+
+  const addMessageToList = ({ messageBody, sender }) => {
+    const index =
+      messages.length >= 1 ? messages[messages.length - 1].index + 1 : 0;
+    console.log(messageBody);
+    addDoc(messageListRef, { messageBody, sender, index });
+  };
+
   return (
-    <View style={{ flex: 1,backgroundColor:"#fafafa" }}>
-        {/**MESSAGE SCROLLVIEW */}
-      <ScrollView>
-        <MessageBubble messageBody="Lorem ipsum" />
-      </ScrollView>
+    <View style={{ flex: 1, backgroundColor: "#fafafa" }}>
+      {/**MESSAGE SCROLLVIEW */}
+      <KeyboardAvoidingView style={{ marginBottom: 100 }}>
+        <ScrollView
+          ref={scrollViewRef}
+          onContentSizeChange={() =>
+            scrollViewRef.current.scrollToEnd({ animated: true })
+          }
+        >
+          <FlatList
+            data={messages}
+            renderItem={({ item: { messageBody, sender } }) => {
+              return (
+                <MessageBubble
+                  messageBody={messageBody}
+                  sender={sender}
+                  characterList={characterList}
+                />
+              );
+            }}
+          />
+        </ScrollView>
+      </KeyboardAvoidingView>
       <KeyboardAvoidingView
         style={{
           position: "absolute",
@@ -92,24 +173,45 @@ export default ({navigation, route}) => {
           left: 0,
           right: 0,
           flexDirection: "column",
-          flex: 1,
+          flex: 0.2,
           justifyContent: "space-around",
           marginHorizontal: 10,
-          marginBottom: 5,
-          backgroundColor:"#fafafa"
+          marginBottom: 0,
+          backgroundColor: "#fafafa",
+          maxHeight: 100,
         }}
       >
-          {/**AUTHOR SELECTOR */}
-        <View style={{ flexDirection: "row", flex: 1,alignItems:"center" }}>
-            <AuthorButtonSelector
-                name="Main character"
-                color={Colors.green}
-            />
-            <TouchableOpacity onPress={() => {
-                navigation.navigate("CharacterCreation")
-            }}>
-                <Ionicons name="add-circle-outline" size={24}/>
-            </TouchableOpacity>
+        {/**AUTHOR SELECTOR */}
+        <View style={{ flexDirection: "row", flex: 1, alignItems: "center" }}>
+          <FlatList
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            data={characterList}
+            keyExtractor={(item) => item.name.toString()}
+            renderItem={({ item: { name, color, id } }) => {
+              return (
+                <AuthorButtonSelector
+                  name={name}
+                  color={color}
+                  _id={id}
+                  onPress={() => {
+                    setSenderId(id);
+                  }}
+                  selectedId={senderId}
+                />
+              );
+            }}
+          />
+
+          <TouchableOpacity
+            onPress={() => {
+              navigation.navigate("CharacterCreation", {
+                saveChanges: addCharacterToList,
+              });
+            }}
+          >
+            <Ionicons name="add-circle-outline" size={24} />
+          </TouchableOpacity>
         </View>
         {/**TEXT INPUT */}
         <View style={{ flexDirection: "row", flex: 1 }}>
@@ -120,6 +222,11 @@ export default ({navigation, route}) => {
               padding: 8,
               borderRadius: 20,
             }}
+            value={messageEdit}
+            onChangeText={(text) => {
+              setMessageEdit(text);
+            }}
+            placeholder={"Message"}
           />
           <TouchableOpacity
             style={{
@@ -132,7 +239,13 @@ export default ({navigation, route}) => {
               marginLeft: 5,
             }}
             onPress={() => {
-              //TODO add message to list + send to firebase
+              if (messageEdit.length > 0) {
+                addMessageToList({
+                  messageBody: messageEdit,
+                  sender: senderId,
+                });
+                setMessageEdit("");
+              }
             }}
           >
             <Ionicons name="send-outline" size={moderateScale(25, 1)} />

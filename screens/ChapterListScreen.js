@@ -86,16 +86,8 @@ export default ({ navigation, route }) => {
   }) => {
     const index =
       chapterList.length >= 1
-        ? chapterList[chapterList.length -1 ].index + 1
+        ? chapterList[chapterList.length - 1].index + 1
         : 0;
-        console.log("Chapter list length: " + chapterList.length)
-    console.log(title,
-      description,
-      lastUpdate,
-      status,
-      author,
-      index);
-
     addDoc(chapterListRef, {
       title,
       description,
@@ -138,6 +130,7 @@ export default ({ navigation, route }) => {
               onPress={() => {
                 navigation.navigate("Chat", {
                   chapterId: id,
+                  storyId: route.params.storyId,
                   saveChanges: addItemToLists,
                 });
               }}

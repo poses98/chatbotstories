@@ -8,19 +8,32 @@ import {
 } from "react-native";
 import Colors from "../constants/Colors";
 
-export const MessageBubble = ({ messageBody, sender, color }) => {
+export const MessageBubble = ({ messageBody, sender, characterList}) => {
+    let verboseName = ""
+    let characterColor = ""
+    let main = false;
+    characterList.forEach(element => {
+      if(sender === element.id){
+        if(!element.main){
+        verboseName = element.name
+        characterColor = element.color
+        }else{
+          main = true;
+        }
+      }
+    });
     return (
-      <View style={[styles.item, sender ? styles.itemIn : styles.itemOut]}>
-        <View style={[styles.balloon, { backgroundColor: sender ? Colors.gray : "#1084ff"}]}>
-          {sender && (
+      <View style={[styles.item, verboseName ? styles.itemIn : styles.itemOut]}>
+        <View style={[styles.balloon, { backgroundColor: verboseName ? "#075E54" : "#1084ff"}]}>
+          {!main && (
             <Text
               style={{
                 paddingTop: 0,
-                color: color ? color : Colors.green,
+                color: characterColor ? characterColor : Colors.green,
                 fontWeight: "bold",
               }}
             >
-              {sender}
+              {verboseName}
             </Text>
           )}
           <Text style={{ paddingTop: 1, color: "white" }}>{messageBody}</Text>
