@@ -136,7 +136,7 @@ export default ({ navigation, route }) => {
             <ChapterItem
               title={title}
               onPress={() => {
-                navigation.navigate("ChapterDetails", {
+                navigation.navigate("Chat", {
                   chapterId: id,
                   saveChanges: addItemToLists,
                 });

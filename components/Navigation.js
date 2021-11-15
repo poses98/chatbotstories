@@ -15,11 +15,11 @@ import ProfileEditScreen from "../screens/ProfileEditScreen";
 import StoryCreateScreen from "../screens/StoryCreateScreen";
 import StoryInfoScreen from "../screens/StoryInfoScreen";
 import ChapterDetailsScreen from "../screens/ChapterDetailsScreen";
-import ChapterReadScreen from "../screens/ChapterReadScreen";
 import LoginScreen from "../screens/LoginScreen";
 import LoadingScreen from "../screens/LoadingScreen";
 import StorySettingsScreen from "../screens/StorySettingsScreen";
 import ChapterListScreen from "../screens/ChapterListScreen";
+import ChatScreen from "../screens/ChatScreen";
 
 const getHeaderTitle = (route) => {
   const routeName = getFocusedRouteNameFromRoute(route) ?? "Home";
@@ -227,6 +227,15 @@ export const RootStackScreen = () => {
         options={({ route }) => { 
           return {
             title: "Chapter list",
+          };
+        }}
+      />
+      <RootStack.Screen
+        name="Chat"
+        component={ChatScreen}
+        options={({ route }) => { 
+          return {
+            title: "Chat",
           };
         }}
       />
