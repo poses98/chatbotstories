@@ -1,4 +1,10 @@
-import React, { useState, useCallback, useEffect, useRef } from "react";
+import React, {
+  useState,
+  useCallback,
+  useEffect,
+  useRef,
+  useLayoutEffect,
+} from "react";
 import { GiftedChat } from "react-native-gifted-chat";
 import { moderateScale } from "react-native-size-matters";
 import Svg, { Path } from "react-native-svg";
@@ -10,6 +16,7 @@ import {
   FlatList,
   KeyboardAvoidingView,
   DEVICE_WIDTH,
+  Alert
 } from "react-native";
 import Colors from "../constants/Colors";
 import Ionicons from "@expo/vector-icons/Ionicons";
@@ -71,6 +78,9 @@ export default ({ navigation, route }) => {
   const [characterList, setCharacterList] = useState([]);
   const [senderId, setSenderId] = useState("");
   const [messageEdit, setMessageEdit] = useState("");
+  const [messageEditId, setMessageEditId] = useState("");
+  const [messageEditIndex, setMessageEditIndex] = useState(0);
+  const [messageEditMode, setMessageEditMode] = useState(false)
   const [canBeMain, setCanBeMain] = useState(false);
   /**Firestore references */
   const characterListRef = firestore()
@@ -83,6 +93,7 @@ export default ({ navigation, route }) => {
     .collection("chapters")
     .doc(route.params.chapterId)
     .collection("messages");
+
   const scrollViewRef = useRef();
 
   /**Getting the characters from the db */
@@ -93,16 +104,19 @@ export default ({ navigation, route }) => {
         setCharacterList(newLists);
         if (newLists.length > 0) {
           setSenderId(newLists[0].id);
+          let i = 0;
           newLists.forEach((element) => {
             if (element.main) {
-              console.log("Characters can't be main, already an existing one")
               setCanBeMain(false);
+              const aux = newLists[0];
+              newLists[0] = element;
+              newLists[i] = aux;
+              setSenderId(newLists[0].id);
             }
+            i++;
           });
-          console.log("Characters can be main?:" + canBeMain)
-
-        }else{
-          setCanBeMain(true)
+        } else {
+          setCanBeMain(true);
         }
       },
       {
@@ -144,7 +158,7 @@ export default ({ navigation, route }) => {
     );
   }, []);
 
-  const getCanBeMain = () =>{
+  const getCanBeMain = () => {
     let check = true;
     characterList.forEach((element) => {
       if (element.main) {
@@ -152,7 +166,60 @@ export default ({ navigation, route }) => {
       }
     });
     return check;
-  }
+  };
+
+  /**
+   * Function that renders the icons in headerbar
+   */
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => renderStackBarIconRight(),
+      headerRightContainerStyle: {
+        paddingRight: 10,
+      },
+    });
+  });
+
+  /**
+   * Function that shows an alert box
+   */
+  const changesWillNotBeSavedAlert = () =>
+    Alert.alert(
+      "This action can not be undone",
+      "Are you sure?",
+      [
+        {
+          text: "Cancel",
+          onPress: () => console.log("Cancel Pressed"),
+          style: "cancel",
+        },
+        {
+          text: "Delete",
+          onPress: () => removeMessage({id:messageEditId}),
+        },
+      ],
+      { cancelable: true }
+    );
+  /**
+   * Function that renders the right icon in the stack bar and
+   * updates database when the icon is pressed
+   */
+  const renderStackBarIconRight = () => {
+    return (
+      <View style={{ flexDirection: "row" }}>
+        {messageEditMode && (
+        <TouchableOpacity
+          onPress={() => {
+            changesWillNotBeSavedAlert();
+          }}
+          style={{ paddingRight: 5 }}
+        >
+          <Ionicons name="trash-bin-outline" size={26} color={Colors.black} />
+        </TouchableOpacity>
+        )}
+      </View>
+    );
+  };
 
   const updateCharacterList = ({ id, name, color, main }) => {
     updateDoc(characterListRef, id, { name, color, main });
@@ -162,11 +229,24 @@ export default ({ navigation, route }) => {
     addDoc(characterListRef, { name, color, main });
   };
 
+  const updateMessage = ({ id, messageBody, sender, index }) => {
+    updateDoc(messageListRef, id, { messageBody, sender, index });
+  };
+
   const addMessageToList = ({ messageBody, sender }) => {
     const index =
       messages.length >= 1 ? messages[messages.length - 1].index + 1 : 0;
     console.log(messageBody);
     addDoc(messageListRef, { messageBody, sender, index });
+  };
+
+  const removeMessage = ({ id }) => {
+    removeDoc(messageListRef, id);
+    setMessageEditId("");
+    setMessageEditIndex(0);
+    setMessageEdit("");
+    setMessageEditMode(false)
+
   };
 
   return (
@@ -181,12 +261,21 @@ export default ({ navigation, route }) => {
         >
           <FlatList
             data={messages}
-            renderItem={({ item: { messageBody, sender } }) => {
+            keyExtractor={(item) => item.id.toString()}
+            renderItem={({ item: { messageBody, sender, id, index } }) => {
               return (
                 <MessageBubble
                   messageBody={messageBody}
                   sender={sender}
                   characterList={characterList}
+                  onLongPress={() => {
+                    setMessageEdit(messageBody);
+                    setMessageEditId(id);
+                    setSenderId(sender);
+                    setMessageEditIndex(index);
+                    setMessageEditMode(true)
+                    //ICONO DE BORRAR MENSAJE
+                  }}
                 />
               );
             }}
@@ -209,7 +298,7 @@ export default ({ navigation, route }) => {
         }}
       >
         {/**AUTHOR SELECTOR */}
-        <View style={{ flexDirection: "row", flex: 1, alignItems: "center" }}>
+        <View style={{ flexDirection: "row", flex: 1, alignItems: "center", paddingBottom:7 }}>
           <FlatList
             horizontal
             showsHorizontalScrollIndicator={false}
@@ -222,7 +311,7 @@ export default ({ navigation, route }) => {
                   color={color}
                   _id={id}
                   onPress={() => {
-                    setSenderId(id)
+                    setSenderId(id);
                   }}
                   onLongPress={() => {
                     navigation.navigate("CharacterCreation", {
@@ -245,7 +334,7 @@ export default ({ navigation, route }) => {
               navigation.navigate("CharacterCreation", {
                 saveChanges: addCharacterToList,
                 canBeMain: getCanBeMain(),
-                isMain: false
+                isMain: false,
               });
             }}
           >
@@ -279,15 +368,31 @@ export default ({ navigation, route }) => {
             }}
             onPress={() => {
               if (messageEdit.length > 0) {
-                addMessageToList({
-                  messageBody: messageEdit,
-                  sender: senderId,
-                });
+                console.log("MessageId:" + messageEditId);
+                if (messageEditId === "") {
+                  addMessageToList({
+                    messageBody: messageEdit,
+                    sender: senderId,
+                  });
+                } else {
+                  updateMessage({
+                    id: messageEditId,
+                    sender: senderId,
+                    messageBody: messageEdit,
+                    index: messageEditIndex,
+                  });
+                  setMessageEditId("");
+                  setMessageEditIndex(0);
+                  setMessageEditMode(false)
+                }
                 setMessageEdit("");
               }
             }}
           >
-            <Ionicons name="send-outline" size={moderateScale(25, 1)} />
+            <Ionicons
+              name={messageEditId === "" ? "send-outline" : "save-outline"}
+              size={moderateScale(25, 1)}
+            />
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
