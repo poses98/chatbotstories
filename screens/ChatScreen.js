@@ -37,7 +37,14 @@ import { NavigationContainer } from "@react-navigation/native";
   * @returns 
   */
 
-const AuthorButtonSelector = ({ _id, onPress, color, selectedId, name }) => {
+const AuthorButtonSelector = ({
+  _id,
+  onPress,
+  onLongPress,
+  name,
+  color,
+  selectedId,
+}) => {
   let selected = selectedId === _id;
   return (
     <TouchableOpacity
@@ -52,6 +59,7 @@ const AuthorButtonSelector = ({ _id, onPress, color, selectedId, name }) => {
         backgroundColor: selected ? color : "#fafafa",
       }}
       onPress={onPress}
+      onLongPress={onLongPress}
     >
       <Text style={{ color: selected ? "#fafafa" : color }}>{name}</Text>
     </TouchableOpacity>
@@ -63,6 +71,7 @@ export default ({ navigation, route }) => {
   const [characterList, setCharacterList] = useState([]);
   const [senderId, setSenderId] = useState("");
   const [messageEdit, setMessageEdit] = useState("");
+  const [canBeMain, setCanBeMain] = useState(false);
   /**Firestore references */
   const characterListRef = firestore()
     .collection("stories")
@@ -82,7 +91,19 @@ export default ({ navigation, route }) => {
       characterListRef,
       (newLists) => {
         setCharacterList(newLists);
-        setSenderId(newLists[0].id);
+        if (newLists.length > 0) {
+          setSenderId(newLists[0].id);
+          newLists.forEach((element) => {
+            if (element.main) {
+              console.log("Characters can't be main, already an existing one")
+              setCanBeMain(false);
+            }
+          });
+          console.log("Characters can be main?:" + canBeMain)
+
+        }else{
+          setCanBeMain(true)
+        }
       },
       {
         sort: (a, b) => {
@@ -123,16 +144,22 @@ export default ({ navigation, route }) => {
     );
   }, []);
 
-  const updateCharacterList = ({ id, name, color }) => {
-    updateDoc(characterListRef, id, { name, color });
+  const getCanBeMain = () =>{
+    let check = true;
+    characterList.forEach((element) => {
+      if (element.main) {
+        check = false;
+      }
+    });
+    return check;
+  }
+
+  const updateCharacterList = ({ id, name, color, main }) => {
+    updateDoc(characterListRef, id, { name, color, main });
   };
 
-  const addCharacterToList = ({ name, color }) => {
-    const index =
-      characterList.length >= 1
-        ? characterList[characterList.length - 1].index + 1
-        : 0;
-    addDoc(characterListRef, { name, color });
+  const addCharacterToList = ({ name, color, main }) => {
+    addDoc(characterListRef, { name, color, main });
   };
 
   const addMessageToList = ({ messageBody, sender }) => {
@@ -187,15 +214,25 @@ export default ({ navigation, route }) => {
             horizontal
             showsHorizontalScrollIndicator={false}
             data={characterList}
-            keyExtractor={(item) => item.name.toString()}
-            renderItem={({ item: { name, color, id } }) => {
+            keyExtractor={(item) => item.id.toString()}
+            renderItem={({ item: { name, color, id, main } }) => {
               return (
                 <AuthorButtonSelector
                   name={name}
                   color={color}
                   _id={id}
                   onPress={() => {
-                    setSenderId(id);
+                    setSenderId(id)
+                  }}
+                  onLongPress={() => {
+                    navigation.navigate("CharacterCreation", {
+                      saveChanges: updateCharacterList,
+                      characterName: name,
+                      characterColor: color,
+                      characterId: id,
+                      isMain: main,
+                      canBeMain: getCanBeMain(),
+                    });
                   }}
                   selectedId={senderId}
                 />
@@ -207,6 +244,8 @@ export default ({ navigation, route }) => {
             onPress={() => {
               navigation.navigate("CharacterCreation", {
                 saveChanges: addCharacterToList,
+                canBeMain: getCanBeMain(),
+                isMain: false
               });
             }}
           >
