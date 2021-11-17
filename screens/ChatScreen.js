@@ -1,22 +1,13 @@
-import React, {
-  useState,
-  useCallback,
-  useEffect,
-  useRef,
-  useLayoutEffect,
-} from "react";
-import { GiftedChat } from "react-native-gifted-chat";
+import React, { useState, useEffect, useRef, useLayoutEffect } from "react";
 import { moderateScale } from "react-native-size-matters";
-import Svg, { Path } from "react-native-svg";
 import {
   StyleSheet,
-  Text,
   View,
   TouchableOpacity,
   FlatList,
   KeyboardAvoidingView,
   DEVICE_WIDTH,
-  Alert
+  Alert,
 } from "react-native";
 import Colors from "../constants/Colors";
 import Ionicons from "@expo/vector-icons/Ionicons";
@@ -28,50 +19,9 @@ import {
 } from "../services/collections";
 import { firestore, auth } from "firebase";
 import { ScrollView, TextInput } from "react-native-gesture-handler";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { MessageBubble } from "../components/MessageBubble";
-import Button from "../components/Button";
-import { NavigationContainer } from "@react-navigation/native";
-
-/**
-  * <GiftedChat
-      messages={messages}
-      onSend={(messages) => onSend(messages)}
-      user={{
-        _id: 1,
-      }}
-    />
-  * @returns 
-  */
-
-const AuthorButtonSelector = ({
-  _id,
-  onPress,
-  onLongPress,
-  name,
-  color,
-  selectedId,
-}) => {
-  let selected = selectedId === _id;
-  return (
-    <TouchableOpacity
-      style={{
-        borderWidth: 1,
-        borderRadius: 15,
-        paddingVertical: 5,
-        paddingHorizontal: 8,
-        borderColor: color ? color : Colors.blue,
-        marginVertical: 5,
-        marginHorizontal: 5,
-        backgroundColor: selected ? color : "#fafafa",
-      }}
-      onPress={onPress}
-      onLongPress={onLongPress}
-    >
-      <Text style={{ color: selected ? "#fafafa" : color }}>{name}</Text>
-    </TouchableOpacity>
-  );
-};
+import { AuthorButtonSelector } from "../components/AuthorButtonSelector";
+import Swipeable from "react-native-swipeable";
 
 export default ({ navigation, route }) => {
   const [messages, setMessages] = useState([]);
@@ -80,7 +30,7 @@ export default ({ navigation, route }) => {
   const [messageEdit, setMessageEdit] = useState("");
   const [messageEditId, setMessageEditId] = useState("");
   const [messageEditIndex, setMessageEditIndex] = useState(0);
-  const [messageEditMode, setMessageEditMode] = useState(false)
+  const [messageEditMode, setMessageEditMode] = useState(false);
   const [canBeMain, setCanBeMain] = useState(false);
   /**Firestore references */
   const characterListRef = firestore()
@@ -169,23 +119,11 @@ export default ({ navigation, route }) => {
   };
 
   /**
-   * Function that renders the icons in headerbar
-   */
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      headerRight: () => renderStackBarIconRight(),
-      headerRightContainerStyle: {
-        paddingRight: 10,
-      },
-    });
-  });
-
-  /**
    * Function that shows an alert box
    */
-  const changesWillNotBeSavedAlert = () =>
+  const changesWillNotBeSavedAlert = (id) =>
     Alert.alert(
-      "This action can not be undone",
+      "This action cannot be undone",
       "Are you sure?",
       [
         {
@@ -195,31 +133,11 @@ export default ({ navigation, route }) => {
         },
         {
           text: "Delete",
-          onPress: () => removeMessage({id:messageEditId}),
+          onPress: () => removeMessage(id),
         },
       ],
       { cancelable: true }
     );
-  /**
-   * Function that renders the right icon in the stack bar and
-   * updates database when the icon is pressed
-   */
-  const renderStackBarIconRight = () => {
-    return (
-      <View style={{ flexDirection: "row" }}>
-        {messageEditMode && (
-        <TouchableOpacity
-          onPress={() => {
-            changesWillNotBeSavedAlert();
-          }}
-          style={{ paddingRight: 5 }}
-        >
-          <Ionicons name="trash-bin-outline" size={26} color={Colors.black} />
-        </TouchableOpacity>
-        )}
-      </View>
-    );
-  };
 
   const updateCharacterList = ({ id, name, color, main }) => {
     updateDoc(characterListRef, id, { name, color, main });
@@ -242,11 +160,6 @@ export default ({ navigation, route }) => {
 
   const removeMessage = ({ id }) => {
     removeDoc(messageListRef, id);
-    setMessageEditId("");
-    setMessageEditIndex(0);
-    setMessageEdit("");
-    setMessageEditMode(false)
-
   };
 
   return (
@@ -259,46 +172,81 @@ export default ({ navigation, route }) => {
             scrollViewRef.current.scrollToEnd({ animated: true })
           }
         >
+          
           <FlatList
             data={messages}
             keyExtractor={(item) => item.id.toString()}
             renderItem={({ item: { messageBody, sender, id, index } }) => {
               return (
-                <MessageBubble
-                  messageBody={messageBody}
-                  sender={sender}
-                  characterList={characterList}
-                  onLongPress={() => {
-                    setMessageEdit(messageBody);
-                    setMessageEditId(id);
-                    setSenderId(sender);
-                    setMessageEditIndex(index);
-                    setMessageEditMode(true)
-                    //ICONO DE BORRAR MENSAJE
-                  }}
-                />
+                <Swipeable
+                  rightButtons={[
+                    <TouchableOpacity
+                      style={{
+                        backgroundColor: Colors.orange,
+                        justifyContent: "center",
+                        width: 45,
+                        height: 45,
+                        borderRadius: 15,
+                        marginHorizontal: 0,
+                        
+                      }}
+                      onPress={() => {
+                        navigation.navigate("MessageEdit", {
+                          messageBody: messageBody,
+                          sender: sender,
+                          id: id,
+                          index: index,
+                          saveChanges: updateMessage,
+                          characterList:characterList
+                        });
+                      }}
+                    >
+                      <Ionicons
+                        name="pencil-outline"
+                        size={26}
+                        style={{ alignSelf: "center", color: "white" }}
+                      />
+                    </TouchableOpacity>,
+                    <TouchableOpacity
+                      style={{
+                        backgroundColor: Colors.red,
+                        justifyContent: "center",
+                        width: 45,
+                        height: 45,
+                        borderRadius: 15,
+                      }}
+                      onPress={() => changesWillNotBeSavedAlert({ id })}
+                    >
+                      <Ionicons
+                        name="trash-bin-outline"
+                        size={26}
+                        style={{ alignSelf: "center", color: "white" }}
+                      />
+                    </TouchableOpacity>,
+                  ]}
+                >
+                  <MessageBubble
+                    messageBody={messageBody}
+                    sender={sender}
+                    characterList={characterList}
+                  />
+                </Swipeable>
               );
             }}
           />
         </ScrollView>
       </KeyboardAvoidingView>
-      <KeyboardAvoidingView
-        style={{
-          position: "absolute",
-          bottom: 0,
-          left: 0,
-          right: 0,
-          flexDirection: "column",
-          flex: 0.2,
-          justifyContent: "space-around",
-          marginHorizontal: 10,
-          marginBottom: 0,
-          backgroundColor: "#fafafa",
-          maxHeight: 100,
-        }}
-      >
+      <KeyboardAvoidingView style={styles.typeBar}>
+        {/**INPUT BAR & AUTHOR SELECTOR */}
         {/**AUTHOR SELECTOR */}
-        <View style={{ flexDirection: "row", flex: 1, alignItems: "center", paddingBottom:7 }}>
+        <View
+          style={{
+            flexDirection: "row",
+            flex: 1,
+            alignItems: "center",
+            paddingBottom: 7,
+          }}
+        >
           <FlatList
             horizontal
             showsHorizontalScrollIndicator={false}
@@ -313,7 +261,7 @@ export default ({ navigation, route }) => {
                   onPress={() => {
                     setSenderId(id);
                   }}
-                  onLongPress={() => {
+                  onLongPress={() =>
                     navigation.navigate("CharacterCreation", {
                       saveChanges: updateCharacterList,
                       characterName: name,
@@ -321,8 +269,8 @@ export default ({ navigation, route }) => {
                       characterId: id,
                       isMain: main,
                       canBeMain: getCanBeMain(),
-                    });
-                  }}
+                    })
+                  }
                   selectedId={senderId}
                 />
               );
@@ -344,28 +292,16 @@ export default ({ navigation, route }) => {
         {/**TEXT INPUT */}
         <View style={{ flexDirection: "row", flex: 1 }}>
           <TextInput
-            style={{
-              backgroundColor: "#c4c4c4dd",
-              flex: 1,
-              padding: 8,
-              borderRadius: 20,
-            }}
+            style={styles.messageInput}
             value={messageEdit}
             onChangeText={(text) => {
               setMessageEdit(text);
             }}
             placeholder={"Message"}
+            multiline={true}
           />
           <TouchableOpacity
-            style={{
-              alignItems: "center",
-              justifyContent: "center",
-              padding: 0,
-              borderWidth: 0,
-              borderRadius: 50,
-              padding: 8,
-              marginLeft: 5,
-            }}
+            style={styles.sendButton}
             onPress={() => {
               if (messageEdit.length > 0) {
                 console.log("MessageId:" + messageEditId);
@@ -374,6 +310,7 @@ export default ({ navigation, route }) => {
                     messageBody: messageEdit,
                     sender: senderId,
                   });
+                  setMessageEdit("");
                 } else {
                   updateMessage({
                     id: messageEditId,
@@ -381,9 +318,10 @@ export default ({ navigation, route }) => {
                     messageBody: messageEdit,
                     index: messageEditIndex,
                   });
+                  setMessageEdit("");
                   setMessageEditId("");
                   setMessageEditIndex(0);
-                  setMessageEditMode(false)
+                  setMessageEditMode(false);
                 }
                 setMessageEdit("");
               }
@@ -417,4 +355,32 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
   },
+  typeBar: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    flexDirection: "column",
+    flex: 0.2,
+    justifyContent: "space-around",
+    marginHorizontal: 10,
+    marginBottom: 0,
+    backgroundColor: "#fafafa",
+  },
+  sendButton: {
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 0,
+    borderWidth: 0,
+    borderRadius: 50,
+    padding: 8,
+    marginLeft: 5,
+  },
+  messageInput : {
+    backgroundColor: "#c4c4c4dd",
+    flex: 1,
+    padding: 8,
+    borderRadius: 20,
+    maxHeight: 100,
+  }
 });

@@ -21,6 +21,7 @@ import StorySettingsScreen from "../screens/StorySettingsScreen";
 import ChapterListScreen from "../screens/ChapterListScreen";
 import ChatScreen from "../screens/ChatScreen";
 import CharacterCreation from "../screens/CharacterCreation";
+import MessageEdit from "../screens/MessageEdit";
 
 const getHeaderTitle = (route) => {
   const routeName = getFocusedRouteNameFromRoute(route) ?? "Home";
@@ -245,7 +246,16 @@ export const RootStackScreen = () => {
         component={CharacterCreation}
         options={({ route }) => { 
           return {
-            title: "",
+            title: "Character creation",
+          };
+        }}
+      />
+      <RootStack.Screen
+        name="MessageEdit"
+        component={MessageEdit}
+        options={({ route }) => { 
+          return {
+            title: "Edit message",
           };
         }}
       />

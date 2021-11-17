@@ -2,10 +2,12 @@ import React from "react";
 import { moderateScale } from "react-native-size-matters";
 import { StyleSheet, Text, View } from "react-native";
 import Colors from "../constants/Colors";
-import { TouchableOpacity } from "react-native-gesture-handler";
 
-export const MessageBubble = ({ messageBody, sender, characterList, onLongPress }) => {
-  let editting = false
+export const MessageBubble = ({
+  messageBody,
+  sender,
+  characterList
+}) => {
   let verboseName = "";
   let characterColor = "";
   let main = false;
@@ -20,30 +22,27 @@ export const MessageBubble = ({ messageBody, sender, characterList, onLongPress 
     }
   });
   return (
-    <View
-      style={[styles.item, verboseName ? styles.itemIn : styles.itemOut]}
-    >
-      <TouchableOpacity
-        style={[
-          styles.balloon,
-          { backgroundColor: verboseName ? "#075E54" : "#1084ff" },
-        ]}
-        onLongPress={onLongPress}
-        delayLongPress={200}
-      >
-        {!main && (
-          <Text
-            style={{
-              paddingTop: 0,
-              color: characterColor ? characterColor : Colors.green,
-              fontWeight: "bold",
-            }}
-          >
-            {verboseName}
-          </Text>
-        )}
-        <Text style={{ paddingTop: 1, color: "white" }}>{messageBody}</Text>
-      </TouchableOpacity>
+    <View style={[styles.item, verboseName ? styles.itemIn : styles.itemOut]}>
+        <View
+          style={[
+            styles.balloon,
+            { backgroundColor: verboseName ? "#075E54" : "#1084ff" },
+          ]}
+
+        >
+          {!main && (
+            <Text
+              style={{
+                paddingTop: 0,
+                color: characterColor ? characterColor : Colors.green,
+                fontWeight: "bold",
+              }}
+            >
+              {verboseName}
+            </Text>
+          )}
+          <Text style={{ paddingTop: 1, color: "white" }}>{messageBody}</Text>
+        </View>
     </View>
   );
 };

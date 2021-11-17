@@ -16,11 +16,13 @@ import {
 } from "../services/collections";
 import { firestore, auth } from "firebase";
 import { ScrollView } from "react-native-gesture-handler";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 /**Chapter item to be populated */
 const ChapterItem = ({ title, description, index, onPress, id }) => {
   return (
     <TouchableOpacity onPress={onPress} style={styles.settingsButton}>
+      <Text style={styles.numberText}>{index+1}</Text>
       <Text style={styles.buttonText}>{title}</Text>
     </TouchableOpacity>
   );
@@ -59,7 +61,12 @@ export default ({ navigation, route }) => {
     onSnapshot(
       chapterListRef,
       (newLists) => {
-        setChapterList(newLists);
+        let i = 0;
+        newLists.forEach(element => {
+          element.index = i;
+          i++
+        });
+        setChapterList(newLists)
       },
       {
         sort: (a, b) => {
@@ -120,10 +127,10 @@ export default ({ navigation, route }) => {
   }
 
   return (
-    <ScrollView style={styles.container}>
+    <View style={styles.container}>
       <FlatList
         data={chapterList}
-        renderItem={({ item: { title, description, id } }) => {
+        renderItem={({ item: { title, description, id,index } }) => {
           return (
             <ChapterItem
               title={title}
@@ -137,11 +144,12 @@ export default ({ navigation, route }) => {
               id={id}
               navigation={navigation}
               onDelete={() => removeItemFromLists(id)}
+              index={index}
             />
           );
         }}
       />
-    </ScrollView>
+    </View>
   );
 };
 
@@ -170,4 +178,8 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
     alignItems: "center",
   },
+  numberText:{
+    fontSize: 14,
+    color: Colors.gray
+  }
 });
