@@ -18,7 +18,7 @@ import LANGUAGES from "../constants/Languages";
 import MONTHS from "../constants/Months";
 import STORY_STATUS from "../constants/StoryStatus";
 import { StackActions } from "@react-navigation/native";
-
+import { onSnapshot } from "../services/collections";
 export default ({ navigation, route }) => {
   /** STATE OBJECTS */
   const [isSaved, setIsSaved] = useState(false);
@@ -30,6 +30,7 @@ export default ({ navigation, route }) => {
   const [stats, setstats] = useState({});
   const [canLike, setcanLike] = useState(true);
   const authorName = route.params.username;
+  const [chapterId, setChapterId] = useState("")
 
   //Refs to firestore
   const storyRef = firestore().collection("stories");
@@ -252,7 +253,62 @@ export default ({ navigation, route }) => {
       alert(error.message);
     }
   };
+  /** Finding out if the user has already started this story to continue reading */
+  useEffect(() => {
+    if (storyId != "") {
+      userRef
+        .doc(auth().currentUser.uid)
+        .collection("startedStories")
+        .doc(storyId)
+        .get()
+        .then((doc) => {
+          if (doc.exists) {
+            setChapterId(doc.data().chapterId)
+            console.log("Story has been started by the user and left on chapter:");
+          } else {
+            // doc.data() will be undefined in this case
+          }
+        })
+        .catch((error) => {
+          console.log("Error getting document:", error);
+        });
+    } else {
+      setnotloaded(true);
+      setloading(false);
+    }
+  }, []);
+  /**Chapter list */
+  const [chapterList, setChapterList] = useState([]);
+  const chapterListRef = firestore()
+    .collection("stories")
+    .doc(route.params.storyId)
+    .collection("chapters");
+  useEffect(() => {
+    onSnapshot(
+      chapterListRef,
+      (newLists) => {
+        let i = 0;
+        newLists.forEach(element => {
+          element.index = i;
+          i++
+        });
+        setChapterList(newLists)
+      },
+      {
+        sort: (a, b) => {
+          if (a.index < b.index) {
+            return -1;
+          }
 
+          if (a.index > b.index) {
+            return 1;
+          }
+
+          return 0;
+        },
+      }
+    );
+  }, []);
   return (
     <ScrollView style={styles.container}>
       {!loading && !notloaded && (
@@ -360,9 +416,17 @@ export default ({ navigation, route }) => {
           </View>
           {/** CONTINUE/START READING BUTTON */}
           <Button
-            text="Start reading"
+            text={(chapterId==="") ? "Start reading" :"Continue reading"}
             textStyle={{ fontWeight: "bold" }}
-            onPress={() => {}}
+            onPress={() => {
+              //TODO admob
+              navigation.navigate("ChatRead",{
+                storyName:data.title,
+                storyId:storyId,
+                chapterId:!(chapterId==="") ? chapterId : chapterList[0].id,
+                chapterList:chapterList
+              })
+            }}
             buttonStyle={{
               marginVertical: 15,
               marginHorizontal: 15,

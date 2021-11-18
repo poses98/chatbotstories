@@ -22,6 +22,7 @@ import ChapterListScreen from "../screens/ChapterListScreen";
 import ChatScreen from "../screens/ChatScreen";
 import CharacterCreation from "../screens/CharacterCreation";
 import MessageEdit from "../screens/MessageEdit";
+import ChatReadScreen from "../screens/ChatReadScreen";
 
 const getHeaderTitle = (route) => {
   const routeName = getFocusedRouteNameFromRoute(route) ?? "Home";
@@ -76,7 +77,6 @@ const getHeaderButton = (route, navigation) => {
           <Text></Text>
         </View>
       );
-    
   }
 };
 
@@ -217,7 +217,7 @@ export const RootStackScreen = () => {
       <RootStack.Screen
         name="ChapterDetails"
         component={ChapterDetailsScreen}
-        options={({ route }) => { 
+        options={({ route }) => {
           return {
             title: "Chapter details",
           };
@@ -226,7 +226,7 @@ export const RootStackScreen = () => {
       <RootStack.Screen
         name="ChapterList"
         component={ChapterListScreen}
-        options={({ route }) => { 
+        options={({ route }) => {
           return {
             title: "Chapter list",
           };
@@ -235,16 +235,25 @@ export const RootStackScreen = () => {
       <RootStack.Screen
         name="Chat"
         component={ChatScreen}
-        options={({ route }) => { 
+        options={({ route }) => {
           return {
             title: "Chat",
           };
         }}
       />
       <RootStack.Screen
+        name="ChatRead"
+        component={ChatReadScreen}
+        options={({ route }) => {
+          return {
+            title: route.params.storyName,
+          };
+        }}
+      />
+      <RootStack.Screen
         name="CharacterCreation"
         component={CharacterCreation}
-        options={({ route }) => { 
+        options={({ route }) => {
           return {
             title: "Character creation",
           };
@@ -253,7 +262,7 @@ export const RootStackScreen = () => {
       <RootStack.Screen
         name="MessageEdit"
         component={MessageEdit}
-        options={({ route }) => { 
+        options={({ route }) => {
           return {
             title: "Edit message",
           };

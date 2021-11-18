@@ -188,7 +188,6 @@ export default ({ navigation, route }) => {
                         height: 45,
                         borderRadius: 15,
                         marginHorizontal: 0,
-                        
                       }}
                       onPress={() => {
                         navigation.navigate("MessageEdit", {
@@ -303,7 +302,7 @@ export default ({ navigation, route }) => {
           <TouchableOpacity
             style={styles.sendButton}
             onPress={() => {
-              if (messageEdit.length > 0) {
+              if (messageEdit.length > 0 && !(senderId === "")) {
                 console.log("MessageId:" + messageEditId);
                 if (messageEditId === "") {
                   addMessageToList({
