@@ -128,15 +128,23 @@ export default ({ navigation, route }) => {
   }, []);
 
   const updateReadingMessages = () => {
-    if (messages.length > readingIndex) {
-      let temp_readMessages = [...readingMessages];
-      temp_readMessages.push(messages[readingIndex]);
-      setReadingMessages(temp_readMessages);
-      setReadingIndex(readingIndex + 1);
-    } else if (messages.length === readingMessages.length) {
-      setFinished(true);
-      console.log("Se ha terminado el capitulo: " + true);
-      nextChapter()
+    if (!finished) {
+      Analytics.logEvent('SpawnMessageInReadingChat', {
+        sender: 'screen tap',
+        user: auth().currentUser.uid,
+        screen: 'chatReadScreen',
+        purpose: 'Tap the screen to spawn a new message',
+      });
+      if (messages.length > readingIndex) {
+        let temp_readMessages = [...readingMessages];
+        temp_readMessages.push(messages[readingIndex]);
+        setReadingMessages(temp_readMessages);
+        setReadingIndex(readingIndex + 1);
+      } else if (messages.length === readingMessages.length) {
+        setFinished(true);
+        console.log("Se ha terminado el capitulo: " + true);
+        nextChapter()
+      }
     }
   };
   return (
@@ -199,6 +207,12 @@ export default ({ navigation, route }) => {
                     chapterId: nextChapterId,
                     chapterList: route.params.chapterList
                   })
+                  Analytics.logEvent('NextChapter', {
+                    sender: 'button',
+                    user: auth().currentUser.uid,
+                    screen: 'chatReadScreen',
+                    purpose: 'Tap the next chapter button',
+                  });
                 }}
               />
             )}

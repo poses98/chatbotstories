@@ -1,21 +1,15 @@
-import React, { useLayoutEffect, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
   StyleSheet,
   Image,
   ScrollView,
-  TouchableOpacity,
-  FlatList,
-  ImageBackground,
-  SafeAreaView
-} from "react-native";
+  FlatList} from "react-native";
 import ProfileHeader from "../components/Profile/ProfileHeader";
 import StoryContainer from "../components/StoryContainer";
 import Colors from "../constants/Colors";
-import Ionicons from "@expo/vector-icons/Ionicons";
 import { firestore, auth } from "firebase";
-import GENRES from "../constants/Genres";
 import * as firebase from "firebase";
 import "firebase/storage";
 import * as Analytics from 'expo-firebase-analytics';

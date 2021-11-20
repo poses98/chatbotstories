@@ -33,6 +33,12 @@ const renderStackBarIconRight = (navigation, addItemToLists) => {
           navigation.navigate("ChapterDetails", {
             saveChanges: addItemToLists,
           });
+          Analytics.logEvent('EditChapterChat', {
+            sender: 'card',
+            user: auth().currentUser.uid,
+            screen: 'chapterListScreen',
+            purpose: 'Tap a chapter to enter edit chat',
+          });
         }}
         style={{ paddingRight: 5 }}
       >

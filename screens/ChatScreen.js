@@ -85,7 +85,6 @@ export default ({ navigation, route }) => {
       }
     );
   }, []);
-
   /**Getting the messages from the db */
   useEffect(() => {
     onSnapshot(
@@ -199,6 +198,13 @@ export default ({ navigation, route }) => {
                           saveChanges: updateMessage,
                           characterList: characterList
                         });
+                        Analytics.logEvent('EditMessageInChat', {
+                          sender: 'swipeable button',
+                          user: auth().currentUser.uid,
+                          story: route.params.storyId,
+                          screen: 'chatScreen',
+                          purpose: 'Pressed swipeable button to edit a message',
+                        });
                       }}
                     >
                       <Ionicons
@@ -215,7 +221,16 @@ export default ({ navigation, route }) => {
                         height: 45,
                         borderRadius: 15,
                       }}
-                      onPress={() => changesWillNotBeSavedAlert({ id })}
+                      onPress={() => {
+                        changesWillNotBeSavedAlert({ id })
+                        Analytics.logEvent('DeleteMessageInChat', {
+                          sender: 'swipeable button',
+                          user: auth().currentUser.uid,
+                          story: route.params.storyId,
+                          screen: 'chatScreen',
+                          purpose: 'Pressed swipeable button to delete a message',
+                        });
+                      }}
                     >
                       <Ionicons
                         name="trash-bin-outline"

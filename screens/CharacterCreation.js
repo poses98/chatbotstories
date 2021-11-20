@@ -2,10 +2,7 @@ import { CommonActions } from "@react-navigation/native";
 import React, { useState } from "react";
 import {
   StyleSheet,
-  Text,
   View,
-  TextInput,
-  TouchableOpacity,
   Switch,
 } from "react-native";
 import Colors from "../constants/Colors";
@@ -24,6 +21,7 @@ const colorList = [
   "purple",
 ];
 import * as Analytics from 'expo-firebase-analytics';
+import { auth } from "firebase";
 
 export default ({ navigation, route }) => {
   const [name, setName] = useState(route.params.characterName || "");
@@ -67,7 +65,7 @@ export default ({ navigation, route }) => {
           thumbColor={main ? "#f4f3f4" : "#f4f3f4"}
           ios_backgroundColor="#3e3e3e"
           disabled={(!canBeMain && !main)}
-          onValueChange={() => {setMain(!main);setCanBeMain(!canBeMain)}}
+          onValueChange={() => { setMain(!main); setCanBeMain(!canBeMain) }}
           value={main}
         />
         <Label text="Select color" icon="color-palette-outline" />
@@ -83,13 +81,13 @@ export default ({ navigation, route }) => {
       <Button
         text="Save"
         onPress={() => {
-            console.log("Saving changes...")
+          console.log("Saving changes...")
           if (name.length > 1) {
-            if(isEditMode){
-                const id = characterId
-                route.params.saveChanges({ id, name, color, main });
-            }else{
-                route.params.saveChanges({ name, color, main });
+            if (isEditMode) {
+              const id = characterId
+              route.params.saveChanges({ id, name, color, main });
+            } else {
+              route.params.saveChanges({ name, color, main });
             }
             navigation.dispatch(CommonActions.goBack());
 
@@ -98,6 +96,12 @@ export default ({ navigation, route }) => {
 
             setValidity(false);
           }
+          Analytics.logEvent('CreateCharacter', {
+            sender: 'card',
+            user: auth().currentUser.uid,
+            screen: 'characterCreation',
+            purpose: 'Create a new character',
+          });
         }}
       />
     </View>

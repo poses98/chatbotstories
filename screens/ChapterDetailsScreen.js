@@ -89,6 +89,12 @@ export default ({ route, navigation }) => {
         onPress={() => {
           let validation = true;
           if (nameField.text.length < 3) {
+            Analytics.logEvent('ChapterNameNoValid', {
+              sender: 'verifier',
+              user: auth().currentUser.uid,
+              screen: 'chapterDetailsScreen',
+              purpose: 'Try to create a chapter with less than 3 chars',
+            });
             validation = false;
             nameField.errorMessage = "Title must have at least 3 characters";
             setnameField({ ...nameField });
@@ -106,10 +112,23 @@ export default ({ route, navigation }) => {
             if (!isEditMode) {
               route.params.saveChanges(data)
               navigation.dispatch(CommonActions.goBack());
+              Analytics.logEvent('CreateChapter', {
+                sender: 'card',
+                user: auth().currentUser.uid,
+                screen: 'chapterDetailsScreen',
+                purpose: 'Create a chapter',
+              });
             } else if (isEditMode) {
               //update chapter
+              Analytics.logEvent('UpdateChapter', {
+                sender: 'card',
+                user: auth().currentUser.uid,
+                screen: 'chapterDetailsScreen',
+                purpose: 'Update a chapter',
+              });
             }
           }
+
         }}
         buttonStyle={{
           marginVertical: 40,
