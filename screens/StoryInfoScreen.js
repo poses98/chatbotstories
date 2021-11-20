@@ -7,6 +7,7 @@ import {
   Image,
   ImageBackground,
   Share,
+  FlatList
 } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import Colors from "../constants/Colors";
@@ -19,6 +20,10 @@ import MONTHS from "../constants/Months";
 import STORY_STATUS from "../constants/StoryStatus";
 import { StackActions } from "@react-navigation/native";
 import { onSnapshot } from "../services/collections";
+import { ChapterItem } from "../components/ChapterItem";
+import { moderateScale } from "react-native-size-matters";
+
+
 export default ({ navigation, route }) => {
   /** STATE OBJECTS */
   const [isSaved, setIsSaved] = useState(false);
@@ -31,6 +36,7 @@ export default ({ navigation, route }) => {
   const [canLike, setcanLike] = useState(true);
   const authorName = route.params.username;
   const [chapterId, setChapterId] = useState("")
+  const [chapterIndex, setChapterIndex] = useState(0)
 
   //Refs to firestore
   const storyRef = firestore().collection("stories");
@@ -144,8 +150,6 @@ export default ({ navigation, route }) => {
       setloading(false);
     }
   }, []);
-  /** Fetching the chapter list for this story */
-
   /** Rendering the top bar icons */
   const renderStackBarIconRight = () => {
     return (
@@ -191,7 +195,7 @@ export default ({ navigation, route }) => {
                   storyId: storyId,
                 })
               );*/
-              navigation.navigate("StorySettings",{storyId:storyId})
+              navigation.navigate("StorySettings", { storyId: storyId })
             }}
             style={{ paddingRight: 8 }}
           >
@@ -263,8 +267,8 @@ export default ({ navigation, route }) => {
         .get()
         .then((doc) => {
           if (doc.exists) {
-            setChapterId(doc.data().chapterId)
-            console.log("Story has been started by the user and left on chapter:");
+            setChapterId(doc.data().nextChapterId)
+            console.log("Story has been started by the user and left on chapter: " + doc.data().nextChapterId);
           } else {
             // doc.data() will be undefined in this case
           }
@@ -291,6 +295,10 @@ export default ({ navigation, route }) => {
         newLists.forEach(element => {
           element.index = i;
           i++
+          if (element.id === chapterId) {
+            setChapterIndex(element.index)
+            console.log("chapter index set to: " + chapterIndex)
+          }
         });
         setChapterList(newLists)
       },
@@ -309,6 +317,34 @@ export default ({ navigation, route }) => {
       }
     );
   }, []);
+  
+  /**Review list */
+  const [reviewList, setReviewList] = useState([])
+  const reviewListRef = firestore()
+    .collection("stories")
+    .doc(route.params.storyId)
+    .collection("reviews");
+  useEffect(() => {
+    onSnapshot(
+      reviewListRef,
+      (newLists) => {
+        setReviewList(newLists)
+      },
+      {
+        sort: (a, b) => {
+          if (a.date < b.date) {
+            return -1;
+          }
+
+          if (a.date > b.date) {
+            return 1;
+          }
+
+          return 0;
+        },
+      }
+    );
+  }, []);
   return (
     <ScrollView style={styles.container}>
       {!loading && !notloaded && (
@@ -317,7 +353,7 @@ export default ({ navigation, route }) => {
           <ImageBackground
             source={GENRES[data.categoryMain].image}
             resizeMode="cover"
-            onError={() => {}}
+            onError={() => { }}
             style={styles.image}
           >
             <View style={styles.storyContainer}>
@@ -351,6 +387,26 @@ export default ({ navigation, route }) => {
               </View>
               {/**STORY DESCRIPTION */}
               <Text style={styles.storyDescription}>"{data.description}"</Text>
+              {/** CONTINUE/START READING BUTTON */}
+              <Button
+                text={(chapterId === "") ? "Start reading" : "Continue reading"}
+                textStyle={{ fontWeight: "bold", color: Colors.lightGray }}
+                onPress={() => {
+                  //TODO admob
+                  navigation.navigate("ChatRead", {
+                    storyName: data.title,
+                    storyId: storyId,
+                    chapterId: !(chapterId === "") ? chapterId : chapterList[0].id,
+                    chapterList: chapterList
+                  })
+                }}
+                buttonStyle={{
+                  marginVertical: 15,
+                  marginHorizontal: 15,
+                  height: 45,
+                  borderColor: Colors.lightGray,
+                }}
+              />
             </View>
           </ImageBackground>
           {/** SOCIAL INTERACTIONS  */}
@@ -414,26 +470,42 @@ export default ({ navigation, route }) => {
               </Text>
             </View>
           </View>
-          {/** CONTINUE/START READING BUTTON */}
-          <Button
-            text={(chapterId==="") ? "Start reading" :"Continue reading"}
-            textStyle={{ fontWeight: "bold" }}
-            onPress={() => {
-              //TODO admob
-              navigation.navigate("ChatRead",{
-                storyName:data.title,
-                storyId:storyId,
-                chapterId:!(chapterId==="") ? chapterId : chapterList[0].id,
-                chapterList:chapterList
-              })
-            }}
-            buttonStyle={{
-              marginVertical: 15,
-              marginHorizontal: 15,
-              height: 45,
-              borderColor: Colors.black,
-            }}
-          />
+
+          {/**Chapter list */}
+          <Text
+            style={{ marginHorizontal: 15, fontSize: 20, color: Colors.gray }}
+          >Chapter list</Text>
+          <View style={{ maxHeight: 250, minHeight: 200, marginHorizontal: 15, borderWidth: 1 }}>
+            <FlatList
+              data={chapterList}
+              renderItem={({ item: { title, description, id, index } }) => {
+                return (
+                  <ChapterItem
+                    title={title}
+                    onPress={() => {
+                      //TODO admob
+                      navigation.navigate("ChatRead", {
+                        storyName: data.title,
+                        storyId: storyId,
+                        chapterId: id,
+                        chapterList: chapterList
+                      })
+                    }}
+                    id={id}
+                    navigation={navigation}
+                    onDelete={() => removeItemFromLists(id)}
+                    index={index}
+                    currentIndex={chapterIndex}
+                  />
+                );
+              }}
+            />
+          </View>
+          {/**Reviews */}
+          <Text
+            style={{ marginHorizontal: 15, fontSize: 20, color: Colors.gray }}
+          >Reviews</Text>
+
         </View>
       )}
       {!loading && notloaded && (
@@ -467,6 +539,7 @@ export default ({ navigation, route }) => {
         </View>
       )}
     </ScrollView>
+
   );
 };
 
@@ -479,7 +552,7 @@ const styles = StyleSheet.create({
   image: {
     flex: 1,
     justifyContent: "center",
-    height: 230,
+    minHeight: moderateScale(230, 0.45),
     width: "100%",
   },
   storyContainer: {
@@ -489,7 +562,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     padding: 15,
     borderColor: Colors.gray,
-    backgroundColor: "rgba(52, 52, 52, 0.6)",
+    backgroundColor: "rgba(52, 52, 52, 0.6)"
   },
   storyBar: {
     alignSelf: "flex-start",

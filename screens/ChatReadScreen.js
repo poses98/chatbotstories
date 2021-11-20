@@ -47,11 +47,11 @@ export default ({ navigation, route }) => {
   const updateReadingStoriesFromUser = () => {
     try {
       updateDoc(readingStoriesRef.doc(route.params.storyId), route.params.storyId, {
-        lastChapterRead: route.params.chapterId,
+        nextChapterId: nextChapterId,
         date: Date.now(),
       });
     } catch (e) {
-        addDoc(readingStoriesRef,{id:route.params.storyId,lastChapterRead: route.params.chapterId,
+        addDoc(readingStoriesRef,{id:route.params.storyId,nextChapterId: nextChapterId,
             date: Date.now()});
     }
   };

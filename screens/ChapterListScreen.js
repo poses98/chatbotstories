@@ -17,16 +17,8 @@ import {
 import { firestore, auth } from "firebase";
 import { ScrollView } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { ChapterItem } from "../components/ChapterItem";
 
-/**Chapter item to be populated */
-const ChapterItem = ({ title, description, index, onPress, id }) => {
-  return (
-    <TouchableOpacity onPress={onPress} style={styles.settingsButton}>
-      <Text style={styles.numberText}>{index+1}</Text>
-      <Text style={styles.buttonText}>{title}</Text>
-    </TouchableOpacity>
-  );
-};
 
 /**
  * This function renders the right icon in the stack bar and
