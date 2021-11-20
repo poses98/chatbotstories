@@ -97,6 +97,7 @@ export default ({ navigation }) => {
                   storyId,
                   date,
                   categoryMain,
+                  author
                 },
               }) => {
                 return (
@@ -111,7 +112,7 @@ export default ({ navigation }) => {
                       navigation.navigate("StoryInfo", {
                         title,
                         storyId,
-                        username: data.username,
+                        username: author,
                       });
                     }}
                   />

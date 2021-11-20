@@ -38,7 +38,7 @@ export default ({ navigation, route }) => {
   const [notloaded, setnotloaded] = useState(false);
   const [stats, setstats] = useState({});
   const [canLike, setcanLike] = useState(true);
-  const authorName = route.params.username;
+  const [authorUserName, setAuthorUserName] = useState("")
   const [chapterId, setChapterId] = useState("")
   const [chapterIndex, setChapterIndex] = useState(0)
   const [ended, setEnded] = useState(false)
@@ -52,7 +52,30 @@ export default ({ navigation, route }) => {
   var month = date.getMonth();
   var year = date.getFullYear();
   var day = date.getDate();
-
+  /**Getting the author name */
+  useEffect(() => {
+    if (storyId != "") {
+      userRef
+        .doc(route.params.username)
+        .get()
+        .then((doc) => {
+          if (doc.exists) {
+            setAuthorUserName(doc.data().username)
+          } else {
+            // doc.data() will be undefined in this case
+            console.log("No such document! (USER)");
+          }
+        })
+        .catch((error) => {
+          console.log("Error getting document:", error);
+        });
+    } else {
+      console.log("No storyId associated");
+      setnotloaded(true);
+      setloading(false);
+      setLoadingMetadata(false)
+    }
+  }, []);
   /** Getting the metadata of the story */
   useEffect(() => {
     if (storyId != "") {
@@ -61,7 +84,6 @@ export default ({ navigation, route }) => {
         .get()
         .then((doc) => {
           if (doc.exists) {
-            console.log("Story loaded: ", doc.data());
             setdata(doc.data());
             if (doc.data().author === auth().currentUser.uid) {
               setowned(true);
@@ -90,7 +112,6 @@ export default ({ navigation, route }) => {
         .get()
         .then((doc) => {
           if (doc.exists) {
-            console.log("Story stats loaded: ", doc.data());
             setstats(doc.data());
             // UPDATE VIEW WILL BE IN START READING BUTTON (AD WILL BE SHOWN)
             // statsRef.doc(storyId).update({ views: doc.data().views + 1 })
@@ -119,7 +140,6 @@ export default ({ navigation, route }) => {
         .then((doc) => {
           if (doc.exists) {
             setcanLike(false);
-            console.log("Story has been liked by the user");
           } else {
             // doc.data() will be undefined in this case
           }
@@ -143,7 +163,6 @@ export default ({ navigation, route }) => {
         .then((doc) => {
           if (doc.exists) {
             setIsSaved(true);
-            console.log("Story has been saved by the user");
           } else {
             // doc.data() will be undefined in this case
           }
@@ -400,7 +419,7 @@ export default ({ navigation, route }) => {
                   { fontStyle: "italic", fontSize: 12, marginBottom: 5 },
                 ]}
               >
-                Written by {authorName}
+                Written by {authorUserName}
               </Text>
               {/**STORY STATUS */}
 

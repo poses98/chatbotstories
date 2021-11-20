@@ -49,7 +49,7 @@ export default ({
       <View style={styles.itemContainer}>
         <View style={styles.infoBox}>
           <Text style={styles.numberInfo}>{posts}</Text>
-          <Text style={styles.textInfo}>Posts</Text>
+          <Text style={styles.textInfo}>Stories</Text>
         </View>
         <View style={styles.infoBox}>
           <Text style={styles.numberInfo}>{followers}</Text>
@@ -81,7 +81,6 @@ export default ({
 
 const styles = StyleSheet.create({
   profileInfo: {
-    flex: 0.43,
     alignItems: "stretch",
     flexDirection: "column",
     marginBottom: 15,
@@ -90,7 +89,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    flex: 1,
     margin: 0,
   },
   profilePic: {
@@ -113,7 +111,6 @@ const styles = StyleSheet.create({
     fontSize: 20,
   },
   bioBox: {
-    flex: 1,
     paddingHorizontal: 15,
     paddingVertical: 5,
   },

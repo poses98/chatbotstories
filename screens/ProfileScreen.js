@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   FlatList,
   ImageBackground,
+  SafeAreaView
 } from "react-native";
 import ProfileHeader from "../components/Profile/ProfileHeader";
 import StoryContainer from "../components/StoryContainer";
@@ -139,7 +140,6 @@ export default ({ navigation }) => {
         }
       });
   }
-  
 
   return (
     <ScrollView style={styles.container}>
@@ -160,6 +160,7 @@ export default ({ navigation }) => {
           {!(stories.length == 0) && (
             <FlatList
               data={stories}
+              keyExtractor={(item) => item.storyId}
               renderItem={({
                 item: {
                   interactive,
@@ -168,6 +169,7 @@ export default ({ navigation }) => {
                   storyId,
                   date,
                   categoryMain,
+                  author
                 },
               }) => {
                 return (
@@ -182,7 +184,7 @@ export default ({ navigation }) => {
                       navigation.navigate("StoryInfo", {
                         title,
                         storyId,
-                        username: data.username,
+                        username: author,
                       });
                     }}
                   />
