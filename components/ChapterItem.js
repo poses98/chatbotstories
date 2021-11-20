@@ -6,7 +6,7 @@ import {
 } from "react-native";
 import Colors from "../constants/Colors";
 import Ionicons from "@expo/vector-icons/Ionicons";
-export const ChapterItem = ({ title, description, index, onPress, id, currentIndex, finished }) => {
+export const ChapterItem = ({ title, description, index, onPress, id, currentIndex, finished, list }) => {
 
   return (
     <TouchableOpacity onPress={onPress} style={styles.settingsButton} disabled={currentIndex < index}>
@@ -15,9 +15,9 @@ export const ChapterItem = ({ title, description, index, onPress, id, currentInd
       ) : (
         <Ionicons name="lock-closed-outline" size={12} style={{ color: Colors.red }} />
       )}
-      <Text style={[styles.buttonText, { color: currentIndex < index ? Colors.gray : Colors.black}]}>{title}</Text>
-      {(currentIndex > index) || finished && (
-      <Ionicons name="checkmark-outline" size={17} style={{ color: Colors.green, marginLeft:5 }}/>
+      <Text style={[styles.buttonText, { color: currentIndex < index ? Colors.gray : Colors.black }]}>{title}</Text>
+      {((currentIndex > index) || finished) && (!list) && (
+        <Ionicons name="checkmark-outline" size={17} style={{ color: Colors.green, marginLeft: 5 }} />
       )}
     </TouchableOpacity>
   );

@@ -22,6 +22,7 @@ import { StackActions } from "@react-navigation/native";
 import { onSnapshot } from "../services/collections";
 import { ChapterItem } from "../components/ChapterItem";
 import { moderateScale } from "react-native-size-matters";
+import * as Analytics from 'expo-firebase-analytics';
 
 
 export default ({ navigation, route }) => {
@@ -528,7 +529,7 @@ export default ({ navigation, route }) => {
           <Text
             style={{ marginHorizontal: 15, fontSize: 20, color: Colors.gray }}
           >Chapter list</Text>
-          <View style={{ maxHeight: 250, minHeight: 200, marginHorizontal: 15, borderWidth: 1 }}>
+          <View style={{ maxHeight: 250, minHeight: 200, marginHorizontal: 15, borderWidth: 1, borderColor:Colors.black }}>
             <FlatList
               data={chapterList}
               renderItem={({ item: { title, description, id, index } }) => {
@@ -550,6 +551,7 @@ export default ({ navigation, route }) => {
                     index={index}
                     currentIndex={chapterIndex}
                     finished={ended}
+                    list={false}
                   />
                 );
               }}

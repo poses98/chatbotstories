@@ -1,6 +1,8 @@
 import * as React from 'react';
 import { View, Text } from 'react-native';
 import { TouchableHighlight } from 'react-native';
+import * as Analytics from 'expo-firebase-analytics';
+
 export default () => {
     const leftContent = <Text>Pull to activate</Text>;
 

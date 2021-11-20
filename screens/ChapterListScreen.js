@@ -18,6 +18,7 @@ import { firestore, auth } from "firebase";
 import { ScrollView } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ChapterItem } from "../components/ChapterItem";
+import * as Analytics from 'expo-firebase-analytics';
 
 
 /**
@@ -137,6 +138,8 @@ export default ({ navigation, route }) => {
               navigation={navigation}
               onDelete={() => removeItemFromLists(id)}
               index={index}
+              finished={true}
+              list={true}
             />
           );
         }}

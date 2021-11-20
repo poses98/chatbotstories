@@ -7,6 +7,7 @@ import LabeledInput from "../components/LabeledInput";
 import Button from "../components/Button";
 import { StatusSelector } from "../components/StatusSelector";
 import { CommonActions } from "@react-navigation/native";
+import * as Analytics from 'expo-firebase-analytics';
 
 export default ({ route, navigation }) => {
   const [Owned, setOwned] = useState(false);

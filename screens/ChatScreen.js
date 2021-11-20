@@ -22,6 +22,7 @@ import { ScrollView, TextInput } from "react-native-gesture-handler";
 import { MessageBubble } from "../components/MessageBubble";
 import { AuthorButtonSelector } from "../components/AuthorButtonSelector";
 import Swipeable from "react-native-swipeable";
+import * as Analytics from 'expo-firebase-analytics';
 
 export default ({ navigation, route }) => {
   const [messages, setMessages] = useState([]);
@@ -172,7 +173,7 @@ export default ({ navigation, route }) => {
             scrollViewRef.current.scrollToEnd({ animated: true })
           }
         >
-          
+
           <FlatList
             data={messages}
             keyExtractor={(item) => item.id.toString()}
@@ -196,7 +197,7 @@ export default ({ navigation, route }) => {
                           id: id,
                           index: index,
                           saveChanges: updateMessage,
-                          characterList:characterList
+                          characterList: characterList
                         });
                       }}
                     >
@@ -247,6 +248,8 @@ export default ({ navigation, route }) => {
           }}
         >
           <FlatList
+            keyboardDismissMode="on-drag"
+            keyboardShouldPersistTaps={'always'}
             horizontal
             showsHorizontalScrollIndicator={false}
             data={characterList}
@@ -375,7 +378,7 @@ const styles = StyleSheet.create({
     padding: 8,
     marginLeft: 5,
   },
-  messageInput : {
+  messageInput: {
     backgroundColor: "#c4c4c4dd",
     flex: 1,
     padding: 8,

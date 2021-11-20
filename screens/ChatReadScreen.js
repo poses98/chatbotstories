@@ -11,6 +11,9 @@ import { MessageBubble } from "../components/MessageBubble";
 import Button from "../components/Button";
 import Colors from "../constants/Colors";
 import StoryStatus from "../constants/StoryStatus";
+import * as Analytics from 'expo-firebase-analytics';
+
+
 export default ({ navigation, route }) => {
   const [messages, setMessages] = useState([]);
   const [characterList, setCharacterList] = useState([]);
@@ -26,35 +29,27 @@ export default ({ navigation, route }) => {
     let isFinished = true;
     route.params.chapterList.forEach((element) => {
       if (route.params.chapterId === element.id) {
-        console.log("El index de este capitulo es:" + element.index);
         thisChapterIndex = element.index;
       }
-      if (element.index === thisChapterIndex + 1 ) {
-        console.log(
-          "El siguiente capitulo es: " +
-            element.title +
-            " con id: " +
-            element.id
-        );
+      if (element.index === thisChapterIndex + 1) {
         setIsEnded(false)
         isFinished = false
         setNextChapterId(element.id);
-        updateReadingStoriesFromUser(isEnded,element.id);
+        updateReadingStoriesFromUser(isFinished, element.id);
       }
     });
-    if(isFinished){
-      console.log("Procediendo a terminar la historia")
+    if (isFinished) {
       setNextChapterId(null);
-      updateReadingStoriesFromUser(isEnded,null);
+      updateReadingStoriesFromUser(isFinished, null);
     }
   };
   const readingStoriesRef = firestore()
     .collection("users")
     .doc(auth().currentUser.uid)
     .collection("startedStories")
-    
 
-  const updateReadingStoriesFromUser = (isEnded,p_nextChapterId) => {
+
+  const updateReadingStoriesFromUser = (isEnded, p_nextChapterId) => {
     try {
       updateDoc(readingStoriesRef.doc(route.params.storyId), route.params.storyId, {
         lastChapterId: route.params.chapterId,
@@ -63,8 +58,10 @@ export default ({ navigation, route }) => {
         finished: isEnded
       });
     } catch (e) {
-        addDoc(readingStoriesRef,{id:route.params.storyId,nextChapterId: p_nextChapterId,
-            date: Date.now(),finished: isEnded,lastChapterId: route.params.chapterId});
+      addDoc(readingStoriesRef, {
+        id: route.params.storyId, nextChapterId: p_nextChapterId,
+        date: Date.now(), finished: isEnded, lastChapterId: route.params.chapterId
+      });
     }
   };
 
@@ -188,22 +185,22 @@ export default ({ navigation, route }) => {
               {isEnded ? "- End of the story -" : "- End of the chapter -"}
             </Text>
             {!isEnded && (
-            <Button
-              text="Next chapter"
-              buttonStyle={{
-                maxHeight: 100,
-                minHeight: 50,
-                marginTop: 15,
-              }}
-              onPress={() => {
-                  navigation.replace( "ChatRead",{
-                    storyName:route.params.storyName,
-                    storyId:route.params.storyId,
-                    chapterId:nextChapterId,
-                    chapterList:route.params.chapterList
+              <Button
+                text="Next chapter"
+                buttonStyle={{
+                  maxHeight: 100,
+                  minHeight: 50,
+                  marginTop: 15,
+                }}
+                onPress={() => {
+                  navigation.replace("ChatRead", {
+                    storyName: route.params.storyName,
+                    storyId: route.params.storyId,
+                    chapterId: nextChapterId,
+                    chapterList: route.params.chapterList
                   })
-              }}
-            />
+                }}
+              />
             )}
           </View>
         )}

@@ -18,6 +18,7 @@ import { firestore, auth } from "firebase";
 import GENRES from "../constants/Genres";
 import * as firebase from "firebase";
 import "firebase/storage";
+import * as Analytics from 'expo-firebase-analytics';
 
 const images = {
   terror: require("../assets/terror.jpg"),
@@ -40,7 +41,7 @@ export default ({ navigation }) => {
   //Get user information
   const userRef = firestore().collection("users");
   const storyRef = firestore().collection("stories");
-  
+
   useEffect(() => {
     const unsubscribe = userRef
       .doc(TEST ? testId : auth().currentUser.uid) // TODO ESTO HAY QUE CAMBIARLO POR EL ID DE USUARIO!
@@ -51,7 +52,7 @@ export default ({ navigation }) => {
       });
     return unsubscribe;
   }, []);
-  
+
   useEffect(() => {
     const unsubscribeStories = firestore()
       .collection("users")
@@ -64,7 +65,7 @@ export default ({ navigation }) => {
           var fetchedStories = [];
           if (querySnapshot.size === 0) {
             setloading(false);
-          }else{
+          } else {
             setStoryCont(querySnapshot.size)
           }
           querySnapshot.forEach((doc) => {
@@ -99,7 +100,7 @@ export default ({ navigation }) => {
 
     return unsubscribeStories;
   }, []);
-  
+
   async function downloadImage(userId) {
     const ref = firebase
       .storage()
@@ -186,6 +187,12 @@ export default ({ navigation }) => {
                         storyId,
                         username: author,
                       });
+                      Analytics.logEvent('OpenStoryInformation', {
+                        sender: 'card',
+                        user: auth().currentUser.uid,
+                        screen: 'profile',
+                        purpose: 'Viewing more info on a story',
+                      });
                     }}
                   />
                 );
@@ -210,7 +217,7 @@ export default ({ navigation }) => {
         </View>
       )}
       {loading && (
-        
+
         <View
           style={{
             flex: 1,
@@ -222,7 +229,7 @@ export default ({ navigation }) => {
           {/** TODO Change loading to loading bars */}
           <Image
             source={require("../assets/loading.gif")}
-            style={{ width: 100, height: 100 }}
+            style={{ width: 100, height: 100, alignSelf: "center" }}
           />
         </View>
       )}

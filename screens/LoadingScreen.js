@@ -1,5 +1,6 @@
 import React from "react";
 import { StyleSheet, View,Image , Text } from "react-native";
+import * as Analytics from 'expo-firebase-analytics';
 
 
 export default () => {

@@ -27,7 +27,16 @@
       "package": "com.bookcraft.bookcraft"
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/favicon.png",
+      "config": {
+        "apiKey" : "AIzaSyCpitxa6of07zmFhubpG6AH1o9BcGWI4GQ",
+        "authDomain": "chatbotstories.firebaseapp.com",
+        "projectId": "chatbotstories",
+        "storageBucket": "chatbotstories.appspot.com",
+        "messagingSenderId": "355055867626",
+        "appId": "1:355055867626:web:b192912fd935da751be993",
+        "measurementId": "G-H9MZ3606L3"
+      }
     },
     "plugins": [
       "expo-screen-orientation"

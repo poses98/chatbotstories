@@ -23,6 +23,7 @@ const colorList = [
   "pink",
   "purple",
 ];
+import * as Analytics from 'expo-firebase-analytics';
 
 export default ({ navigation, route }) => {
   const [name, setName] = useState(route.params.characterName || "");

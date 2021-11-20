@@ -17,6 +17,7 @@ import { firestore, auth } from "firebase";
 import GENRES from "../constants/Genres";
 import * as firebase from "firebase";
 import "firebase/storage";
+import * as Analytics from 'expo-firebase-analytics';
 
 const images = {
   terror: require("../assets/terror.jpg"),

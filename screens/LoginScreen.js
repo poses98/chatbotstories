@@ -5,6 +5,7 @@ import LabeledInput from "../components/LabeledInput";
 import Colors from "../constants/Colors";
 import validator from "validator";
 import { auth, firestore } from "firebase"
+import * as Analytics from 'expo-firebase-analytics';
 
 const validateFields = (email, password) => {
     const isValid = {

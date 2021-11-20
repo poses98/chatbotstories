@@ -19,6 +19,7 @@ import { doc, getDoc } from "firebase/firestore";
 import * as ImagePicker from "expo-image-picker";
 import * as firebase from "firebase";
 import "firebase/storage";
+import * as Analytics from 'expo-firebase-analytics';
 
 export default ({ navigation }) => {
   const [hasBeenChanges, setHasBeenChanges] = useState(false);

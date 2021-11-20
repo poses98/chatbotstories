@@ -7,6 +7,9 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { AuthorButtonSelector } from "../components/AuthorButtonSelector";
 import LabeledInput from "../components/LabeledInput";
 import Button from "../components/Button";
+import * as Analytics from 'expo-firebase-analytics';
+
+
 export default ({ navigation, route }) => {
   const [messageBody, setMessageBody] = useState(route.params.messageBody);
   const [sender, setSender] = useState(route.params.sender);

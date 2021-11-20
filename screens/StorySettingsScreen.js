@@ -22,6 +22,7 @@ import { Picker } from "@react-native-picker/picker";
 import Button from "../components/Button";
 import { updateDoc, addDoc } from "../services/collections";
 import { Label } from "../components/Label";
+import * as Analytics from 'expo-firebase-analytics';
 
 export default ({ navigation, route }) => {
   const storyId = route.params.storyId;

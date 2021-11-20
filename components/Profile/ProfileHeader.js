@@ -2,6 +2,7 @@ import * as React from "react";
 import { View, Text, StyleSheet, Image } from "react-native";
 import A from "react-native-a";
 import Button from "../Button";
+import * as Analytics from 'expo-firebase-analytics';
 
 export default ({
   profilePic,
@@ -21,6 +22,11 @@ export default ({
         textStyle={{ fontWeight: "bold" }}
         onPress={() => {
           data.navigation.navigate("ProfileEdit");
+          Analytics.logEvent('EditProfile', {
+            sender: 'card',
+            screen: 'profile',
+            purpose: 'Edit profile button pressed',
+          });
         }}
         buttonStyle={{ marginTop: 10 }}
       />
