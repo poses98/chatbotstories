@@ -18,25 +18,35 @@ export default ({ navigation, route }) => {
   const [readingIndex, setReadingIndex] = useState(0);
   const [finished, setFinished] = useState(false);
   const [nextChapterId, setNextChapterId] = useState("");
+  const [isEnded, setIsEnded] = useState(true)
+
 
   const nextChapter = () => {
     let thisChapterIndex = "";
+    let isFinished = true;
     route.params.chapterList.forEach((element) => {
       if (route.params.chapterId === element.id) {
         console.log("El index de este capitulo es:" + element.index);
         thisChapterIndex = element.index;
       }
-      if (element.index === thisChapterIndex + 1 && element.status === 2) {
+      if (element.index === thisChapterIndex + 1 ) {
         console.log(
           "El siguiente capitulo es: " +
             element.title +
             " con id: " +
             element.id
         );
+        setIsEnded(false)
+        isFinished = false
         setNextChapterId(element.id);
-        updateReadingStoriesFromUser();
+        updateReadingStoriesFromUser(isEnded,element.id);
       }
     });
+    if(isFinished){
+      console.log("Procediendo a terminar la historia")
+      setNextChapterId(null);
+      updateReadingStoriesFromUser(isEnded,null);
+    }
   };
   const readingStoriesRef = firestore()
     .collection("users")
@@ -44,15 +54,17 @@ export default ({ navigation, route }) => {
     .collection("startedStories")
     
 
-  const updateReadingStoriesFromUser = () => {
+  const updateReadingStoriesFromUser = (isEnded,p_nextChapterId) => {
     try {
       updateDoc(readingStoriesRef.doc(route.params.storyId), route.params.storyId, {
-        nextChapterId: nextChapterId,
+        lastChapterId: route.params.chapterId,
+        nextChapterId: p_nextChapterId,
         date: Date.now(),
+        finished: isEnded
       });
     } catch (e) {
-        addDoc(readingStoriesRef,{id:route.params.storyId,nextChapterId: nextChapterId,
-            date: Date.now()});
+        addDoc(readingStoriesRef,{id:route.params.storyId,nextChapterId: p_nextChapterId,
+            date: Date.now(),finished: isEnded,lastChapterId: route.params.chapterId});
     }
   };
 
@@ -126,8 +138,8 @@ export default ({ navigation, route }) => {
       setReadingIndex(readingIndex + 1);
     } else if (messages.length === readingMessages.length) {
       setFinished(true);
-      console.log("Se ha terminado el capitulo: " + finished);
-      console.log(nextChapter());
+      console.log("Se ha terminado el capitulo: " + true);
+      nextChapter()
     }
   };
   return (
@@ -173,8 +185,9 @@ export default ({ navigation, route }) => {
                 textTransform: "uppercase",
               }}
             >
-              - End of the chapter -
+              {isEnded ? "- End of the story -" : "- End of the chapter -"}
             </Text>
+            {!isEnded && (
             <Button
               text="Next chapter"
               buttonStyle={{
@@ -191,6 +204,7 @@ export default ({ navigation, route }) => {
                   })
               }}
             />
+            )}
           </View>
         )}
       </ScrollView>

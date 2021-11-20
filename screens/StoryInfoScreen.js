@@ -28,6 +28,10 @@ export default ({ navigation, route }) => {
   /** STATE OBJECTS */
   const [isSaved, setIsSaved] = useState(false);
   const [loading, setloading] = useState(true);
+  const [loadingMetadata, setLoadingMetadata] = useState(true)
+  const [loadingChapterList, setLoadingChapterList] = useState(true)
+  const [loadingReviewList, setLoadingReviewList] = useState(true)
+  const [loadingStats, setLoadingStats] = useState(true)
   const [data, setdata] = useState({});
   const [storyId, setstoryId] = useState(route.params.storyId || "");
   const [owned, setowned] = useState(false);
@@ -37,6 +41,7 @@ export default ({ navigation, route }) => {
   const authorName = route.params.username;
   const [chapterId, setChapterId] = useState("")
   const [chapterIndex, setChapterIndex] = useState(0)
+  const [ended, setEnded] = useState(false)
 
   //Refs to firestore
   const storyRef = firestore().collection("stories");
@@ -61,7 +66,7 @@ export default ({ navigation, route }) => {
             if (doc.data().author === auth().currentUser.uid) {
               setowned(true);
             }
-            setloading(false);
+            setLoadingMetadata(false)
           } else {
             // doc.data() will be undefined in this case
             console.log("No such document! (METADATA)");
@@ -74,6 +79,7 @@ export default ({ navigation, route }) => {
       console.log("No storyId associated");
       setnotloaded(true);
       setloading(false);
+      setLoadingMetadata(false)
     }
   }, []);
   /** Getting the stats of the story */
@@ -88,7 +94,7 @@ export default ({ navigation, route }) => {
             setstats(doc.data());
             // UPDATE VIEW WILL BE IN START READING BUTTON (AD WILL BE SHOWN)
             // statsRef.doc(storyId).update({ views: doc.data().views + 1 })
-            setloading(false);
+            setLoadingStats(false)
           } else {
             // doc.data() will be undefined in this case
             console.log("No such document! (STATS)");
@@ -155,7 +161,7 @@ export default ({ navigation, route }) => {
     return (
       <View style={{ flexDirection: "row" }}>
         {/** save story button */}
-        {!notloaded && !loading && (
+        {!notloaded && !loadingChapterList && !loadingMetadata && !loadingStats && (
           <TouchableOpacity
             onPress={() => {
               setIsSaved(!isSaved);
@@ -186,15 +192,9 @@ export default ({ navigation, route }) => {
           </TouchableOpacity>
         )}
         {/**Only render if it's owner*/}
-        {owned && !notloaded && !loading && (
+        {owned && !notloaded && !loadingChapterList && !loadingMetadata && !loadingStats && (
           <TouchableOpacity
             onPress={() => {
-              /**TODO setEditMode 
-              navigation.dispatch(
-                StackActions.replace("StoryCreate", {
-                  storyId: storyId,
-                })
-              );*/
               navigation.navigate("StorySettings", { storyId: storyId })
             }}
             style={{ paddingRight: 8 }}
@@ -268,9 +268,44 @@ export default ({ navigation, route }) => {
         .then((doc) => {
           if (doc.exists) {
             setChapterId(doc.data().nextChapterId)
+            onSnapshot(
+              chapterListRef,
+              (newLists) => {
+                let i = 0;
+                newLists.forEach(element => {
+                  console.log("%s %s i=%d", element.id, doc.data().nextChapterId, i)
+                  element.index = i;
+                  const _i = i
+                  i++
+                  if (element.id === doc.data().nextChapterId && !(doc.data().nextChapterId === null)) {
+                    setChapterIndex(_i)
+                    console.log("chapter index set to: " + _i)
+                  } else if (doc.data().nextChapterId === null || doc.data().finished) {
+                    setChapterIndex(doc.data().lastChapterId)
+                    setEnded(true)
+                    console.log("chapter index set to: " + doc.data().lastChapterId)
+                  }
+                });
+                setLoadingChapterList(false)
+                setChapterList(newLists)
+              },
+              {
+                sort: (a, b) => {
+                  if (a.index < b.index) {
+                    return -1;
+                  }
+
+                  if (a.index > b.index) {
+                    return 1;
+                  }
+
+                  return 0;
+                },
+              }
+            );
             console.log("Story has been started by the user and left on chapter: " + doc.data().nextChapterId);
           } else {
-            // doc.data() will be undefined in this case
+            setLoadingChapterList(false)
           }
         })
         .catch((error) => {
@@ -295,10 +330,6 @@ export default ({ navigation, route }) => {
         newLists.forEach(element => {
           element.index = i;
           i++
-          if (element.id === chapterId) {
-            setChapterIndex(element.index)
-            console.log("chapter index set to: " + chapterIndex)
-          }
         });
         setChapterList(newLists)
       },
@@ -316,8 +347,9 @@ export default ({ navigation, route }) => {
         },
       }
     );
-  }, []);
-  
+
+  }, [])
+
   /**Review list */
   const [reviewList, setReviewList] = useState([])
   const reviewListRef = firestore()
@@ -329,6 +361,8 @@ export default ({ navigation, route }) => {
       reviewListRef,
       (newLists) => {
         setReviewList(newLists)
+        setLoadingReviewList(false)
+        console.log("Review: %s",reviewList[0])
       },
       {
         sort: (a, b) => {
@@ -347,7 +381,7 @@ export default ({ navigation, route }) => {
   }, []);
   return (
     <ScrollView style={styles.container}>
-      {!loading && !notloaded && (
+      {!loadingChapterList && !loadingMetadata && !loadingStats && !notloaded && (
         <View>
           {/**HEADER */}
           <ImageBackground
@@ -389,7 +423,7 @@ export default ({ navigation, route }) => {
               <Text style={styles.storyDescription}>"{data.description}"</Text>
               {/** CONTINUE/START READING BUTTON */}
               <Button
-                text={(chapterId === "") ? "Start reading" : "Continue reading"}
+                text={(chapterId === "") ? "Start reading" : ended ? "Read again" : "Continue reading"}
                 textStyle={{ fontWeight: "bold", color: Colors.lightGray }}
                 onPress={() => {
                   //TODO admob
@@ -496,6 +530,7 @@ export default ({ navigation, route }) => {
                     onDelete={() => removeItemFromLists(id)}
                     index={index}
                     currentIndex={chapterIndex}
+                    finished={ended}
                   />
                 );
               }}
@@ -508,7 +543,7 @@ export default ({ navigation, route }) => {
 
         </View>
       )}
-      {!loading && notloaded && (
+      {!loadingChapterList && !loadingMetadata && !loadingStats && notloaded && (
         <View
           style={{
             alignItems: "center",
@@ -523,7 +558,7 @@ export default ({ navigation, route }) => {
           <Text> Try again later</Text>
         </View>
       )}
-      {loading && (
+      {loadingChapterList && loadingMetadata && loadingStats && loading && (
         <View
           style={{
             flex: 1,

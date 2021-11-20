@@ -87,16 +87,12 @@ export default ({ route, navigation }) => {
         textStyle={{ fontWeight: "bold" }}
         onPress={() => {
           let validation = true;
-          if (nameField.text.length === 0) {
+          if (nameField.text.length < 3) {
             validation = false;
-            nameField.errorMessage = "Title can't be empty!";
+            nameField.errorMessage = "Title must have at least 3 characters";
             setnameField({ ...nameField });
           }
-          if (descriptionField.text.length === 0) {
-            validation = false;
-            descriptionField.errorMessage = "Description can't be empty!";
-            setdescriptionField({ ...descriptionField });
-          }
+         
           if (validation) {
             const data = {
               title: nameField.text,

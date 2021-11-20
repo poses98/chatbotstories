@@ -5,12 +5,20 @@ import {
   TouchableOpacity,
 } from "react-native";
 import Colors from "../constants/Colors";
-export const ChapterItem = ({ title, description, index, onPress, id, currentIndex }) => {
-  console.log(title + ":" + currentIndex < index)
+import Ionicons from "@expo/vector-icons/Ionicons";
+export const ChapterItem = ({ title, description, index, onPress, id, currentIndex, finished }) => {
+
   return (
     <TouchableOpacity onPress={onPress} style={styles.settingsButton} disabled={currentIndex < index}>
-      <Text style={[styles.numberText, { color: currentIndex < index ? Colors.lightGray : Colors.black }]}>{index + 1}</Text>
-      <Text style={[styles.buttonText, { color: currentIndex < index ? Colors.lightGray : Colors.black, textDecorationLine: currentIndex > index ? "line-through" : "none"}]}>{title}</Text>
+      {(currentIndex >= index) || (index === 0) || finished ? (
+        <Text style={[styles.numberText, { color: currentIndex < index ? Colors.lightGray : Colors.black }]}>{index + 1}</Text>
+      ) : (
+        <Ionicons name="lock-closed-outline" size={12} style={{ color: Colors.red }} />
+      )}
+      <Text style={[styles.buttonText, { color: currentIndex < index ? Colors.gray : Colors.black}]}>{title}</Text>
+      {(currentIndex > index) || finished && (
+      <Ionicons name="checkmark-outline" size={17} style={{ color: Colors.green, marginLeft:5 }}/>
+      )}
     </TouchableOpacity>
   );
 };
