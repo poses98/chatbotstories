@@ -127,20 +127,6 @@ export default ({ route, navigation }) => {
           views: 0,
           likes: 0,
         });
-        //Adding story to the respecting category
-        categoryRef
-          .doc(`${data.categoryMain}`)
-          .collection("stories")
-          .doc(docRef.id)
-          .set({ id: false });
-        //if story is intereactive adding it to the interactive category
-        if (interactive) {
-          categoryRef
-            .doc("i")
-            .collection("stories")
-            .doc(docRef.id)
-            .set({ id: false });
-        }
         console.log("Document written with ID: ", docRef.id);
         //Creating reference to the story in user's collection
         firestore()
@@ -171,60 +157,19 @@ export default ({ route, navigation }) => {
    */
   const updateStory = (data) => {
     data.storyId = storyId;
-    setdata({ ...data });
-    updateDoc(storyRef, storyId, data);
-    console.log("old category:", oldCategory);
-    console.log("new category:", categoryMain);
-    //checking if the category of the story has changed
-    if (oldCategory != data.categoryMain) {
-      console.log("proceeding to delete old category");
-      const categoryRef = firestore().collection("storyCategories");
-      //Adding story to the respecting category
-      categoryRef
-        .doc(`${data.categoryMain}`)
-        .collection("stories")
-        .doc(storyId)
-        .set({ id: false });
-      categoryRef
-        .doc(`${oldCategory}`)
-        .collection("stories")
-        .doc(storyId)
-        .delete();
-    }
-    //checking if the interactivity of the story has changed
-    if (oldInteractive != data.interactive) {
-      console.log(
-        "interactivity has changed, proceeding to make changes on the db"
-      );
-      const categoryRef = firestore().collection("storyCategories");
-      //if the new interactivity is true it means that we just need to add
-      //the story to the interactive category ("i"). Otherwise we need to delete
-      //it from that same category.
-      if (data.interactive) {
-        categoryRef
-          .doc("i")
-          .collection("stories")
-          .doc(storyId)
-          .set({ id: false });
-      } else if (!data.interactive) {
-        categoryRef.doc("i").collection("stories").doc(storyId).delete();
-      } else {
-        console.log("Unexpected input.");
-      }
-    }
-    //Creating reference to the story in user's collection
-    firestore()
+    const userStoryRef = firestore()
       .collection("users")
       .doc(auth().currentUser.uid)
       .collection("stories")
-      .doc(storyId)
-      .set({ date: data.date })
-      .then(() => {
-        navigation.dispatch(CommonActions.goBack());
-      })
-      .catch((error) => {
-        console.error("Error adding document: ", error);
-      });
+    setdata({ ...data });
+    try{
+    updateDoc(storyRef, storyId, data);
+    updateDoc(userStoryRef, storyId, { date: data.date })
+    }catch(e){
+      console.log(e)
+    }
+    navigation.dispatch(CommonActions.goBack());
+
   };
   /** GENRE BUBBLE TEMPLATE */
   const GenreBubble = ({ image, verboseName, genreKey }) => {
@@ -250,8 +195,6 @@ export default ({ route, navigation }) => {
     );
   };
 
-  /**TODO SPAWN MEMBER INPUTS */
-
   return (
     <ScrollView style={styles.container}>
       {!loading && !notloaded && (
@@ -261,7 +204,7 @@ export default ({ route, navigation }) => {
             label="Name"
             text={nameField.text}
             onChangeText={(text) => {
-              setnameField({ text });
+                setnameField({ text }); 
             }}
             errorMessage={nameField.errorMessage}
             placeholder="The perfect name for your story"
