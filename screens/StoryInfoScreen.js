@@ -470,7 +470,7 @@ export default ({ navigation, route }) => {
               flex: 1,
               alignItems: "center",
               marginVertical: 10,
-              paddingLeft: 10,
+              marginHorizontal:15
             }}
           >
             {/**LIKE BUTTON */}
@@ -517,7 +517,7 @@ export default ({ navigation, route }) => {
             </View>
             {/** DATE */}
             <View
-              style={{ flex: 1, alignItems: "flex-end", marginHorizontal: 10 }}
+              style={{ flex: 1, alignItems: "flex-end"}}
             >
               <Text>
                 {day} {MONTHS[month]} {year}
@@ -527,9 +527,9 @@ export default ({ navigation, route }) => {
 
           {/**Chapter list */}
           <Text
-            style={{ marginHorizontal: 15, fontSize: 20, color: Colors.gray }}
+            style={{ marginHorizontal: 15, fontSize: 15, color: Colors.gray, textTransform:"uppercase" }}
           >Chapter list</Text>
-          <View style={{ maxHeight: 250, minHeight: 200, marginHorizontal: 15, borderWidth: 1, borderColor:Colors.black }}>
+          <View style={{ maxHeight: 250, minHeight: 200, marginHorizontal: 15, borderWidth: 1, borderColor:Colors.black, borderRadius:10 }}>
             <FlatList
               data={chapterList}
               renderItem={({ item: { title, description, id, index } }) => {
@@ -552,6 +552,7 @@ export default ({ navigation, route }) => {
                     currentIndex={chapterIndex}
                     finished={ended}
                     list={false}
+
                   />
                 );
               }}
@@ -559,7 +560,7 @@ export default ({ navigation, route }) => {
           </View>
           {/**Reviews */}
           <Text
-            style={{ marginHorizontal: 15, fontSize: 20, color: Colors.gray }}
+            style={{ marginHorizontal: 15,marginVertical:15, fontSize: 15, color: Colors.gray, textTransform:"uppercase" }}
           >Reviews</Text>
 
         </View>
@@ -647,6 +648,5 @@ const styles = StyleSheet.create({
   storyStats: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 5,
   },
 });
