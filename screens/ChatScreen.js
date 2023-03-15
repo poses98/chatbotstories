@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef, useLayoutEffect } from "react";
-import { moderateScale } from "react-native-size-matters";
+import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
+import { moderateScale } from 'react-native-size-matters';
 import {
   StyleSheet,
   View,
@@ -8,42 +8,42 @@ import {
   KeyboardAvoidingView,
   DEVICE_WIDTH,
   Alert,
-} from "react-native";
-import Colors from "../constants/Colors";
-import Ionicons from "@expo/vector-icons/Ionicons";
+} from 'react-native';
+import Colors from '../constants/Colors';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import {
   onSnapshot,
   addDoc,
   removeDoc,
   updateDoc,
-} from "../services/collections";
-import { firestore, auth } from "firebase";
-import { ScrollView, TextInput } from "react-native-gesture-handler";
-import { MessageBubble } from "../components/MessageBubble";
-import { AuthorButtonSelector } from "../components/AuthorButtonSelector";
-import Swipeable from "react-native-swipeable";
+} from '../services/collections';
+import { firestore, auth } from '@react-native-firebase/app';
+import { ScrollView, TextInput } from 'react-native-gesture-handler';
+import { MessageBubble } from '../components/MessageBubble';
+import { AuthorButtonSelector } from '../components/AuthorButtonSelector';
+import Swipeable from 'react-native-swipeable';
 import * as Analytics from 'expo-firebase-analytics';
 
 export default ({ navigation, route }) => {
   const [messages, setMessages] = useState([]);
   const [characterList, setCharacterList] = useState([]);
-  const [senderId, setSenderId] = useState("");
-  const [messageEdit, setMessageEdit] = useState("");
-  const [messageEditId, setMessageEditId] = useState("");
+  const [senderId, setSenderId] = useState('');
+  const [messageEdit, setMessageEdit] = useState('');
+  const [messageEditId, setMessageEditId] = useState('');
   const [messageEditIndex, setMessageEditIndex] = useState(0);
   const [messageEditMode, setMessageEditMode] = useState(false);
   const [canBeMain, setCanBeMain] = useState(false);
   /**Firestore references */
   const characterListRef = firestore()
-    .collection("stories")
+    .collection('stories')
     .doc(route.params.storyId)
-    .collection("characters");
+    .collection('characters');
   const messageListRef = firestore()
-    .collection("stories")
+    .collection('stories')
     .doc(route.params.storyId)
-    .collection("chapters")
+    .collection('chapters')
     .doc(route.params.chapterId)
-    .collection("messages");
+    .collection('messages');
 
   const scrollViewRef = useRef();
 
@@ -123,16 +123,16 @@ export default ({ navigation, route }) => {
    */
   const changesWillNotBeSavedAlert = (id) =>
     Alert.alert(
-      "This action cannot be undone",
-      "Are you sure?",
+      'This action cannot be undone',
+      'Are you sure?',
       [
         {
-          text: "Cancel",
-          onPress: () => console.log("Cancel Pressed"),
-          style: "cancel",
+          text: 'Cancel',
+          onPress: () => console.log('Cancel Pressed'),
+          style: 'cancel',
         },
         {
-          text: "Delete",
+          text: 'Delete',
           onPress: () => removeMessage(id),
         },
       ],
@@ -163,7 +163,7 @@ export default ({ navigation, route }) => {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#fafafa" }}>
+    <View style={{ flex: 1, backgroundColor: '#fafafa' }}>
       {/**MESSAGE SCROLLVIEW */}
       <KeyboardAvoidingView style={{ marginBottom: 100 }}>
         <ScrollView
@@ -172,7 +172,6 @@ export default ({ navigation, route }) => {
             scrollViewRef.current.scrollToEnd({ animated: true })
           }
         >
-
           <FlatList
             data={messages}
             keyExtractor={(item) => item.id.toString()}
@@ -183,20 +182,20 @@ export default ({ navigation, route }) => {
                     <TouchableOpacity
                       style={{
                         backgroundColor: Colors.orange,
-                        justifyContent: "center",
+                        justifyContent: 'center',
                         width: 45,
                         height: 45,
                         borderRadius: 15,
                         marginHorizontal: 0,
                       }}
                       onPress={() => {
-                        navigation.navigate("MessageEdit", {
+                        navigation.navigate('MessageEdit', {
                           messageBody: messageBody,
                           sender: sender,
                           id: id,
                           index: index,
                           saveChanges: updateMessage,
-                          characterList: characterList
+                          characterList: characterList,
                         });
                         Analytics.logEvent('EditMessageInChat', {
                           sender: 'swipeable button',
@@ -210,32 +209,33 @@ export default ({ navigation, route }) => {
                       <Ionicons
                         name="pencil-outline"
                         size={26}
-                        style={{ alignSelf: "center", color: "white" }}
+                        style={{ alignSelf: 'center', color: 'white' }}
                       />
                     </TouchableOpacity>,
                     <TouchableOpacity
                       style={{
                         backgroundColor: Colors.red,
-                        justifyContent: "center",
+                        justifyContent: 'center',
                         width: 45,
                         height: 45,
                         borderRadius: 15,
                       }}
                       onPress={() => {
-                        changesWillNotBeSavedAlert({ id })
+                        changesWillNotBeSavedAlert({ id });
                         Analytics.logEvent('DeleteMessageInChat', {
                           sender: 'swipeable button',
                           user: auth().currentUser.uid,
                           story: route.params.storyId,
                           screen: 'chatScreen',
-                          purpose: 'Pressed swipeable button to delete a message',
+                          purpose:
+                            'Pressed swipeable button to delete a message',
                         });
                       }}
                     >
                       <Ionicons
                         name="trash-bin-outline"
                         size={26}
-                        style={{ alignSelf: "center", color: "white" }}
+                        style={{ alignSelf: 'center', color: 'white' }}
                       />
                     </TouchableOpacity>,
                   ]}
@@ -256,9 +256,9 @@ export default ({ navigation, route }) => {
         {/**AUTHOR SELECTOR */}
         <View
           style={{
-            flexDirection: "row",
+            flexDirection: 'row',
             flex: 1,
-            alignItems: "center",
+            alignItems: 'center',
             paddingBottom: 7,
           }}
         >
@@ -279,7 +279,7 @@ export default ({ navigation, route }) => {
                     setSenderId(id);
                   }}
                   onLongPress={() =>
-                    navigation.navigate("CharacterCreation", {
+                    navigation.navigate('CharacterCreation', {
                       saveChanges: updateCharacterList,
                       characterName: name,
                       characterColor: color,
@@ -296,7 +296,7 @@ export default ({ navigation, route }) => {
 
           <TouchableOpacity
             onPress={() => {
-              navigation.navigate("CharacterCreation", {
+              navigation.navigate('CharacterCreation', {
                 saveChanges: addCharacterToList,
                 canBeMain: getCanBeMain(),
                 isMain: false,
@@ -307,27 +307,27 @@ export default ({ navigation, route }) => {
           </TouchableOpacity>
         </View>
         {/**TEXT INPUT */}
-        <View style={{ flexDirection: "row", flex: 1 }}>
+        <View style={{ flexDirection: 'row', flex: 1 }}>
           <TextInput
             style={styles.messageInput}
             value={messageEdit}
             onChangeText={(text) => {
               setMessageEdit(text);
             }}
-            placeholder={"Message"}
+            placeholder={'Message'}
             multiline={true}
           />
           <TouchableOpacity
             style={styles.sendButton}
             onPress={() => {
-              if (messageEdit.length > 0 && !(senderId === "")) {
-                console.log("MessageId:" + messageEditId);
-                if (messageEditId === "") {
+              if (messageEdit.length > 0 && !(senderId === '')) {
+                console.log('MessageId:' + messageEditId);
+                if (messageEditId === '') {
                   addMessageToList({
                     messageBody: messageEdit,
                     sender: senderId,
                   });
-                  setMessageEdit("");
+                  setMessageEdit('');
                 } else {
                   updateMessage({
                     id: messageEditId,
@@ -335,17 +335,17 @@ export default ({ navigation, route }) => {
                     messageBody: messageEdit,
                     index: messageEditIndex,
                   });
-                  setMessageEdit("");
-                  setMessageEditId("");
+                  setMessageEdit('');
+                  setMessageEditId('');
                   setMessageEditIndex(0);
                   setMessageEditMode(false);
                 }
-                setMessageEdit("");
+                setMessageEdit('');
               }
             }}
           >
             <Ionicons
-              name={messageEditId === "" ? "send-outline" : "save-outline"}
+              name={messageEditId === '' ? 'send-outline' : 'save-outline'}
               size={moderateScale(25, 1)}
             />
           </TouchableOpacity>
@@ -357,36 +357,36 @@ export default ({ navigation, route }) => {
 
 const styles = StyleSheet.create({
   text: {
-    color: "white",
-    fontWeight: "bold",
-    backgroundColor: "transparent",
+    color: 'white',
+    fontWeight: 'bold',
+    backgroundColor: 'transparent',
     paddingLeft: 25,
   },
   input: {
-    backgroundColor: "rgba(255, 255, 255, 0.4)",
+    backgroundColor: 'rgba(255, 255, 255, 0.4)',
     width: DEVICE_WIDTH,
     height: 40,
-    color: "#ffffff",
+    color: '#ffffff',
   },
   image: {
     width: 40,
     height: 40,
   },
   typeBar: {
-    position: "absolute",
+    position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
-    flexDirection: "column",
+    flexDirection: 'column',
     flex: 0.2,
-    justifyContent: "space-around",
+    justifyContent: 'space-around',
     marginHorizontal: 10,
     marginBottom: 0,
-    backgroundColor: "#fafafa",
+    backgroundColor: '#fafafa',
   },
   sendButton: {
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
     padding: 0,
     borderWidth: 0,
     borderRadius: 50,
@@ -394,10 +394,10 @@ const styles = StyleSheet.create({
     marginLeft: 5,
   },
   messageInput: {
-    backgroundColor: "#c4c4c4dd",
+    backgroundColor: '#c4c4c4dd',
     flex: 1,
     padding: 8,
     borderRadius: 20,
     maxHeight: 100,
-  }
+  },
 });

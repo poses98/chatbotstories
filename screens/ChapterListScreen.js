@@ -1,25 +1,24 @@
-import React, { useState, useLayoutEffect, useEffect } from "react";
+import React, { useState, useLayoutEffect, useEffect } from 'react';
 import {
   StyleSheet,
   Text,
   View,
   TouchableOpacity,
   FlatList,
-} from "react-native";
-import Colors from "../constants/Colors";
-import Ionicons from "@expo/vector-icons/Ionicons";
+} from 'react-native';
+import Colors from '../constants/Colors';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import {
   onSnapshot,
   addDoc,
   removeDoc,
   updateDoc,
-} from "../services/collections";
-import { firestore, auth } from "firebase";
-import { ScrollView } from "react-native-gesture-handler";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { ChapterItem } from "../components/ChapterItem";
+} from '../services/collections';
+import { firestore, auth } from '@react-native-firebase/app';
+import { ScrollView } from 'react-native-gesture-handler';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { ChapterItem } from '../components/ChapterItem';
 import * as Analytics from 'expo-firebase-analytics';
-
 
 /**
  * This function renders the right icon in the stack bar and
@@ -27,10 +26,10 @@ import * as Analytics from 'expo-firebase-analytics';
  */
 const renderStackBarIconRight = (navigation, addItemToLists) => {
   return (
-    <View style={{ flexDirection: "row" }}>
+    <View style={{ flexDirection: 'row' }}>
       <TouchableOpacity
         onPress={() => {
-          navigation.navigate("ChapterDetails", {
+          navigation.navigate('ChapterDetails', {
             saveChanges: addItemToLists,
           });
           Analytics.logEvent('EditChapterChat', {
@@ -52,20 +51,20 @@ export default ({ navigation, route }) => {
   const [newItem, setNewItem] = useState();
   const [chapterList, setChapterList] = useState([]);
   const chapterListRef = firestore()
-    .collection("stories")
+    .collection('stories')
     .doc(route.params.storyId)
-    .collection("chapters");
+    .collection('chapters');
 
   useEffect(() => {
     onSnapshot(
       chapterListRef,
       (newLists) => {
         let i = 0;
-        newLists.forEach(element => {
+        newLists.forEach((element) => {
           element.index = i;
-          i++
+          i++;
         });
-        setChapterList(newLists)
+        setChapterList(newLists);
       },
       {
         sort: (a, b) => {
@@ -129,12 +128,12 @@ export default ({ navigation, route }) => {
     <View style={styles.container}>
       <FlatList
         data={chapterList}
-        renderItem={({ item: { title, description, id,index } }) => {
+        renderItem={({ item: { title, description, id, index } }) => {
           return (
             <ChapterItem
               title={title}
               onPress={() => {
-                navigation.navigate("Chat", {
+                navigation.navigate('Chat', {
                   chapterId: id,
                   storyId: route.params.storyId,
                   saveChanges: addItemToLists,
@@ -157,16 +156,16 @@ export default ({ navigation, route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "white",
+    backgroundColor: 'white',
   },
   icon: {
     padding: 5,
     fontSize: 32,
-    color: "white",
+    color: 'white',
   },
   buttonText: {
     fontSize: 17,
-    fontWeight: "normal",
+    fontWeight: 'normal',
     paddingLeft: 15,
   },
   settingsButton: {
@@ -175,12 +174,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     fontSize: 20,
     marginVertical: 5,
-    flexDirection: "row",
-    justifyContent: "flex-start",
-    alignItems: "center",
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
   },
-  numberText:{
+  numberText: {
     fontSize: 14,
-    color: Colors.gray
-  }
+    color: Colors.gray,
+  },
 });

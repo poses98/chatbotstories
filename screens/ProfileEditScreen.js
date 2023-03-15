@@ -1,4 +1,4 @@
-import React, { useState, useLayoutEffect, useEffect } from "react";
+import React, { useState, useLayoutEffect, useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,32 +7,30 @@ import {
   TouchableOpacity,
   ScrollView,
   Alert,
-} from "react-native";
-import { CommonActions } from "@react-navigation/native";
-import Colors from "../constants/Colors";
-import A from "react-native-a";
-import LabeledInput from "../components/LabeledInput";
-import Ionicons from "@expo/vector-icons/Ionicons";
-import { firestore, auth, storage } from "firebase";
-import { updateDoc, removeDoc } from "../services/collections";
-import { doc, getDoc } from "firebase/firestore";
-import * as ImagePicker from "expo-image-picker";
-import * as firebase from "firebase";
-import "firebase/storage";
+} from 'react-native';
+import { CommonActions } from '@react-navigation/native';
+import Colors from '../constants/Colors';
+import A from 'react-native-a';
+import LabeledInput from '../components/LabeledInput';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import { firestore, auth, storage } from '@react-native-firebase/app';
+import { updateDoc, removeDoc } from '../services/collections';
+import * as ImagePicker from 'expo-image-picker';
+import * as firebase from '@react-native-firebase/app';
 import * as Analytics from 'expo-firebase-analytics';
 
 export default ({ navigation }) => {
   const [hasBeenChanges, setHasBeenChanges] = useState(false);
   const [data, setdata] = useState({
     username: {
-      errorMessage: "",
+      errorMessage: '',
     },
   });
-  const [errorMessage, seterrorMessage] = useState("");
+  const [errorMessage, seterrorMessage] = useState('');
   const [loading, setloading] = useState(true);
-  const [oldUsername, setoldUsername] = useState("");
-  const docRef = firestore().collection("users");
-  const userRef = firestore().collection("usernames");
+  const [oldUsername, setoldUsername] = useState('');
+  const docRef = firestore().collection('users');
+  const userRef = firestore().collection('usernames');
   /**
    * Getting the user data to show in the form
    */
@@ -42,17 +40,17 @@ export default ({ navigation }) => {
       .get()
       .then((doc) => {
         if (doc.exists) {
-          console.log("Document loaded");
+          console.log('Document loaded');
           setoldUsername(doc.data().username);
           setdata(doc.data());
           downloadImage(auth().currentUser.uid);
         } else {
           // doc.data() will be undefined in this case
-          console.log("No such document!");
+          console.log('No such document!');
         }
       })
       .catch((error) => {
-        console.log("Error getting document:", error);
+        console.log('Error getting document:', error);
       });
   }, []);
   /**
@@ -73,10 +71,10 @@ export default ({ navigation }) => {
    */
   const renderStackBarIconRight = () => {
     return (
-      <View style={{ flexDirection: "row" }}>
+      <View style={{ flexDirection: 'row' }}>
         <TouchableOpacity
           onPress={() => {
-            data.description = data.description.replace(/\r?\n|\r/, "").trim();
+            data.description = data.description.replace(/\r?\n|\r/, '').trim();
             setdata({ ...data });
             userRef
               .doc(data.username.toLowerCase())
@@ -97,26 +95,25 @@ export default ({ navigation }) => {
                 if (available) {
                   console.log(`deleting last username: ${oldUsername}`);
                   removeDoc(userRef, oldUsername.toLowerCase());
-                  console.log("username available, updating object...");
+                  console.log('username available, updating object...');
                   firestore()
-                    .collection("usernames")
+                    .collection('usernames')
                     .doc(data.username.toLowerCase())
                     .set({ uid: auth().currentUser.uid });
 
-                  
                   updateDoc(docRef, auth().currentUser.uid, data);
-                  
+
                   uploadImage();
                 } else {
                   console.log(
-                    "USERNAME NOT AVAILABLE. PROCEEDING TO HANDLE THIS."
+                    'USERNAME NOT AVAILABLE. PROCEEDING TO HANDLE THIS.'
                   );
 
-                  seterrorMessage("Username is not available 💔");
+                  seterrorMessage('Username is not available 💔');
                 }
               })
               .catch((error) => {
-                console.log("Error getting document:", error);
+                console.log('Error getting document:', error);
               });
           }}
           style={{ paddingRight: 5 }}
@@ -131,7 +128,7 @@ export default ({ navigation }) => {
    */
   const backButtonProfileEdit = () => {
     return (
-      <View style={{ flexDirection: "row" }}>
+      <View style={{ flexDirection: 'row' }}>
         <TouchableOpacity
           onPress={() => {
             if (hasBeenChanges) {
@@ -152,16 +149,16 @@ export default ({ navigation }) => {
    */
   const changesWillNotBeSavedAlert = () =>
     Alert.alert(
-      "Changes will not be saved",
-      "Are you sure?",
+      'Changes will not be saved',
+      'Are you sure?',
       [
         {
-          text: "Cancel",
-          onPress: () => console.log("Cancel Pressed"),
-          style: "cancel",
+          text: 'Cancel',
+          onPress: () => console.log('Cancel Pressed'),
+          style: 'cancel',
         },
         {
-          text: "OK",
+          text: 'OK',
           onPress: () => {
             navigation.dispatch(CommonActions.goBack());
           },
@@ -174,11 +171,11 @@ export default ({ navigation }) => {
   //Checking for the media permission
   useEffect(() => {
     (async () => {
-      if (Platform.OS !== "web") {
+      if (Platform.OS !== 'web') {
         const { status } =
           await ImagePicker.requestMediaLibraryPermissionsAsync();
-        if (status !== "granted") {
-          alert("Sorry, we need camera roll permissions to make this work!");
+        if (status !== 'granted') {
+          alert('Sorry, we need camera roll permissions to make this work!');
         }
       }
     })();
@@ -216,24 +213,24 @@ export default ({ navigation }) => {
       };
       xhr.onerror = function (e) {
         console.log(e);
-        reject(new TypeError("Network request failed"));
+        reject(new TypeError('Network request failed'));
       };
-      xhr.responseType = "blob";
-      xhr.open("GET", uri, true);
+      xhr.responseType = 'blob';
+      xhr.open('GET', uri, true);
       xhr.send(null);
     });
 
     const ref = firebase
       .storage()
       .ref()
-      .child("profilePictures/" + name);
+      .child('profilePictures/' + name);
     const snapshot = await ref.put(blob);
 
-    console.log("state: " + snapshot.state);
+    console.log('state: ' + snapshot.state);
     firestore()
-      .collection("users")
+      .collection('users')
       .doc(auth().currentUser.uid)
-      .set({ lastUpdate: Date.now() },{merge: true});
+      .set({ lastUpdate: Date.now() }, { merge: true });
     // We're done with the blob, close and release it
     blob.close();
 
@@ -244,7 +241,7 @@ export default ({ navigation }) => {
     const ref = firebase
       .storage()
       .ref()
-      .child("profilePictures/" + userId);
+      .child('profilePictures/' + userId);
 
     await ref
       .getDownloadURL()
@@ -257,25 +254,25 @@ export default ({ navigation }) => {
         // A full list of error codes is available at
         // https://firebase.google.com/docs/storage/web/handle-errors
         switch (error.code) {
-          case "storage/object-not-found":
+          case 'storage/object-not-found':
             console.log("ERROR GETTING IMAGE: Storage doesn't exist");
             break;
 
-          case "storage/unauthorized":
+          case 'storage/unauthorized':
             // User doesn't have permission to access the object
             console.log(
               "ERROR GETTING IMAGE: User doesn't have permission to access the file."
             );
             break;
 
-          case "storage/canceled":
+          case 'storage/canceled':
             // User canceled the upload
-            console.log("ERROR GETTING IMAGE: User cancelled operation");
+            console.log('ERROR GETTING IMAGE: User cancelled operation');
             break;
 
-          case "storage/unknown":
+          case 'storage/unknown':
             // Unknown error occurred, inspect the server response
-            console.log("ERROR GETTING IMAGE: Unkwon error occurred");
+            console.log('ERROR GETTING IMAGE: Unkwon error occurred');
             break;
         }
       });
@@ -289,7 +286,7 @@ export default ({ navigation }) => {
             source={
               image
                 ? { uri: image }
-                : require("../assets/profilepicplaceholder.png")
+                : require('../assets/profilepicplaceholder.png')
             }
           />
           <TouchableOpacity
@@ -310,7 +307,7 @@ export default ({ navigation }) => {
               setdata({ ...data, name: text });
               setHasBeenChanges(true);
             }}
-            autoCompleteType={"name"}
+            autoCompleteType={'name'}
             placeholder="Your name"
             maxLength={30}
             defaultValue={data.name}
@@ -356,7 +353,7 @@ export default ({ navigation }) => {
             multiline={true}
             numberOfLines={6}
             maxHeight={120}
-            inputStyle={{ padding: 7.9, textAlignVertical: "top" }}
+            inputStyle={{ padding: 7.9, textAlignVertical: 'top' }}
           />
         </View>
       )}
@@ -364,13 +361,13 @@ export default ({ navigation }) => {
         <View
           style={{
             flex: 1,
-            backgroundColor: "#fff",
-            justifyContent: "center",
-            alignItems: "center",
+            backgroundColor: '#fff',
+            justifyContent: 'center',
+            alignItems: 'center',
           }}
         >
           <Image
-            source={require("../assets/loading.gif")}
+            source={require('../assets/loading.gif')}
             style={{ width: 100, height: 100 }}
           />
         </View>
@@ -382,18 +379,18 @@ export default ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: '#fff',
   },
   profilePic: {
     width: 90,
     height: 90,
     borderRadius: 50,
-    alignItems: "center",
-    alignSelf: "center",
+    alignItems: 'center',
+    alignSelf: 'center',
     marginVertical: 15,
   },
   changeProfilePicText: {
-    alignSelf: "center",
+    alignSelf: 'center',
     color: Colors.blue,
     fontSize: 16,
     marginBottom: 15,
@@ -403,16 +400,16 @@ const styles = StyleSheet.create({
     fontSize: 24,
   },
   centeredView: {
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
     marginTop: 50,
   },
   modalView: {
-    backgroundColor: "white",
+    backgroundColor: 'white',
     borderRadius: 20,
     padding: 35,
-    alignItems: "center",
-    shadowColor: "#000",
+    alignItems: 'center',
+    shadowColor: '#000',
     shadowOffset: {
       width: 0,
       height: 2,
@@ -423,15 +420,15 @@ const styles = StyleSheet.create({
   },
   infoBox: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   textInfo: {
     fontSize: 14,
     marginTop: 3,
   },
   numberInfo: {
-    fontWeight: "bold",
+    fontWeight: 'bold',
     fontSize: 18,
   },
   bioBox: {
@@ -440,7 +437,7 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
   },
   profileName: {
-    fontWeight: "bold",
+    fontWeight: 'bold',
     fontSize: 15,
   },
   profileWeb: {
@@ -448,7 +445,7 @@ const styles = StyleSheet.create({
   },
   profileDescription: {
     fontSize: 15,
-    justifyContent: "center",
-    alignItems: "stretch",
+    justifyContent: 'center',
+    alignItems: 'stretch',
   },
 });

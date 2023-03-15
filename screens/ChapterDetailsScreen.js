@@ -1,30 +1,29 @@
-import React, { useState } from "react";
-import { StyleSheet, ScrollView } from "react-native";
-import { firestore, auth } from "firebase";
-import Colors from "../constants/Colors";
-import _STATUS_ from "../constants/StoryStatus";
-import LabeledInput from "../components/LabeledInput";
-import Button from "../components/Button";
-import { StatusSelector } from "../components/StatusSelector";
-import { CommonActions } from "@react-navigation/native";
-import * as Analytics from 'expo-firebase-analytics';
+import React, { useState } from 'react';
+import { StyleSheet, ScrollView } from 'react-native';
+import { firestore, auth } from '@react-native-firebase/app';
+import Colors from '../constants/Colors';
+import _STATUS_ from '../constants/StoryStatus';
+import LabeledInput from '../components/LabeledInput';
+import Button from '../components/Button';
+import { StatusSelector } from '../components/StatusSelector';
+import { CommonActions } from '@react-navigation/native';
 
 export default ({ route, navigation }) => {
   const [Owned, setOwned] = useState(false);
   const [Data, setData] = useState([]);
   const [isEditMode, setEditMode] = useState(false);
   const [storyId, setStoryId] = useState(
-    route.params ? route.params.storyId : ""
+    route.params ? route.params.storyId : ''
   );
   const [nameField, setnameField] = useState({
     // story name field
-    errorMessage: "",
-    text: "",
+    errorMessage: '',
+    text: '',
   });
   const [descriptionField, setdescriptionField] = useState({
     // description of the story
-    errorMessage: "",
-    text: "",
+    errorMessage: '',
+    text: '',
   });
   const [memberNumber, setMemberNumber] = useState(2);
   const [index, setIndex] = useState(0);
@@ -33,9 +32,9 @@ export default ({ route, navigation }) => {
     setstatus(value);
   };
   const chaptersRef = firestore()
-    .collection("stories")
+    .collection('stories')
     .doc(storyId)
-    .collection("chapters");
+    .collection('chapters');
 
   /** SEND CHAPTER TO FIRESTORE */
   const createChapter = (data) => {
@@ -72,7 +71,7 @@ export default ({ route, navigation }) => {
         maxHeight={120}
         inputStyle={{
           padding: 7.9,
-          textAlignVertical: "top",
+          textAlignVertical: 'top',
           color: Colors.black,
         }}
       />
@@ -84,8 +83,8 @@ export default ({ route, navigation }) => {
       />
       {/**CREATE CHAPTER BUTTON */}
       <Button
-        text={isEditMode ? "Save" : "Create"}
-        textStyle={{ fontWeight: "bold" }}
+        text={isEditMode ? 'Save' : 'Create'}
+        textStyle={{ fontWeight: 'bold' }}
         onPress={() => {
           let validation = true;
           if (nameField.text.length < 3) {
@@ -96,21 +95,21 @@ export default ({ route, navigation }) => {
               purpose: 'Try to create a chapter with less than 3 chars',
             });
             validation = false;
-            nameField.errorMessage = "Title must have at least 3 characters";
+            nameField.errorMessage = 'Title must have at least 3 characters';
             setnameField({ ...nameField });
           }
-         
+
           if (validation) {
             const data = {
               title: nameField.text,
-              description: descriptionField.text.replace(/(\r\n|\n|\r)/gm, ""),
+              description: descriptionField.text.replace(/(\r\n|\n|\r)/gm, ''),
               lastUpdate: Date.now(),
               author: auth().currentUser.uid,
-              status: status
+              status: status,
             };
-            
+
             if (!isEditMode) {
-              route.params.saveChanges(data)
+              route.params.saveChanges(data);
               navigation.dispatch(CommonActions.goBack());
               Analytics.logEvent('CreateChapter', {
                 sender: 'card',
@@ -128,7 +127,6 @@ export default ({ route, navigation }) => {
               });
             }
           }
-
         }}
         buttonStyle={{
           marginVertical: 40,
@@ -144,7 +142,7 @@ export default ({ route, navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: '#fff',
     paddingTop: 15,
   },
 
@@ -154,23 +152,23 @@ const styles = StyleSheet.create({
     borderRadius: 50,
   },
   genreContainer: {
-    alignItems: "center",
+    alignItems: 'center',
     paddingVertical: 5,
     borderRadius: 50,
   },
   labelContainer: {
     flex: 1,
-    flexDirection: "row",
+    flexDirection: 'row',
     paddingLeft: 15,
     paddingVertical: 10,
-    alignItems: "center",
+    alignItems: 'center',
   },
   genreText: {
     fontSize: 10,
     marginTop: 5,
-    textTransform: "uppercase",
+    textTransform: 'uppercase',
     color: Colors.black,
-    fontWeight: "bold",
+    fontWeight: 'bold',
   },
   genrePicSelected: {
     width: 70,

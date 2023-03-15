@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useState, useEffect } from "react";
+import React, { useLayoutEffect, useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -8,20 +8,20 @@ import {
   TouchableOpacity,
   FlatList,
   Switch,
-} from "react-native";
-import { firestore, auth } from "firebase";
-import { StackActions } from "@react-navigation/native";
+} from 'react-native';
+import { firestore, auth } from '@react-native-firebase/app';
+import { StackActions } from '@react-navigation/native';
 
-import Colors from "../constants/Colors";
-import GENRES from "../constants/Genres";
-import LANGUAGES from "../constants/Languages";
-import _STATUS_ from "../constants/StoryStatus";
-import Ionicons from "@expo/vector-icons/Ionicons";
-import LabeledInput from "../components/LabeledInput";
-import { Picker } from "@react-native-picker/picker";
-import Button from "../components/Button";
-import { updateDoc, addDoc } from "../services/collections";
-import { Label } from "../components/Label";
+import Colors from '../constants/Colors';
+import GENRES from '../constants/Genres';
+import LANGUAGES from '../constants/Languages';
+import _STATUS_ from '../constants/StoryStatus';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import LabeledInput from '../components/LabeledInput';
+import { Picker } from '@react-native-picker/picker';
+import Button from '../components/Button';
+import { updateDoc, addDoc } from '../services/collections';
+import { Label } from '../components/Label';
 import * as Analytics from 'expo-firebase-analytics';
 
 export default ({ navigation, route }) => {
@@ -30,7 +30,7 @@ export default ({ navigation, route }) => {
     <ScrollView style={styles.container}>
       <TouchableOpacity
         onPress={() => {
-          navigation.navigate("StoryCreate", {
+          navigation.navigate('StoryCreate', {
             storyId: storyId,
           });
         }}
@@ -41,7 +41,7 @@ export default ({ navigation, route }) => {
       </TouchableOpacity>
       <TouchableOpacity
         onPress={() => {
-          navigation.navigate("ChapterList", {
+          navigation.navigate('ChapterList', {
             storyId: storyId,
           });
         }}
@@ -57,7 +57,7 @@ export default ({ navigation, route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: '#fff',
     paddingTop: 15,
   },
 
@@ -67,23 +67,23 @@ const styles = StyleSheet.create({
     borderRadius: 50,
   },
   genreContainer: {
-    alignItems: "center",
+    alignItems: 'center',
     paddingVertical: 5,
     borderRadius: 50,
   },
   labelContainer: {
     flex: 1,
-    flexDirection: "row",
+    flexDirection: 'row',
     paddingLeft: 15,
     paddingVertical: 10,
-    alignItems: "center",
+    alignItems: 'center',
   },
   genreText: {
     fontSize: 10,
     marginTop: 5,
-    textTransform: "uppercase",
+    textTransform: 'uppercase',
     color: Colors.black,
-    fontWeight: "bold",
+    fontWeight: 'bold',
   },
   genrePicSelected: {
     width: 70,
@@ -98,13 +98,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     fontSize: 20,
     marginVertical: 5,
-    flexDirection: "row",
-    justifyContent: "flex-start",
-    alignItems: "center",
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
   },
   buttonText: {
     fontSize: 17,
-    fontWeight: "normal",
+    fontWeight: 'normal',
     paddingLeft: 15,
   },
 });

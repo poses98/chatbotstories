@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useState, useEffect } from "react";
+import React, { useLayoutEffect, useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -8,31 +8,30 @@ import {
   TouchableOpacity,
   FlatList,
   Switch,
-} from "react-native";
-import { firestore, auth } from "firebase";
-import { StackActions } from "@react-navigation/native";
-import { CommonActions } from "@react-navigation/native";
-import Colors from "../constants/Colors";
-import GENRES from "../constants/Genres";
-import LANGUAGES from "../constants/Languages";
-import _STATUS_ from "../constants/StoryStatus";
-import Ionicons from "@expo/vector-icons/Ionicons";
-import LabeledInput from "../components/LabeledInput";
-import { Picker } from "@react-native-picker/picker";
-import Button from "../components/Button";
-import { Label } from "../components/Label";
-import { updateDoc, addDoc } from "../services/collections";
-import { StatusSelector } from "../components/StatusSelector";
+} from 'react-native';
+import { StackActions } from '@react-navigation/native';
+import { CommonActions } from '@react-navigation/native';
+import Colors from '../constants/Colors';
+import GENRES from '../constants/Genres';
+import LANGUAGES from '../constants/Languages';
+import _STATUS_ from '../constants/StoryStatus';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import LabeledInput from '../components/LabeledInput';
+import { Picker } from '@react-native-picker/picker';
+import Button from '../components/Button';
+import { Label } from '../components/Label';
+import { updateDoc, addDoc } from '../services/collections';
+import { StatusSelector } from '../components/StatusSelector';
 import * as Analytics from 'expo-firebase-analytics';
 
 export default ({ route, navigation }) => {
   /** STORY ID IN CASE IS UPDATE MODE */
   const [storyId, setStoryId] = useState(
-    route.params ? route.params.storyId : ""
+    route.params ? route.params.storyId : ''
   );
   const [isEditMode, setEditMode] = useState(false);
 
-  navigation.setOptions({ title: storyId ? "Story detail" : "Create story" });
+  navigation.setOptions({ title: storyId ? 'Story detail' : 'Create story' });
 
   /** STATE ATRIBUTTES */
   const [owned, setowned] = useState(false); // owner of the story
@@ -41,16 +40,16 @@ export default ({ route, navigation }) => {
   const [notloaded, setnotloaded] = useState(false); // couldnt load the data
   const [nameField, setnameField] = useState({
     // story name field
-    errorMessage: "",
-    text: "",
+    errorMessage: '',
+    text: '',
   });
   const [categoryMain, setcategoryMain] = useState(0); // category of the story
   const [oldCategory, setOldCategory] = useState(0); // category of the story
 
   const [descriptionField, setdescriptionField] = useState({
     // description of the story
-    errorMessage: "",
-    text: "",
+    errorMessage: '',
+    text: '',
   });
   const [interactive, setinteractive] = useState(false); // interactivity of the story
   const [oldInteractive, setOldInteractive] = useState(false); //check variable for old interactivity
@@ -58,51 +57,13 @@ export default ({ route, navigation }) => {
   const [language, setlanguage] = useState(0); // language of the story
   const [memberNumber, setMemberNumber] = useState(2); //number of the members of the story
 
-  const storyRef = firestore().collection("stories");
-
   const updateStatus = (value) => {
     setstatus(value);
   };
   /** Getting the metadata of the story */
   useEffect(() => {
-    if (storyId != "") {
-      storyRef
-        .doc(storyId)
-        .get()
-        .then((doc) => {
-          if (doc.exists) {
-            console.log("Story loaded: ", doc.data());
-            if (doc.data().author === auth().currentUser.uid) {
-              console.log("edit mode enable");
-              setEditMode(true);
-              console.log("user is owner");
-              setowned(true);
-              console.log("data fetched into state variable:");
-              setdata(doc.data());
-              console.log(data);
-              nameField.text = doc.data().title;
-              setnameField({ ...nameField });
-              descriptionField.text = doc.data().description;
-              setdescriptionField({ ...descriptionField });
-              setcategoryMain(doc.data().categoryMain);
-              setOldCategory(doc.data().categoryMain);
-              setinteractive(doc.data().interactive);
-              setOldInteractive(doc.data().interactive);
-              setlanguage(doc.data().language);
-              setstatus(doc.data().status);
-            } else {
-              setStoryId("");
-            }
-            setloading(false);
-          } else {
-            // doc.data() will be undefined in this case
-            setnotloaded(true);
-            console.log("No such document! (METADATA)");
-          }
-        })
-        .catch((error) => {
-          console.log("Error getting document:", error);
-        });
+    if (storyId != '') {
+      // get story API
     } else {
       setloading(false);
     }
@@ -111,71 +72,11 @@ export default ({ route, navigation }) => {
    *
    * @param {form data}} data
    */
-  const createStory = (data) => {
-    firestore()
-      .collection("stories")
-      .add(data)
-      .then((docRef) => {
-        //Creating storyId field in the story doc
-        firestore()
-          .collection("stories")
-          .doc(docRef.id)
-          .update({ storyId: docRef.id });
-        const statsRef = firestore().collection("storyStats");
-        const categoryRef = firestore().collection("storyCategories");
-        //Creating the story doc in stats collection
-        statsRef.doc(docRef.id).set({
-          views: 0,
-          likes: 0,
-        });
-        console.log("Document written with ID: ", docRef.id);
-        //Creating reference to the story in user's collection
-        firestore()
-          .collection("users")
-          .doc(auth().currentUser.uid)
-          .collection("stories")
-          .doc(docRef.id)
-          .set({ date: data.date })
-          .then(() => {
-            navigation.dispatch(
-              StackActions.replace("StoryInfo", {
-                title: nameField.text,
-                storyId: docRef.id,
-              })
-            );
-          })
-          .catch((error) => {
-            console.error("Error adding document: ", error);
-          });
-      })
-      .catch((error) => {
-        console.error("Error adding document: ", error);
-      });
-  };
-  /**Updates an existing story with the new data provided in the form
-   *
-   * @param {form data} data
-   */
-  const updateStory = (data) => {
-    data.storyId = storyId;
-    const userStoryRef = firestore()
-      .collection("users")
-      .doc(auth().currentUser.uid)
-      .collection("stories")
-    setdata({ ...data });
-    try{
-    updateDoc(storyRef, storyId, data);
-    updateDoc(userStoryRef, storyId, { date: data.date })
-    }catch(e){
-      console.log(e)
-    }
-    navigation.dispatch(CommonActions.goBack());
-
-  };
+  const createStory = (data) => {};
   /** GENRE BUBBLE TEMPLATE */
   const GenreBubble = ({ image, verboseName, genreKey }) => {
     return (
-      <View style={{ flex: 1, flexDirection: "row", marginHorizontal: 10 }}>
+      <View style={{ flex: 1, flexDirection: 'row', marginHorizontal: 10 }}>
         <TouchableOpacity
           style={styles.genreContainer}
           onPress={() => {
@@ -205,7 +106,7 @@ export default ({ route, navigation }) => {
             label="Name"
             text={nameField.text}
             onChangeText={(text) => {
-                setnameField({ text }); 
+              setnameField({ text });
             }}
             errorMessage={nameField.errorMessage}
             placeholder="The perfect name for your story"
@@ -229,7 +130,7 @@ export default ({ route, navigation }) => {
             maxHeight={120}
             inputStyle={{
               padding: 7.9,
-              textAlignVertical: "top",
+              textAlignVertical: 'top',
               color: Colors.black,
             }}
           />
@@ -256,13 +157,12 @@ export default ({ route, navigation }) => {
             <View
               style={{
                 flex: 1,
-                flexDirection: "row",
-                justifyContent: "space-between",
+                flexDirection: 'row',
+                justifyContent: 'space-between',
               }}
             >
               <Button
                 text="Yes"
-                textStyle={{ fontWeight: "bold" }}
                 onPress={() => {
                   setinteractive(true);
                 }}
@@ -271,16 +171,16 @@ export default ({ route, navigation }) => {
                   marginTop: 15,
                   marginHorizontal: 15,
                   height: 45,
-                  backgroundColor: interactive ? Colors.green : "transparent",
-                  borderColor: interactive ? "#fafafa" : Colors.gray,
+                  backgroundColor: interactive ? Colors.green : 'transparent',
+                  borderColor: interactive ? '#fafafa' : Colors.gray,
                 }}
                 textStyle={{
-                  color: interactive ? "#fafafa" : Colors.gray,
+                  color: interactive ? '#fafafa' : Colors.gray,
+                  fontWeight: 'bold',
                 }}
               />
               <Button
                 text="No"
-                textStyle={{ fontWeight: "bold" }}
                 onPress={() => {
                   setinteractive(false);
                 }}
@@ -289,11 +189,12 @@ export default ({ route, navigation }) => {
                   marginTop: 15,
                   marginHorizontal: 15,
                   height: 45,
-                  backgroundColor: !interactive ? Colors.red : "transparent",
-                  borderColor: !interactive ? "#fafafa" : Colors.gray,
+                  backgroundColor: !interactive ? Colors.red : 'transparent',
+                  borderColor: !interactive ? '#fafafa' : Colors.gray,
                 }}
                 textStyle={{
-                  color: !interactive ? "#fafafa" : Colors.gray,
+                  color: !interactive ? '#fafafa' : Colors.gray,
+                  fontWeight: 'bold',
                 }}
               />
             </View>
@@ -307,7 +208,7 @@ export default ({ route, navigation }) => {
             />
           )}
           {/** PICKER FOR LANGUAGE */}
-          <View style={{ flexDirection: "column", marginTop: 15 }}>
+          <View style={{ flexDirection: 'column', marginTop: 15 }}>
             <Label text="Language" icon="list-outline" />
             <Picker
               enabled={true}
@@ -334,8 +235,8 @@ export default ({ route, navigation }) => {
 
           {/** CREATE STORY BUTTON */}
           <Button
-            text={isEditMode ? "Save" : "Create"}
-            textStyle={{ fontWeight: "bold" }}
+            text={isEditMode ? 'Save' : 'Create'}
+            textStyle={{ fontWeight: 'bold' }}
             onPress={() => {
               let validation = true;
               if (nameField.text.length === 0) {
@@ -353,7 +254,7 @@ export default ({ route, navigation }) => {
                   title: nameField.text,
                   description: descriptionField.text.replace(
                     /(\r\n|\n|\r)/gm,
-                    ""
+                    ''
                   ),
                   categoryMain: categoryMain,
                   date: Date.now(),
@@ -365,10 +266,10 @@ export default ({ route, navigation }) => {
                 if (!isEditMode) {
                   //create story
                   createStory(data);
-                  console.log("Creating new story! : " + data);
+                  console.log('Creating new story! : ' + data);
                 } else if (isEditMode) {
-                  updateStory(data);
-                  console.log("Updating an existing story! : " + data);
+                  //update story
+                  console.log('Updating an existing story! : ' + data);
                 }
               }
             }}
@@ -385,13 +286,13 @@ export default ({ route, navigation }) => {
         <View
           style={{
             flex: 1,
-            backgroundColor: "#fff",
-            justifyContent: "center",
-            alignItems: "center",
+            backgroundColor: '#fff',
+            justifyContent: 'center',
+            alignItems: 'center',
           }}
         >
           <Image
-            source={require("../assets/loading.gif")}
+            source={require('../assets/loading.gif')}
             style={{ width: 100, height: 100 }}
           />
         </View>
@@ -403,7 +304,7 @@ export default ({ route, navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: '#fff',
     paddingTop: 15,
   },
 
@@ -413,23 +314,23 @@ const styles = StyleSheet.create({
     borderRadius: 50,
   },
   genreContainer: {
-    alignItems: "center",
+    alignItems: 'center',
     paddingVertical: 5,
     borderRadius: 50,
   },
   labelContainer: {
     flex: 1,
-    flexDirection: "row",
+    flexDirection: 'row',
     paddingLeft: 15,
     paddingVertical: 10,
-    alignItems: "center",
+    alignItems: 'center',
   },
   genreText: {
     fontSize: 10,
     marginTop: 5,
-    textTransform: "uppercase",
+    textTransform: 'uppercase',
     color: Colors.black,
-    fontWeight: "bold",
+    fontWeight: 'bold',
   },
   genrePicSelected: {
     width: 70,
