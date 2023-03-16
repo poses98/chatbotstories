@@ -43,6 +43,12 @@ const StorySchema = new mongoose.Schema({
       },
     ],
   },
+  reviews: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Review',
+    },
+  ],
 });
 
 module.exports = mongoose.model('Story', StorySchema);

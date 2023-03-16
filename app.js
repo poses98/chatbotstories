@@ -20,6 +20,8 @@ const chapterRoutes = require('./routers/chapter');
 const characterRoutes = require('./routers/character');
 const messageRoutes = require('./routers/message');
 const storyRoutes = require('./routers/story');
+const reviewRoutes = require('./routers/review');
+const readStatusRoutes = require('./routers/readstatus');
 
 app.use(`/api/${API_VERSION}`, userRoutes);
 app.use(`/api/${API_VERSION}`, authRoutes);
@@ -27,6 +29,8 @@ app.use(`/api/${API_VERSION}`, chapterRoutes);
 app.use(`/api/${API_VERSION}`, characterRoutes);
 app.use(`/api/${API_VERSION}`, messageRoutes);
 app.use(`/api/${API_VERSION}`, storyRoutes);
+app.use(`/api/${API_VERSION}`, reviewRoutes);
+app.use(`/api/${API_VERSION}`, readStatusRoutes);
 
 const server = http.createServer(app);
 
