@@ -11,9 +11,9 @@ const readStatusSchema = new Schema({
     ref: 'Story',
   },
   finished: Boolean,
-  nextChapterId: mongoose.Schema.Types.ObjectId,
+  nextChapter: mongoose.Schema.Types.ObjectId,
   lastTimeRead: Date,
-  lastChapterReadId: mongoose.Schema.Types.ObjectId,
+  previousChapter: mongoose.Schema.Types.ObjectId,
 });
 
 readStatusSchema.virtual('userObj', {

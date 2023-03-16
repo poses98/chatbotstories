@@ -1,28 +1,35 @@
 const ReadStatus = require('../models/ReadStatus');
+const User = require('../models/User');
 
 // Create a new read status
 const createReadStatus = async (req, res) => {
   try {
-    const {
-      user,
-      story,
-      finished,
-      nextChapterId,
-      lastTimeRead,
-      lastChapterReadId,
-    } = req.body;
+    const { user, story, finished, nextChapter, previousChapter } = req.body;
 
     const readStatus = new ReadStatus({
       user,
       story,
       finished,
-      nextChapterId,
-      lastTimeRead,
-      lastChapterReadId,
+      nextChapter,
+      previousChapter,
     });
 
+    readStatus.lastTimeRead = new Date().toUTCString();
+
     const savedReadStatus = await readStatus.save();
-    return res.status(201).json(savedReadStatus);
+    if (savedReadStatus) {
+      const userRef = await User.findById(user);
+      if (userRef) {
+        userRef.readStatuses.push(savedReadStatus._id);
+        const storedUser = await userRef.save();
+        if (storedUser) return res.status(201).json(savedReadStatus);
+        else return res.status(400).send();
+      } else {
+        return res.status(400).send();
+      }
+    } else {
+      return res.status(400).send();
+    }
   } catch (error) {
     console.error(error);
     return res.status(500).send('Server error');
@@ -65,9 +72,9 @@ const updateReadStatusById = async (req, res) => {
       user,
       story,
       finished,
-      nextChapterId,
+      nextChapter,
       lastTimeRead,
-      lastChapterReadId,
+      previousChapter,
     } = req.body;
 
     const readStatus = await ReadStatus.findById(id);
@@ -78,12 +85,12 @@ const updateReadStatusById = async (req, res) => {
     readStatus.user = user || readStatus.user;
     readStatus.story = story || readStatus.story;
     readStatus.finished = finished ?? readStatus.finished;
-    readStatus.nextChapterId = nextChapterId || readStatus.nextChapterId;
-    readStatus.lastTimeRead = lastTimeRead || readStatus.lastTimeRead;
-    readStatus.lastChapterReadId =
-      lastChapterReadId || readStatus.lastChapterReadId;
+    readStatus.nextChapter = nextChapter || readStatus.nextChapter;
+    readStatus.lastTimeRead = new Date().toUTCString();
+    readStatus.previousChapter = previousChapter || readStatus.previousChapter;
 
     const savedReadStatus = await readStatus.save();
+
     return res.json(savedReadStatus);
   } catch (error) {
     console.error(error);
@@ -95,11 +102,29 @@ const updateReadStatusById = async (req, res) => {
 const deleteReadStatusById = async (req, res) => {
   try {
     const { id } = req.params;
+    const { user } = req.body;
     const readStatus = await ReadStatus.findByIdAndDelete(id);
     if (!readStatus) {
       return res.status(404).send('Read status not found');
     }
-    return res.json({ message: 'Read status deleted successfully' });
+
+    if (readStatus) {
+      const userRef = await User.findById(user);
+      const readStatusIndex = userRef.readStatuses.findIndex(
+        (reviewRef) => reviewRef.toString() === id
+      );
+      if (readStatusIndex !== -1) {
+        userRef.readStatuses.splice(readStatusIndex, 1);
+        const storedUser = userRef.save();
+        if (storedUser) {
+          return res
+            .status(201)
+            .json({ message: 'Read status deleted successfully' });
+        } else {
+          res.status(400).send();
+        }
+      }
+    }
   } catch (error) {
     console.error(error);
     return res.status(500).send('Server error');

@@ -11,6 +11,12 @@ const UserSchema = Schema({
   lastLogin: Date,
   lastUpdate: Date,
   profilePicture: String,
+  readStatuses: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'ReadStatus',
+    },
+  ],
   likes: [
     {
       story: {
