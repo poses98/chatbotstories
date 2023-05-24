@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   StyleSheet,
   Text,
@@ -11,7 +11,15 @@ import Button from '../components/Button';
 import LabeledInput from '../components/LabeledInput';
 import Colors from '../constants/Colors';
 import validator from 'validator';
-import firebase from './firebase';
+import {
+  GoogleAuthProvider,
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+} from 'firebase/auth';
+import UserApi from '../api/user';
+import useFirebase from '../hooks/useFirebase';
+import { useNavigation, StackActions } from '@react-navigation/native';
 
 const validateFields = (email, password) => {
   const isValid = {
@@ -27,16 +35,11 @@ const validateFields = (email, password) => {
   return isValid;
 };
 
-const login = (email, password) => {
-  firebase
-    .auth()
-    .signInWithEmailAndPassword(email, password)
-    .then(() => {
-      console.log('login user...');
-    });
-};
-
 export default () => {
+  const auth = getAuth();
+  const { user, isLoading } = useFirebase();
+  const navigation = useNavigation();
+
   const [isCreateMode, setCreateMode] = useState(false);
   const [emailField, setEmailField] = useState({
     text: '',
@@ -58,14 +61,91 @@ export default () => {
     text: '',
     errorMessage: '',
   });
+
+  useEffect(() => {
+    if (!isLoading && user) {
+      navigation.dispatch(StackActions.replace('Home'));
+    }
+  }, [user, isLoading]);
+  const login = (email, password) => {
+    const data = {
+      name: name.text,
+      username: userName.text,
+      description: '',
+      website: '',
+    };
+    signInWithEmailAndPassword(auth, email, password)
+      .then((userCredential) => {
+        const user = userCredential.user;
+      })
+      .catch((e) => {
+        console.error(e);
+        setPasswordField({ errorMessage: e.message });
+      });
+  };
   const createAccount = (email, password, data) => {
-    const userRef = firestore().collection('usernames');
-    // create account API
+    // sign up firebase
+    createUserWithEmailAndPassword(auth, email, password)
+      .then((userCredential) => {
+        // Signed in
+        const user = userCredential.user;
+        // create account API
+        UserApi.createUser(data)
+          .then((response) => {
+            console.log('Response');
+            console.log(response);
+          })
+          .catch((e) => {
+            console.error(e);
+          });
+      })
+      .catch((error) => {
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        console.error(errorMessage);
+      });
+  };
+
+  const handleSubmit = () => {
+    const isValid = validateFields(emailField.text, passwordField.text);
+    let isAllValid = true;
+    if (!isValid.email) {
+      setEmailField({
+        ...emailField,
+        errorMessage: 'Introduce un email válido',
+      });
+      isAllValid = false;
+    }
+    if (!isValid.password) {
+      setPasswordField({
+        ...passwordField,
+        errorMessage:
+          'Introduce una contraseña con al menos 8 caracteres con mayúsculas, minísculas y números',
+      });
+      isAllValid = false;
+    }
+    if (isCreateMode && passwordConfirmationField.text != passwordField.text) {
+      passwordConfirmationField.errorMessage = 'Las contraseñas no coinciden';
+      setPasswordConfirmationField({
+        ...passwordConfirmationField,
+      });
+      isAllValid = false;
+    }
+    if (isAllValid) {
+      const data = {
+        name: name.text,
+        username: userName.text,
+        description: '',
+        website: '',
+      };
+      isCreateMode
+        ? createAccount(emailField.text, passwordField.text, data)
+        : login(emailField.text, passwordField.text);
+    }
   };
   return (
     <ScrollView style={{ flex: 1, flexDirection: 'column' }}>
       <View style={styles.container}>
-        {/* Header */}
         <View style={styles.headerBox}>
           <Text style={styles.header}>Bookster</Text>
         </View>
@@ -94,7 +174,7 @@ export default () => {
               />
             </View>
           )}
-          {/* Email input */}
+
           <LabeledInput
             label="Email"
             text={emailField.text}
@@ -106,7 +186,6 @@ export default () => {
             autoCompleteType={'email'}
             autoCapitalize="none"
           />
-          {/* Password input */}
           <LabeledInput
             label="Contraseña"
             text={passwordField.text}
@@ -118,7 +197,6 @@ export default () => {
             labelStyle={styles.label}
             autoCompleteType={'password'}
           />
-          {/* Password confirmation input */}
           {isCreateMode && (
             <View>
               <LabeledInput
@@ -134,7 +212,6 @@ export default () => {
               />
             </View>
           )}
-          {/* Login Toggle */}
           <TouchableOpacity
             onPress={() => {
               setCreateMode(!isCreateMode);
@@ -156,48 +233,12 @@ export default () => {
           behavior="height"
           enabled
         >
-          {/* Login button / Create account */}
           <Button
             text={isCreateMode ? 'Crear cuenta' : 'Iniciar sesión'}
             textStyle={{ color: 'white', textTransform: 'uppercase' }}
             buttonStyle={{ backgroundColor: Colors.blue }}
             onPress={() => {
-              const isValid = validateFields(
-                emailField.text,
-                passwordField.text
-              );
-              let isAllValid = true;
-              if (!isValid.email) {
-                emailField.errorMessage = 'Introduce un email válido';
-                setEmailField({ ...emailField });
-                isAllValid = false;
-              }
-              if (!isValid.password) {
-                passwordField.errorMessage =
-                  'Introduce una contraseña con al menos 8 caracteres con mayúsculas, minísculas y números';
-                setPasswordField({ ...passwordField });
-                isAllValid = false;
-              }
-              if (
-                isCreateMode &&
-                passwordConfirmationField.text != passwordField.text
-              ) {
-                passwordConfirmationField.errorMessage =
-                  'Las contraseñas no coinciden';
-                setPasswordConfirmationField({ ...passwordConfirmationField });
-                isAllValid = false;
-              }
-              if (isAllValid) {
-                const data = {
-                  name: name.text,
-                  username: userName.text,
-                  description: '',
-                  website: '',
-                };
-                isCreateMode
-                  ? createAccount(emailField.text, passwordField.text, data)
-                  : login(emailField.text, passwordField.text);
-              }
+              handleSubmit();
             }}
           />
         </KeyboardAvoidingView>

@@ -1,8 +1,7 @@
-import * as React from "react";
-import { View, Text, StyleSheet, Image } from "react-native";
-import A from "react-native-a";
-import Button from "../Button";
-import * as Analytics from 'expo-firebase-analytics';
+import * as React from 'react';
+import { View, Text, StyleSheet, Image } from 'react-native';
+import A from 'react-native-a';
+import Button from '../Button';
 
 export default ({
   profilePic,
@@ -19,14 +18,9 @@ export default ({
     return (
       <Button
         text="Edit profile"
-        textStyle={{ fontWeight: "bold" }}
+        textStyle={{ fontWeight: 'bold' }}
         onPress={() => {
-          data.navigation.navigate("ProfileEdit");
-          Analytics.logEvent('EditProfile', {
-            sender: 'card',
-            screen: 'profile',
-            purpose: 'Edit profile button pressed',
-          });
+          data.navigation.navigate('ProfileEdit');
         }}
         buttonStyle={{ marginTop: 10 }}
       />
@@ -38,9 +32,9 @@ export default ({
       {/* Header profile */}
       <View
         style={{
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "center",
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'center',
         }}
       >
         <Image
@@ -48,7 +42,7 @@ export default ({
           source={
             image
               ? { uri: image }
-              : require("../../assets/profilepicplaceholder.png")
+              : require('../../assets/profilepicplaceholder.png')
           }
         />
       </View>
@@ -70,13 +64,13 @@ export default ({
         {/* Profile name  */}
         <Text style={styles.profileName}>{name}</Text>
         {/* Web  */}
-        {web != "" && (
+        {web != '' && (
           <A style={styles.profileWeb} href={web}>
             <Text>{web}</Text>
           </A>
         )}
         {/* Bio  */}
-        {description != "" && (
+        {description != '' && (
           <Text style={styles.profileDescription}>{description}</Text>
         )}
         <EditProfileButton />
@@ -87,14 +81,14 @@ export default ({
 
 const styles = StyleSheet.create({
   profileInfo: {
-    alignItems: "stretch",
-    flexDirection: "column",
+    alignItems: 'stretch',
+    flexDirection: 'column',
     marginBottom: 15,
   },
   itemContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     margin: 0,
   },
   profilePic: {
@@ -105,15 +99,15 @@ const styles = StyleSheet.create({
   },
   infoBox: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   textInfo: {
     fontSize: 14,
     marginTop: 3,
   },
   numberInfo: {
-    fontWeight: "bold",
+    fontWeight: 'bold',
     fontSize: 20,
   },
   bioBox: {
@@ -121,7 +115,7 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
   },
   profileName: {
-    fontWeight: "bold",
+    fontWeight: 'bold',
     fontSize: 15,
   },
   profileWeb: {
@@ -129,7 +123,7 @@ const styles = StyleSheet.create({
   },
   profileDescription: {
     fontSize: 15,
-    justifyContent: "center",
-    alignItems: "stretch",
+    justifyContent: 'center',
+    alignItems: 'stretch',
   },
 });

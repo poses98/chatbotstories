@@ -11,18 +11,11 @@ import {
 } from 'react-native';
 import Colors from '../constants/Colors';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import {
-  onSnapshot,
-  addDoc,
-  removeDoc,
-  updateDoc,
-} from '../services/collections';
-import { firestore, auth } from '@react-native-firebase/app';
+
 import { ScrollView, TextInput } from 'react-native-gesture-handler';
 import { MessageBubble } from '../components/MessageBubble';
 import { AuthorButtonSelector } from '../components/AuthorButtonSelector';
 import Swipeable from 'react-native-swipeable';
-import * as Analytics from 'expo-firebase-analytics';
 
 export default ({ navigation, route }) => {
   const [messages, setMessages] = useState([]);
@@ -33,80 +26,13 @@ export default ({ navigation, route }) => {
   const [messageEditIndex, setMessageEditIndex] = useState(0);
   const [messageEditMode, setMessageEditMode] = useState(false);
   const [canBeMain, setCanBeMain] = useState(false);
-  /**Firestore references */
-  const characterListRef = firestore()
-    .collection('stories')
-    .doc(route.params.storyId)
-    .collection('characters');
-  const messageListRef = firestore()
-    .collection('stories')
-    .doc(route.params.storyId)
-    .collection('chapters')
-    .doc(route.params.chapterId)
-    .collection('messages');
 
   const scrollViewRef = useRef();
 
   /**Getting the characters from the db */
-  useEffect(() => {
-    onSnapshot(
-      characterListRef,
-      (newLists) => {
-        setCharacterList(newLists);
-        if (newLists.length > 0) {
-          setSenderId(newLists[0].id);
-          let i = 0;
-          newLists.forEach((element) => {
-            if (element.main) {
-              setCanBeMain(false);
-              const aux = newLists[0];
-              newLists[0] = element;
-              newLists[i] = aux;
-              setSenderId(newLists[0].id);
-            }
-            i++;
-          });
-        } else {
-          setCanBeMain(true);
-        }
-      },
-      {
-        sort: (a, b) => {
-          if (a.index < b.index) {
-            return -1;
-          }
-
-          if (a.index > b.index) {
-            return 1;
-          }
-
-          return 0;
-        },
-      }
-    );
-  }, []);
+  useEffect(() => {}, []);
   /**Getting the messages from the db */
-  useEffect(() => {
-    onSnapshot(
-      messageListRef,
-      (newLists) => {
-        setMessages(newLists);
-      },
-      {
-        sort: (a, b) => {
-          if (a.index < b.index) {
-            return -1;
-          }
-
-          if (a.index > b.index) {
-            return 1;
-          }
-
-          return 0;
-        },
-      }
-    );
-  }, []);
+  useEffect(() => {}, []);
 
   const getCanBeMain = () => {
     let check = true;
@@ -139,28 +65,19 @@ export default ({ navigation, route }) => {
       { cancelable: true }
     );
 
-  const updateCharacterList = ({ id, name, color, main }) => {
-    updateDoc(characterListRef, id, { name, color, main });
-  };
+  const updateCharacterList = ({ id, name, color, main }) => {};
 
-  const addCharacterToList = ({ name, color, main }) => {
-    addDoc(characterListRef, { name, color, main });
-  };
+  const addCharacterToList = ({ name, color, main }) => {};
 
-  const updateMessage = ({ id, messageBody, sender, index }) => {
-    updateDoc(messageListRef, id, { messageBody, sender, index });
-  };
+  const updateMessage = ({ id, messageBody, sender, index }) => {};
 
   const addMessageToList = ({ messageBody, sender }) => {
     const index =
       messages.length >= 1 ? messages[messages.length - 1].index + 1 : 0;
     console.log(messageBody);
-    addDoc(messageListRef, { messageBody, sender, index });
   };
 
-  const removeMessage = ({ id }) => {
-    removeDoc(messageListRef, id);
-  };
+  const removeMessage = ({ id }) => {};
 
   return (
     <View style={{ flex: 1, backgroundColor: '#fafafa' }}>
@@ -197,13 +114,6 @@ export default ({ navigation, route }) => {
                           saveChanges: updateMessage,
                           characterList: characterList,
                         });
-                        Analytics.logEvent('EditMessageInChat', {
-                          sender: 'swipeable button',
-                          user: auth().currentUser.uid,
-                          story: route.params.storyId,
-                          screen: 'chatScreen',
-                          purpose: 'Pressed swipeable button to edit a message',
-                        });
                       }}
                     >
                       <Ionicons
@@ -222,14 +132,6 @@ export default ({ navigation, route }) => {
                       }}
                       onPress={() => {
                         changesWillNotBeSavedAlert({ id });
-                        Analytics.logEvent('DeleteMessageInChat', {
-                          sender: 'swipeable button',
-                          user: auth().currentUser.uid,
-                          story: route.params.storyId,
-                          screen: 'chatScreen',
-                          purpose:
-                            'Pressed swipeable button to delete a message',
-                        });
                       }}
                     >
                       <Ionicons
@@ -364,7 +266,6 @@ const styles = StyleSheet.create({
   },
   input: {
     backgroundColor: 'rgba(255, 255, 255, 0.4)',
-    width: DEVICE_WIDTH,
     height: 40,
     color: '#ffffff',
   },

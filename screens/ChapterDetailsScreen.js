@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { StyleSheet, ScrollView } from 'react-native';
-import { firestore, auth } from '@react-native-firebase/app';
 import Colors from '../constants/Colors';
 import _STATUS_ from '../constants/StoryStatus';
 import LabeledInput from '../components/LabeledInput';
@@ -31,14 +30,10 @@ export default ({ route, navigation }) => {
   const updateStatus = (value) => {
     setstatus(value);
   };
-  const chaptersRef = firestore()
-    .collection('stories')
-    .doc(storyId)
-    .collection('chapters');
 
-  /** SEND CHAPTER TO FIRESTORE */
+  /** SEND CHAPTER TO DB */
   const createChapter = (data) => {
-    addDoc(chaptersRef, data);
+    a;
   };
   return (
     <ScrollView style={styles.container}>
@@ -88,12 +83,6 @@ export default ({ route, navigation }) => {
         onPress={() => {
           let validation = true;
           if (nameField.text.length < 3) {
-            Analytics.logEvent('ChapterNameNoValid', {
-              sender: 'verifier',
-              user: auth().currentUser.uid,
-              screen: 'chapterDetailsScreen',
-              purpose: 'Try to create a chapter with less than 3 chars',
-            });
             validation = false;
             nameField.errorMessage = 'Title must have at least 3 characters';
             setnameField({ ...nameField });
@@ -111,20 +100,8 @@ export default ({ route, navigation }) => {
             if (!isEditMode) {
               route.params.saveChanges(data);
               navigation.dispatch(CommonActions.goBack());
-              Analytics.logEvent('CreateChapter', {
-                sender: 'card',
-                user: auth().currentUser.uid,
-                screen: 'chapterDetailsScreen',
-                purpose: 'Create a chapter',
-              });
             } else if (isEditMode) {
               //update chapter
-              Analytics.logEvent('UpdateChapter', {
-                sender: 'card',
-                user: auth().currentUser.uid,
-                screen: 'chapterDetailsScreen',
-                purpose: 'Update a chapter',
-              });
             }
           }
         }}

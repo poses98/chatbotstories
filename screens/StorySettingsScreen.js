@@ -9,7 +9,6 @@ import {
   FlatList,
   Switch,
 } from 'react-native';
-import { firestore, auth } from '@react-native-firebase/app';
 import { StackActions } from '@react-navigation/native';
 
 import Colors from '../constants/Colors';
@@ -20,9 +19,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import LabeledInput from '../components/LabeledInput';
 import { Picker } from '@react-native-picker/picker';
 import Button from '../components/Button';
-import { updateDoc, addDoc } from '../services/collections';
 import { Label } from '../components/Label';
-import * as Analytics from 'expo-firebase-analytics';
 
 export default ({ navigation, route }) => {
   const storyId = route.params.storyId;

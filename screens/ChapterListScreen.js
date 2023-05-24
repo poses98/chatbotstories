@@ -8,17 +8,9 @@ import {
 } from 'react-native';
 import Colors from '../constants/Colors';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import {
-  onSnapshot,
-  addDoc,
-  removeDoc,
-  updateDoc,
-} from '../services/collections';
-import { firestore, auth } from '@react-native-firebase/app';
 import { ScrollView } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ChapterItem } from '../components/ChapterItem';
-import * as Analytics from 'expo-firebase-analytics';
 
 /**
  * This function renders the right icon in the stack bar and
@@ -32,12 +24,6 @@ const renderStackBarIconRight = (navigation, addItemToLists) => {
           navigation.navigate('ChapterDetails', {
             saveChanges: addItemToLists,
           });
-          Analytics.logEvent('EditChapterChat', {
-            sender: 'card',
-            user: auth().currentUser.uid,
-            screen: 'chapterListScreen',
-            purpose: 'Tap a chapter to enter edit chat',
-          });
         }}
         style={{ paddingRight: 5 }}
       >
@@ -50,37 +36,9 @@ const renderStackBarIconRight = (navigation, addItemToLists) => {
 export default ({ navigation, route }) => {
   const [newItem, setNewItem] = useState();
   const [chapterList, setChapterList] = useState([]);
-  const chapterListRef = firestore()
-    .collection('stories')
-    .doc(route.params.storyId)
-    .collection('chapters');
 
-  useEffect(() => {
-    onSnapshot(
-      chapterListRef,
-      (newLists) => {
-        let i = 0;
-        newLists.forEach((element) => {
-          element.index = i;
-          i++;
-        });
-        setChapterList(newLists);
-      },
-      {
-        sort: (a, b) => {
-          if (a.index < b.index) {
-            return -1;
-          }
-
-          if (a.index > b.index) {
-            return 1;
-          }
-
-          return 0;
-        },
-      }
-    );
-  }, []);
+  // get chapters api
+  useEffect(() => {}, []);
 
   const addItemToLists = ({
     title,
@@ -93,22 +51,15 @@ export default ({ navigation, route }) => {
       chapterList.length >= 1
         ? chapterList[chapterList.length - 1].index + 1
         : 0;
-    addDoc(chapterListRef, {
-      title,
-      description,
-      lastUpdate,
-      status,
-      author,
-      index,
-    });
+    // add chapter
   };
 
   const removeItemFromLists = (id) => {
-    removeDoc(chapterListRef, id);
+    // remove chapter
   };
 
   const updateItemFromLists = (id, item) => {
-    updateDoc(chapterListRef, id, item);
+    // update chapter list
   };
 
   useLayoutEffect(() => {

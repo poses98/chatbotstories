@@ -20,9 +20,7 @@ import LabeledInput from '../components/LabeledInput';
 import { Picker } from '@react-native-picker/picker';
 import Button from '../components/Button';
 import { Label } from '../components/Label';
-import { updateDoc, addDoc } from '../services/collections';
 import { StatusSelector } from '../components/StatusSelector';
-import * as Analytics from 'expo-firebase-analytics';
 
 export default ({ route, navigation }) => {
   /** STORY ID IN CASE IS UPDATE MODE */

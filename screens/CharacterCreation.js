@@ -16,8 +16,6 @@ const colorList = [
   'pink',
   'purple',
 ];
-import * as Analytics from 'expo-firebase-analytics';
-import { auth } from '@react-native-firebase/app';
 
 export default ({ navigation, route }) => {
   const [name, setName] = useState(route.params.characterName || '');
@@ -31,9 +29,6 @@ export default ({ navigation, route }) => {
     route.params.characterId ? true : false
   );
   const [isValid, setValidity] = useState(true);
-
-  console.log('Character is main?:' + main);
-  console.log('Can be main?:' + canBeMain);
 
   return (
     <View style={styles.container}>
@@ -94,12 +89,6 @@ export default ({ navigation, route }) => {
 
             setValidity(false);
           }
-          Analytics.logEvent('CreateCharacter', {
-            sender: 'card',
-            user: auth().currentUser.uid,
-            screen: 'characterCreation',
-            purpose: 'Create a new character',
-          });
         }}
       />
     </View>

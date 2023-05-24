@@ -1,56 +1,56 @@
-import * as React from "react";
-import { getFocusedRouteNameFromRoute } from "@react-navigation/native";
-import { createStackNavigator } from "@react-navigation/stack";
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { View, Text, TouchableOpacity } from "react-native";
+import * as React from 'react';
+import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { View, Text, TouchableOpacity } from 'react-native';
 
-import Ionicons from "@expo/vector-icons/Ionicons";
-import Colors from "../constants/Colors";
+import Ionicons from '@expo/vector-icons/Ionicons';
+import Colors from '../constants/Colors';
 
-import HomeScreen from "../screens/HomeScreen";
-import DiscoverScreen from "../screens/DiscoverScreen";
-import SavedStoriesScreen from "../screens/SavedStoriesScreen";
-import ProfileScreen from "../screens/ProfileScreen";
-import ProfileEditScreen from "../screens/ProfileEditScreen";
-import StoryCreateScreen from "../screens/StoryCreateScreen";
-import StoryInfoScreen from "../screens/StoryInfoScreen";
-import ChapterDetailsScreen from "../screens/ChapterDetailsScreen";
-import LoginScreen from "../screens/LoginScreen";
-import LoadingScreen from "../screens/LoadingScreen";
-import StorySettingsScreen from "../screens/StorySettingsScreen";
-import ChapterListScreen from "../screens/ChapterListScreen";
-import ChatScreen from "../screens/ChatScreen";
-import CharacterCreation from "../screens/CharacterCreation";
-import MessageEdit from "../screens/MessageEdit";
-import ChatReadScreen from "../screens/ChatReadScreen";
+import HomeScreen from '../screens/HomeScreen';
+import DiscoverScreen from '../screens/DiscoverScreen';
+import SavedStoriesScreen from '../screens/SavedStoriesScreen';
+import ProfileScreen from '../screens/ProfileScreen';
+import ProfileEditScreen from '../screens/ProfileEditScreen';
+import StoryCreateScreen from '../screens/StoryCreateScreen';
+import StoryInfoScreen from '../screens/StoryInfoScreen';
+import ChapterDetailsScreen from '../screens/ChapterDetailsScreen';
+import LoginScreen from '../screens/LoginScreen';
+import LoadingScreen from '../screens/LoadingScreen';
+import StorySettingsScreen from '../screens/StorySettingsScreen';
+import ChapterListScreen from '../screens/ChapterListScreen';
+import ChatScreen from '../screens/ChatScreen';
+import CharacterCreation from '../screens/CharacterCreation';
+import MessageEdit from '../screens/MessageEdit';
+import ChatReadScreen from '../screens/ChatReadScreen';
 
 const getHeaderTitle = (route) => {
-  const routeName = getFocusedRouteNameFromRoute(route) ?? "Home";
+  const routeName = getFocusedRouteNameFromRoute(route) ?? 'Home';
 
   switch (routeName) {
-    case "Home":
-      return "News feed";
-    case "Profile":
-      return "My profile";
-    case "SavedStories":
-      return "Saved Stories";
-    case "Discover":
-      return "Discover";
-    case "Create":
-      return "Create new story";
+    case 'Home':
+      return 'News feed';
+    case 'Profile':
+      return 'My profile';
+    case 'SavedStories':
+      return 'Saved Stories';
+    case 'Discover':
+      return 'Discover';
+    case 'Create':
+      return 'Create new story';
   }
 };
 
 const getHeaderButton = (route, navigation) => {
-  const routeName = getFocusedRouteNameFromRoute(route) ?? "Home";
+  const routeName = getFocusedRouteNameFromRoute(route) ?? 'Home';
 
   switch (routeName) {
-    case "Home":
+    case 'Home':
       return <View></View>;
-    case "Profile":
+    case 'Profile':
       return (
         <View>
-          <TouchableOpacity onPress={() => navigation.navigate("StoryCreate")}>
+          <TouchableOpacity onPress={() => navigation.navigate('StoryCreate')}>
             <Ionicons
               name="add-circle-outline"
               size={26}
@@ -59,19 +59,19 @@ const getHeaderButton = (route, navigation) => {
           </TouchableOpacity>
         </View>
       );
-    case "SavedStories":
+    case 'SavedStories':
       return (
         <View>
           <Text></Text>
         </View>
       );
-    case "Discover":
+    case 'Discover':
       return (
         <View>
           <Text></Text>
         </View>
       );
-    case "Create":
+    case 'Create':
       return (
         <View>
           <Text></Text>
@@ -99,7 +99,7 @@ const StoriesStackScreen = () => {
         component={ChapterListScreen}
         options={({ route }) => {
           return {
-            title: route.params.title + " chapter creation",
+            title: route.params.title + ' chapter creation',
           };
         }}
       />
@@ -116,17 +116,17 @@ const MainTabNavigation = () => {
         tabBarIcon: ({ focused, color, size }) => {
           let iconName;
 
-          if (route.name === "Home") {
-            iconName = focused ? "home" : "home-outline";
-          } else if (route.name === "Discover") {
-            iconName = focused ? "search" : "search-outline";
-          } else if (route.name === "Create") {
-            iconName = focused ? "add-circle-outline" : "add-circle-outline";
+          if (route.name === 'Home') {
+            iconName = focused ? 'home' : 'home-outline';
+          } else if (route.name === 'Discover') {
+            iconName = focused ? 'search' : 'search-outline';
+          } else if (route.name === 'Create') {
+            iconName = focused ? 'add-circle-outline' : 'add-circle-outline';
             size = 40;
-          } else if (route.name === "SavedStories") {
-            iconName = focused ? "library" : "library-outline";
-          } else if (route.name === "Profile") {
-            iconName = focused ? "person" : "person-outline";
+          } else if (route.name === 'SavedStories') {
+            iconName = focused ? 'library' : 'library-outline';
+          } else if (route.name === 'Profile') {
+            iconName = focused ? 'person' : 'person-outline';
           }
           return <Ionicons name={iconName} size={size} color={color} />;
         },
@@ -158,18 +158,16 @@ export const LoadingStackScreen = () => {
 
 const AuthStack = createStackNavigator();
 export const AuthStackScreen = () => {
-  return (
-    <AuthStack.Navigator>
-      <AuthStack.Screen name="Login" component={LoginScreen} />
-    </AuthStack.Navigator>
-  );
+  return <AuthStack.Navigator></AuthStack.Navigator>;
 };
 
-const RootStack = createStackNavigator();
-export const RootStackScreen = () => {
+const UserStack = createStackNavigator();
+export const UserStackScreen = () => {
   return (
-    <RootStack.Navigator>
-      <RootStack.Screen
+    <UserStack.Navigator>
+      <UserStack.Screen name="Login" component={LoginScreen} />
+
+      <UserStack.Screen
         name="Home"
         component={MainTabNavigation}
         options={({ route, navigation }) => ({
@@ -180,12 +178,14 @@ export const RootStackScreen = () => {
           },
         })}
       />
-      <RootStack.Screen
-        name="ProfileEdit"
-        component={ProfileEditScreen}
-        options={{ title: "Edit profile" }}
-      />
-      <RootStack.Screen
+      {
+        <UserStack.Screen
+          name="ProfileEdit"
+          component={ProfileEditScreen}
+          options={{ title: 'Edit profile' }}
+        />
+      }
+      <UserStack.Screen
         name="StoryInfo"
         component={StoryInfoScreen}
         options={({ route }) => {
@@ -195,53 +195,53 @@ export const RootStackScreen = () => {
           };
         }}
       />
-      <RootStack.Screen
+      <UserStack.Screen
         name="StoryCreate"
         component={StoryCreateScreen}
         options={({ route }) => {
           return {
-            title: "",
+            title: '',
           };
         }}
       />
 
-      <RootStack.Screen
+      <UserStack.Screen
         name="StorySettings"
         component={StorySettingsScreen}
         options={({ route }) => {
           return {
-            title: "Story settings",
+            title: 'Story settings',
           };
         }}
       />
-      <RootStack.Screen
+      <UserStack.Screen
         name="ChapterDetails"
         component={ChapterDetailsScreen}
         options={({ route }) => {
           return {
-            title: "Chapter details",
+            title: 'Chapter details',
           };
         }}
       />
-      <RootStack.Screen
+      <UserStack.Screen
         name="ChapterList"
         component={ChapterListScreen}
         options={({ route }) => {
           return {
-            title: "Chapter list",
+            title: 'Chapter list',
           };
         }}
       />
-      <RootStack.Screen
+      <UserStack.Screen
         name="Chat"
         component={ChatScreen}
         options={({ route }) => {
           return {
-            title: "Chat",
+            title: 'Chat',
           };
         }}
       />
-      <RootStack.Screen
+      <UserStack.Screen
         name="ChatRead"
         component={ChatReadScreen}
         options={({ route }) => {
@@ -250,24 +250,24 @@ export const RootStackScreen = () => {
           };
         }}
       />
-      <RootStack.Screen
+      <UserStack.Screen
         name="CharacterCreation"
         component={CharacterCreation}
         options={({ route }) => {
           return {
-            title: "Character creation",
+            title: 'Character creation',
           };
         }}
       />
-      <RootStack.Screen
+      <UserStack.Screen
         name="MessageEdit"
         component={MessageEdit}
         options={({ route }) => {
           return {
-            title: "Edit message",
+            title: 'Edit message',
           };
         }}
       />
-    </RootStack.Navigator>
+    </UserStack.Navigator>
   );
 };

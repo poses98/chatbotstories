@@ -1,14 +1,11 @@
-import React, { useState, useLayoutEffect } from "react";
-import { CommonActions } from "@react-navigation/native";
-import { StyleSheet, View, FlatList, TouchableOpacity } from "react-native";
-import Colors from "../constants/Colors";
-import { updateDoc } from "../services/collections";
-import Ionicons from "@expo/vector-icons/Ionicons";
-import { AuthorButtonSelector } from "../components/AuthorButtonSelector";
-import LabeledInput from "../components/LabeledInput";
-import Button from "../components/Button";
-import * as Analytics from 'expo-firebase-analytics';
-
+import React, { useState, useLayoutEffect } from 'react';
+import { CommonActions } from '@react-navigation/native';
+import { StyleSheet, View, FlatList, TouchableOpacity } from 'react-native';
+import Colors from '../constants/Colors';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import { AuthorButtonSelector } from '../components/AuthorButtonSelector';
+import LabeledInput from '../components/LabeledInput';
+import Button from '../components/Button';
 
 export default ({ navigation, route }) => {
   const [messageBody, setMessageBody] = useState(route.params.messageBody);
@@ -30,10 +27,10 @@ export default ({ navigation, route }) => {
 
   const renderStackBarIconRight = () => {
     return (
-      <View style={{ flexDirection: "row" }}>
+      <View style={{ flexDirection: 'row' }}>
         <TouchableOpacity
           onPress={() => {
-            console.log("Saving changes...");
+            console.log('Saving changes...');
             if (messageBody.length > 1) {
               route.params.saveChanges({
                 id: id,
@@ -43,7 +40,7 @@ export default ({ navigation, route }) => {
               });
               navigation.dispatch(CommonActions.goBack());
             } else {
-              console.log("ERROR: Message body length < 1");
+              console.log('ERROR: Message body length < 1');
               setValidity(false);
             }
           }}
@@ -72,10 +69,7 @@ export default ({ navigation, route }) => {
         inputStyle={{ color: Colors.black, marginBottom: 15 }}
       />
       {/**Author selector */}
-      <View
-        style={{
-        }}
-      >
+      <View style={{}}>
         <FlatList
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -103,7 +97,7 @@ export default ({ navigation, route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: '#fff',
     padding: 5,
   },
   input: {
@@ -119,8 +113,8 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.darkGray,
     height: 48,
     margin: 16,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   label: {
     color: Colors.black,

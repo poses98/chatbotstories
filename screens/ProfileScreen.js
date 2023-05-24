@@ -10,9 +10,9 @@ import {
 import ProfileHeader from '../components/Profile/ProfileHeader';
 import StoryContainer from '../components/StoryContainer';
 import Colors from '../constants/Colors';
-import { firestore, auth } from '@react-native-firebase/app';
-import * as firebase from '@react-native-firebase/app';
-import * as Analytics from 'expo-firebase-analytics';
+import Lottie from 'lottie-react-native';
+import UserApi from '../api/user';
+import useFirebase from '../hooks/useFirebase';
 
 const images = {
   terror: require('../assets/terror.jpg'),
@@ -23,8 +23,9 @@ const images = {
 
 export default ({ navigation }) => {
   // TODO loading for every single item from DB to be totally loaded!
-  const testId = 'dOS86iiJmcPbVKi4nP9m8BAUr0g2';
+  const testId = '';
   const TEST = false;
+  const { user } = useFirebase();
   const [owned, setOwned] = useState(false);
   const [stories, setStories] = useState([]);
   const [storyCont, setStoryCont] = useState(0);
@@ -32,66 +33,19 @@ export default ({ navigation }) => {
   const [loading, setloading] = useState(true);
   const [image, setImage] = useState(null);
   //Get user information
-  const userRef = firestore().collection('users');
-  const storyRef = firestore().collection('stories');
+  useEffect(() => {
+    if (!data)
+      UserApi.getUserById(user.uid)
+        .then((response) => {
+          console.log(response);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+  }, [user]);
 
   useEffect(() => {
-    const unsubscribe = userRef
-      .doc(TEST ? testId : auth().currentUser.uid) // TODO ESTO HAY QUE CAMBIARLO POR EL ID DE USUARIO!
-      .onSnapshot((doc) => {
-        console.log('Profile data fetched: ', doc.data());
-        setdata(doc.data());
-        downloadImage(TEST ? testId : auth().currentUser.uid);
-      });
-    return unsubscribe;
-  }, []);
-
-  useEffect(() => {
-    const unsubscribeStories = firestore()
-      .collection('users')
-      .doc(TEST ? testId : auth().currentUser.uid) // TODO ESTO HAY QUE CAMBIARLO POR EL ID DE USUARIO!
-      .collection('stories')
-      .orderBy('date', 'desc')
-      .limit(100)
-      .onSnapshot(
-        (querySnapshot) => {
-          var fetchedStories = [];
-          if (querySnapshot.size === 0) {
-            setloading(false);
-          } else {
-            setStoryCont(querySnapshot.size);
-          }
-          querySnapshot.forEach((doc) => {
-            //Fetching every story from DB
-            storyRef
-              .doc(doc.id)
-              .get()
-              .then((doc) => {
-                if (doc.exists) {
-                  fetchedStories.push(doc.data());
-                  console.log('Story loaded with id: ', doc.id);
-                  setStories(fetchedStories);
-                  setloading(false);
-                } else {
-                  // doc.data() will be undefined in this case
-                  setloading(false);
-                  console.log('No such document!');
-                }
-              })
-              .catch((error) => {
-                console.log('Error getting document:', error);
-              });
-          });
-
-          console.log(stories);
-        },
-        (error) => {
-          setloading(false);
-          console.log(error);
-        }
-      );
-
-    return unsubscribeStories;
+    // get user stories
   }, []);
 
   async function downloadImage(userId) {
@@ -136,18 +90,18 @@ export default ({ navigation }) => {
   }
 
   return (
-    <ScrollView style={styles.container}>
-      {!loading && (
+    <>
+      <ScrollView style={styles.container}>
         <View>
           <ProfileHeader
-            name={data.name}
-            web={data.website}
-            description={data.description}
-            posts={storyCont}
-            followers="673"
-            following="1.965"
+            name={data.name || ''}
+            web={data.website || ''}
+            description={data.description || ''}
+            posts={storyCont || ''}
+            followers={data.followers || ''}
+            following={data.following || ''}
             navigation={navigation}
-            userId={auth().currentUser.uid}
+            userId={data.userId}
             image={image}
           />
           {console.log(stories.length)}
@@ -180,12 +134,6 @@ export default ({ navigation }) => {
                         storyId,
                         username: author,
                       });
-                      Analytics.logEvent('OpenStoryInformation', {
-                        sender: 'card',
-                        user: auth().currentUser.uid,
-                        screen: 'profile',
-                        purpose: 'Viewing more info on a story',
-                      });
                     }}
                   />
                 );
@@ -208,24 +156,8 @@ export default ({ navigation }) => {
             </View>
           )}
         </View>
-      )}
-      {loading && (
-        <View
-          style={{
-            flex: 1,
-            backgroundColor: '#fff',
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}
-        >
-          {/** TODO Change loading to loading bars */}
-          <Image
-            source={require('../assets/loading.gif')}
-            style={{ width: 100, height: 100, alignSelf: 'center' }}
-          />
-        </View>
-      )}
-    </ScrollView>
+      </ScrollView>
+    </>
   );
 };
 

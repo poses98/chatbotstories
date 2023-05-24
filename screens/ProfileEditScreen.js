@@ -13,13 +13,12 @@ import Colors from '../constants/Colors';
 import A from 'react-native-a';
 import LabeledInput from '../components/LabeledInput';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { firestore, auth, storage } from '@react-native-firebase/app';
-import { updateDoc, removeDoc } from '../services/collections';
 import * as ImagePicker from 'expo-image-picker';
-import * as firebase from '@react-native-firebase/app';
-import * as Analytics from 'expo-firebase-analytics';
+import UserApi from '../api/user';
+import useFirebase from '../hooks/useFirebase';
 
 export default ({ navigation }) => {
+  const { user } = useFirebase();
   const [hasBeenChanges, setHasBeenChanges] = useState(false);
   const [data, setdata] = useState({
     username: {
@@ -27,32 +26,12 @@ export default ({ navigation }) => {
     },
   });
   const [errorMessage, seterrorMessage] = useState('');
-  const [loading, setloading] = useState(true);
+  const [loading, setloading] = useState(false);
   const [oldUsername, setoldUsername] = useState('');
-  const docRef = firestore().collection('users');
-  const userRef = firestore().collection('usernames');
   /**
    * Getting the user data to show in the form
    */
-  useEffect(() => {
-    docRef
-      .doc(auth().currentUser.uid)
-      .get()
-      .then((doc) => {
-        if (doc.exists) {
-          console.log('Document loaded');
-          setoldUsername(doc.data().username);
-          setdata(doc.data());
-          downloadImage(auth().currentUser.uid);
-        } else {
-          // doc.data() will be undefined in this case
-          console.log('No such document!');
-        }
-      })
-      .catch((error) => {
-        console.log('Error getting document:', error);
-      });
-  }, []);
+  useEffect(() => {}, []);
   /**
    * This function renders the icons in headerbar
    */
@@ -69,52 +48,17 @@ export default ({ navigation }) => {
    * This function renders the right icon in the stack bar and
    * updates database when the icon is pressed
    */
-  const renderStackBarIconRight = () => {
+  const renderStackBarIconRight = async () => {
     return (
       <View style={{ flexDirection: 'row' }}>
         <TouchableOpacity
           onPress={() => {
-            data.description = data.description.replace(/\r?\n|\r/, '').trim();
+            data.description = data.description
+              ? data.description.replace(/\r?\n|\r/, '').trim()
+              : '';
             setdata({ ...data });
-            userRef
-              .doc(data.username.toLowerCase())
-              .get()
-              .then((doc) => {
-                let available = false;
-                if (doc.exists) {
-                  console.log(doc.data());
-                  if (doc.data().uid === auth().currentUser.uid) {
-                    available = true;
-                  } else {
-                    available = false;
-                  }
-                } else {
-                  available = true;
-                }
-
-                if (available) {
-                  console.log(`deleting last username: ${oldUsername}`);
-                  removeDoc(userRef, oldUsername.toLowerCase());
-                  console.log('username available, updating object...');
-                  firestore()
-                    .collection('usernames')
-                    .doc(data.username.toLowerCase())
-                    .set({ uid: auth().currentUser.uid });
-
-                  updateDoc(docRef, auth().currentUser.uid, data);
-
-                  uploadImage();
-                } else {
-                  console.log(
-                    'USERNAME NOT AVAILABLE. PROCEEDING TO HANDLE THIS.'
-                  );
-
-                  seterrorMessage('Username is not available 💔');
-                }
-              })
-              .catch((error) => {
-                console.log('Error getting document:', error);
-              });
+            // check if username is available
+            UserApi.updateUser(user.uid, data);
           }}
           style={{ paddingRight: 5 }}
         >
@@ -227,10 +171,7 @@ export default ({ navigation }) => {
     const snapshot = await ref.put(blob);
 
     console.log('state: ' + snapshot.state);
-    firestore()
-      .collection('users')
-      .doc(auth().currentUser.uid)
-      .set({ lastUpdate: Date.now() }, { merge: true });
+    // update user lastUpdate
     // We're done with the blob, close and release it
     blob.close();
 
@@ -341,7 +282,9 @@ export default ({ navigation }) => {
           />
           {/**Description */}
           <LabeledInput
-            label={`Description ${data.description.length}/200`}
+            label={`Description ${
+              data.description ? data.description.length : 0
+            }/200`}
             text={data.description}
             onChangeText={(text) => {
               setdata({ ...data, description: text });

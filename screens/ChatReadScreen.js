@@ -1,7 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { StyleSheet, View, FlatList, DEVICE_WIDTH, Text } from 'react-native';
-import { addDoc, onSnapshot, updateDoc } from '../services/collections';
-import { firestore, auth } from '@react-native-firebase/app';
 import {
   ScrollView,
   TouchableHighlight,
@@ -11,7 +9,6 @@ import { MessageBubble } from '../components/MessageBubble';
 import Button from '../components/Button';
 import Colors from '../constants/Colors';
 import StoryStatus from '../constants/StoryStatus';
-import * as Analytics from 'expo-firebase-analytics';
 
 export default ({ navigation, route }) => {
   const [messages, setMessages] = useState([]);
@@ -41,104 +38,20 @@ export default ({ navigation, route }) => {
       updateReadingStoriesFromUser(isFinished, null);
     }
   };
-  const readingStoriesRef = firestore()
-    .collection('users')
-    .doc(auth().currentUser.uid)
-    .collection('startedStories');
 
   const updateReadingStoriesFromUser = (isEnded, p_nextChapterId) => {
-    try {
-      updateDoc(
-        readingStoriesRef.doc(route.params.storyId),
-        route.params.storyId,
-        {
-          lastChapterId: route.params.chapterId,
-          nextChapterId: p_nextChapterId,
-          date: Date.now(),
-          finished: isEnded,
-        }
-      );
-    } catch (e) {
-      addDoc(readingStoriesRef, {
-        id: route.params.storyId,
-        nextChapterId: p_nextChapterId,
-        date: Date.now(),
-        finished: isEnded,
-        lastChapterId: route.params.chapterId,
-      });
-    }
+    // update story reading status
   };
-
-  /**Firestore references */
-  const characterListRef = firestore()
-    .collection('stories')
-    .doc(route.params.storyId)
-    .collection('characters');
-  const messageListRef = firestore()
-    .collection('stories')
-    .doc(route.params.storyId)
-    .collection('chapters')
-    .doc(route.params.chapterId)
-    .collection('messages');
 
   const scrollViewRef = useRef();
 
   /**Getting the characters from the db */
-  useEffect(() => {
-    onSnapshot(
-      characterListRef,
-      (newLists) => {
-        setCharacterList(newLists);
-      },
-      {
-        sort: (a, b) => {
-          if (a.index < b.index) {
-            return -1;
-          }
-
-          if (a.index > b.index) {
-            return 1;
-          }
-
-          return 0;
-        },
-      }
-    );
-  }, []);
+  useEffect(() => {}, []);
   /**Getting the messages from the db */
-  useEffect(() => {
-    onSnapshot(
-      messageListRef,
-      (newLists) => {
-        setMessages(newLists);
-        if (newLists.length > readingIndex) {
-          setReadingMessages([newLists[readingIndex]]);
-          console.log(readingMessages);
-          setReadingIndex(readingIndex + 1);
-        }
-      },
-      {
-        sort: (a, b) => {
-          if (a.index < b.index) {
-            return -1;
-          }
-          if (a.index > b.index) {
-            return 1;
-          }
-          return 0;
-        },
-      }
-    );
-  }, []);
+  useEffect(() => {}, []);
 
   const updateReadingMessages = () => {
     if (!finished) {
-      Analytics.logEvent('SpawnMessageInReadingChat', {
-        sender: 'screen tap',
-        user: auth().currentUser.uid,
-        screen: 'chatReadScreen',
-        purpose: 'Tap the screen to spawn a new message',
-      });
       if (messages.length > readingIndex) {
         let temp_readMessages = [...readingMessages];
         temp_readMessages.push(messages[readingIndex]);
@@ -211,12 +124,6 @@ export default ({ navigation, route }) => {
                     chapterId: nextChapterId,
                     chapterList: route.params.chapterList,
                   });
-                  Analytics.logEvent('NextChapter', {
-                    sender: 'button',
-                    user: auth().currentUser.uid,
-                    screen: 'chatReadScreen',
-                    purpose: 'Tap the next chapter button',
-                  });
                 }}
               />
             )}
@@ -236,7 +143,6 @@ const styles = StyleSheet.create({
   },
   input: {
     backgroundColor: 'rgba(255, 255, 255, 0.4)',
-    width: DEVICE_WIDTH,
     height: 40,
     color: '#ffffff',
   },

@@ -11,7 +11,6 @@ import {
 } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import Colors from '../constants/Colors';
-import { firestore, auth } from '@react-native-firebase/app';
 import GENRES from '../constants/Genres';
 import { ScrollView } from 'react-native-gesture-handler';
 import Button from '../components/Button';
@@ -19,10 +18,8 @@ import LANGUAGES from '../constants/Languages';
 import MONTHS from '../constants/Months';
 import STORY_STATUS from '../constants/StoryStatus';
 import { StackActions } from '@react-navigation/native';
-import { onSnapshot } from '../services/collections';
 import { ChapterItem } from '../components/ChapterItem';
 import { moderateScale } from 'react-native-size-matters';
-import * as Analytics from 'expo-firebase-analytics';
 
 export default ({ navigation, route }) => {
   /** STATE OBJECTS */
@@ -43,11 +40,6 @@ export default ({ navigation, route }) => {
   const [chapterIndex, setChapterIndex] = useState(0);
   const [ended, setEnded] = useState(false);
 
-  //Refs to firestore
-  const storyRef = firestore().collection('stories');
-  const statsRef = firestore().collection('storyStats');
-  const userRef = firestore().collection('users');
-
   var date = new Date(data.date);
   var month = date.getMonth();
   var year = date.getFullYear();
@@ -55,20 +47,6 @@ export default ({ navigation, route }) => {
   /**Getting the author name */
   useEffect(() => {
     if (storyId != '') {
-      userRef
-        .doc(route.params.username)
-        .get()
-        .then((doc) => {
-          if (doc.exists) {
-            setAuthorUserName(doc.data().username);
-          } else {
-            // doc.data() will be undefined in this case
-            console.log('No such document! (USER)');
-          }
-        })
-        .catch((error) => {
-          console.log('Error getting document:', error);
-        });
     } else {
       console.log('No storyId associated');
       setnotloaded(true);
@@ -78,52 +56,12 @@ export default ({ navigation, route }) => {
   }, []);
   /** Getting the metadata of the story */
   useEffect(() => {
-    if (storyId != '') {
-      storyRef
-        .doc(storyId)
-        .get()
-        .then((doc) => {
-          if (doc.exists) {
-            setdata(doc.data());
-            if (doc.data().author === auth().currentUser.uid) {
-              setowned(true);
-            }
-            setLoadingMetadata(false);
-          } else {
-            // doc.data() will be undefined in this case
-            console.log('No such document! (METADATA)');
-          }
-        })
-        .catch((error) => {
-          console.log('Error getting document:', error);
-        });
-    } else {
-      console.log('No storyId associated');
-      setnotloaded(true);
-      setloading(false);
-      setLoadingMetadata(false);
-    }
+    // get story api
   }, []);
   /** Getting the stats of the story */
   useEffect(() => {
     if (storyId != '') {
-      statsRef
-        .doc(storyId)
-        .get()
-        .then((doc) => {
-          if (doc.exists) {
-            setstats(doc.data());
-            // UPDATE VIEW WILL BE IN START READING BUTTON (AD WILL BE SHOWN)
-            // statsRef.doc(storyId).update({ views: doc.data().views + 1 })
-            setLoadingStats(false);
-          } else {
-            // doc.data() will be undefined in this case
-            console.log('No such document! (STATS)');
-          }
-        })
-        .catch((error) => {
-          console.log('Error getting document:', error);
-        });
+      // get story stats
     } else {
       setnotloaded(true);
       setloading(false);
@@ -132,21 +70,7 @@ export default ({ navigation, route }) => {
   /** Finding out if the user has already liked this story to enable the like button */
   useEffect(() => {
     if (storyId != '') {
-      userRef
-        .doc(auth().currentUser.uid)
-        .collection('likedStories')
-        .doc(storyId)
-        .get()
-        .then((doc) => {
-          if (doc.exists) {
-            setcanLike(false);
-          } else {
-            // doc.data() will be undefined in this case
-          }
-        })
-        .catch((error) => {
-          console.log('Error getting document:', error);
-        });
+      setcanLike(false);
     } else {
       setnotloaded(true);
       setloading(false);
@@ -155,21 +79,7 @@ export default ({ navigation, route }) => {
   /** Finding out if the user has already saved this story to check the saved button */
   useEffect(() => {
     if (storyId != '') {
-      userRef
-        .doc(auth().currentUser.uid)
-        .collection('savedStories')
-        .doc(storyId)
-        .get()
-        .then((doc) => {
-          if (doc.exists) {
-            setIsSaved(true);
-          } else {
-            // doc.data() will be undefined in this case
-          }
-        })
-        .catch((error) => {
-          console.log('Error getting document:', error);
-        });
+      setIsSaved(true);
     } else {
       setnotloaded(true);
       setloading(false);
@@ -189,19 +99,9 @@ export default ({ navigation, route }) => {
                 setIsSaved(!isSaved);
                 /**TODO Save story into user's account */
                 if (!isSaved) {
-                  firestore()
-                    .collection('users')
-                    .doc(auth().currentUser.uid)
-                    .collection('savedStories')
-                    .doc(storyId)
-                    .set({ date: Date.now() });
+                  // save story
                 } else if (isSaved) {
-                  firestore()
-                    .collection('users')
-                    .doc(auth().currentUser.uid)
-                    .collection('savedStories')
-                    .doc(storyId)
-                    .delete();
+                  // delete story
                 }
               }}
               style={{ paddingRight: 8 }}
@@ -246,21 +146,9 @@ export default ({ navigation, route }) => {
   /** Likes a story if it is possible, if it is already liked deletes the like */
   const likeStory = () => {
     if (canLike) {
-      stats.likes += 1;
-      statsRef.doc(storyId).update({ likes: stats.likes });
-      userRef
-        .doc(auth().currentUser.uid)
-        .collection('likedStories')
-        .doc(storyId)
-        .set({ liked: true });
+      // like story api
     } else {
-      stats.likes -= 1;
-      statsRef.doc(storyId).update({ likes: stats.likes });
-      userRef
-        .doc(auth().currentUser.uid)
-        .collection('likedStories')
-        .doc(storyId)
-        .delete();
+      // remove like from story
     }
     setcanLike(!canLike);
     setstats({ ...stats });
@@ -269,7 +157,9 @@ export default ({ navigation, route }) => {
   const onShare = async () => {
     try {
       const result = await Share.share({
-        message: `Hey! I have found ${data.title} in BookCraft and I think you\'re gonna love it!`,
+        message: `Hey! I have found ${
+          data.title || ''
+        } in BookCraft and I think you\'re gonna love it!`,
         url: '',
         title: `${data.title} in BookCraft`,
       });
@@ -290,73 +180,6 @@ export default ({ navigation, route }) => {
   /** Finding out if the user has already started this story to continue reading */
   useEffect(() => {
     if (storyId != '') {
-      userRef
-        .doc(auth().currentUser.uid)
-        .collection('startedStories')
-        .doc(storyId)
-        .get()
-        .then((doc) => {
-          if (doc.exists) {
-            setChapterId(doc.data().nextChapterId);
-            onSnapshot(
-              chapterListRef,
-              (newLists) => {
-                let i = 0;
-                newLists.forEach((element) => {
-                  console.log(
-                    '%s %s i=%d',
-                    element.id,
-                    doc.data().nextChapterId,
-                    i
-                  );
-                  element.index = i;
-                  const _i = i;
-                  i++;
-                  if (
-                    element.id === doc.data().nextChapterId &&
-                    !(doc.data().nextChapterId === null)
-                  ) {
-                    setChapterIndex(_i);
-                    console.log('chapter index set to: ' + _i);
-                  } else if (
-                    doc.data().nextChapterId === null ||
-                    doc.data().finished
-                  ) {
-                    setChapterIndex(doc.data().lastChapterId);
-                    setEnded(true);
-                    console.log(
-                      'chapter index set to: ' + doc.data().lastChapterId
-                    );
-                  }
-                });
-                setLoadingChapterList(false);
-                setChapterList(newLists);
-              },
-              {
-                sort: (a, b) => {
-                  if (a.index < b.index) {
-                    return -1;
-                  }
-
-                  if (a.index > b.index) {
-                    return 1;
-                  }
-
-                  return 0;
-                },
-              }
-            );
-            console.log(
-              'Story has been started by the user and left on chapter: ' +
-                doc.data().nextChapterId
-            );
-          } else {
-            setLoadingChapterList(false);
-          }
-        })
-        .catch((error) => {
-          console.log('Error getting document:', error);
-        });
     } else {
       setnotloaded(true);
       setloading(false);
@@ -364,275 +187,237 @@ export default ({ navigation, route }) => {
   }, []);
   /**Chapter list */
   const [chapterList, setChapterList] = useState([]);
-  const chapterListRef = firestore()
-    .collection('stories')
-    .doc(route.params.storyId)
-    .collection('chapters');
+
   useEffect(() => {
-    onSnapshot(
-      chapterListRef,
-      (newLists) => {
-        let i = 0;
-        newLists.forEach((element) => {
-          element.index = i;
-          i++;
-        });
-        setChapterList(newLists);
-      },
-      {
-        sort: (a, b) => {
-          if (a.index < b.index) {
-            return -1;
-          }
-
-          if (a.index > b.index) {
-            return 1;
-          }
-
-          return 0;
-        },
-      }
-    );
+    // get chapters and sort them by index
   }, []);
 
   /**Review list */
   const [reviewList, setReviewList] = useState([]);
-  const reviewListRef = firestore()
-    .collection('stories')
-    .doc(route.params.storyId)
-    .collection('reviews');
   useEffect(() => {
-    onSnapshot(
-      reviewListRef,
-      (newLists) => {
-        setReviewList(newLists);
-        setLoadingReviewList(false);
-        console.log('Review: %s', reviewList[0]);
-      },
-      {
-        sort: (a, b) => {
-          if (a.date < b.date) {
-            return -1;
-          }
-
-          if (a.date > b.date) {
-            return 1;
-          }
-
-          return 0;
-        },
-      }
-    );
+    // get chapter list
   }, []);
   return (
     <ScrollView style={styles.container}>
-      {!loadingChapterList && !loadingMetadata && !loadingStats && !notloaded && (
-        <View>
-          {/**HEADER */}
-          <ImageBackground
-            source={GENRES[data.categoryMain].image}
-            resizeMode="cover"
-            onError={() => {}}
-            style={styles.image}
-          >
-            <View style={styles.storyContainer}>
-              {/**STORY NAME */}
-              <Text style={styles.storyTitle}>{data.title} </Text>
-              {/**STORY AUTHOR */}
-              <Text
-                style={[
-                  styles.storyDescription,
-                  { fontStyle: 'italic', fontSize: 12, marginBottom: 5 },
-                ]}
-              >
-                Written by {authorUserName}
-              </Text>
-              {/**STORY STATUS */}
+      {!loadingChapterList &&
+        !loadingMetadata &&
+        !loadingStats &&
+        !notloaded && (
+          <View>
+            {/**HEADER */}
+            <ImageBackground
+              source={GENRES[data.categoryMain].image}
+              resizeMode="cover"
+              onError={() => {}}
+              style={styles.image}
+            >
+              <View style={styles.storyContainer}>
+                {/**STORY NAME */}
+                <Text style={styles.storyTitle}>{data.title} </Text>
+                {/**STORY AUTHOR */}
+                <Text
+                  style={[
+                    styles.storyDescription,
+                    { fontStyle: 'italic', fontSize: 12, marginBottom: 5 },
+                  ]}
+                >
+                  Written by {authorUserName}
+                </Text>
+                {/**STORY STATUS */}
 
-              {/**STORY STATS */}
-              <View style={{ flexDirection: 'row' }}>
-                <View style={styles.storyStats}>
-                  <Ionicons
-                    name="eye-outline"
-                    size={20}
-                    color={Colors.lightGray}
-                  />
-                  <Text style={{ color: Colors.lightGray }}>{stats.views}</Text>
+                {/**STORY STATS */}
+                <View style={{ flexDirection: 'row' }}>
+                  <View style={styles.storyStats}>
+                    <Ionicons
+                      name="eye-outline"
+                      size={20}
+                      color={Colors.lightGray}
+                    />
+                    <Text style={{ color: Colors.lightGray }}>
+                      {stats.views}
+                    </Text>
+                  </View>
+                  <View style={styles.storyStats}>
+                    <Ionicons name="heart" size={20} color={Colors.red} />
+                    <Text style={{ color: Colors.lightGray }}>
+                      {stats.likes}
+                    </Text>
+                  </View>
                 </View>
-                <View style={styles.storyStats}>
-                  <Ionicons name="heart" size={20} color={Colors.red} />
-                  <Text style={{ color: Colors.lightGray }}>{stats.likes}</Text>
-                </View>
+                {/**STORY DESCRIPTION */}
+                <Text style={styles.storyDescription}>
+                  "{data.description}"
+                </Text>
+                {/** CONTINUE/START READING BUTTON */}
+                <Button
+                  text={
+                    chapterId === ''
+                      ? 'Start reading'
+                      : ended
+                      ? 'Read again'
+                      : 'Continue reading'
+                  }
+                  textStyle={{ fontWeight: 'bold', color: Colors.lightGray }}
+                  onPress={() => {
+                    //TODO admob
+                    navigation.navigate('ChatRead', {
+                      storyName: data.title,
+                      storyId: storyId,
+                      chapterId: !(chapterId === '')
+                        ? chapterId
+                        : chapterList[0].id,
+                      chapterList: chapterList,
+                    });
+                  }}
+                  buttonStyle={{
+                    marginVertical: 15,
+                    marginHorizontal: 15,
+                    height: 45,
+                    borderColor: Colors.lightGray,
+                  }}
+                />
               </View>
-              {/**STORY DESCRIPTION */}
-              <Text style={styles.storyDescription}>"{data.description}"</Text>
-              {/** CONTINUE/START READING BUTTON */}
-              <Button
-                text={
-                  chapterId === ''
-                    ? 'Start reading'
-                    : ended
-                    ? 'Read again'
-                    : 'Continue reading'
-                }
-                textStyle={{ fontWeight: 'bold', color: Colors.lightGray }}
-                onPress={() => {
-                  //TODO admob
-                  navigation.navigate('ChatRead', {
-                    storyName: data.title,
-                    storyId: storyId,
-                    chapterId: !(chapterId === '')
-                      ? chapterId
-                      : chapterList[0].id,
-                    chapterList: chapterList,
-                  });
-                }}
-                buttonStyle={{
-                  marginVertical: 15,
-                  marginHorizontal: 15,
-                  height: 45,
-                  borderColor: Colors.lightGray,
+            </ImageBackground>
+            {/** SOCIAL INTERACTIONS  */}
+            <View
+              style={{
+                flexDirection: 'row',
+                flex: 1,
+                alignItems: 'center',
+                marginVertical: 10,
+                marginHorizontal: 15,
+              }}
+            >
+              {/**LIKE BUTTON */}
+              <View>
+                <TouchableOpacity style={styles.storyStats} onPress={likeStory}>
+                  <Ionicons
+                    name={canLike ? 'heart-outline' : 'heart'}
+                    size={30}
+                    color={canLike ? Colors.black : Colors.red}
+                  />
+                </TouchableOpacity>
+              </View>
+
+              {/**COMMENT BUTTON */}
+              <View>
+                <TouchableOpacity
+                  style={[styles.storyStats, { paddingLeft: 8 }]}
+                  onPress={() => {
+                    /** TODO go to comment section */
+                  }}
+                >
+                  <Ionicons
+                    name="chatbox-outline"
+                    size={30}
+                    color={Colors.black}
+                  />
+                </TouchableOpacity>
+              </View>
+
+              {/**SHARE BUTTON */}
+              <View>
+                <TouchableOpacity
+                  style={styles.storyStats}
+                  onPress={() => {
+                    onShare();
+                  }}
+                >
+                  <Ionicons
+                    name="share-social-outline"
+                    size={30}
+                    color={Colors.black}
+                  />
+                </TouchableOpacity>
+              </View>
+              {/** DATE */}
+              <View style={{ flex: 1, alignItems: 'flex-end' }}>
+                <Text>
+                  {day} {MONTHS[month]} {year}
+                </Text>
+              </View>
+            </View>
+
+            {/**Chapter list */}
+            <Text
+              style={{
+                marginHorizontal: 15,
+                fontSize: 15,
+                color: Colors.gray,
+                textTransform: 'uppercase',
+              }}
+            >
+              Chapter list
+            </Text>
+            <View
+              style={{
+                maxHeight: 250,
+                minHeight: 200,
+                marginHorizontal: 15,
+                borderWidth: 1,
+                borderColor: Colors.black,
+                borderRadius: 10,
+              }}
+            >
+              <FlatList
+                data={chapterList}
+                renderItem={({ item: { title, description, id, index } }) => {
+                  return (
+                    <ChapterItem
+                      title={title}
+                      onPress={() => {
+                        //TODO admob
+                        navigation.navigate('ChatRead', {
+                          storyName: data.title,
+                          storyId: storyId,
+                          chapterId: id,
+                          chapterList: chapterList,
+                        });
+                      }}
+                      id={id}
+                      navigation={navigation}
+                      onDelete={() => removeItemFromLists(id)}
+                      index={index}
+                      currentIndex={chapterIndex}
+                      finished={ended}
+                      list={false}
+                    />
+                  );
                 }}
               />
             </View>
-          </ImageBackground>
-          {/** SOCIAL INTERACTIONS  */}
-          <View
-            style={{
-              flexDirection: 'row',
-              flex: 1,
-              alignItems: 'center',
-              marginVertical: 10,
-              marginHorizontal: 15,
-            }}
-          >
-            {/**LIKE BUTTON */}
-            <View>
-              <TouchableOpacity style={styles.storyStats} onPress={likeStory}>
-                <Ionicons
-                  name={canLike ? 'heart-outline' : 'heart'}
-                  size={30}
-                  color={canLike ? Colors.black : Colors.red}
-                />
-              </TouchableOpacity>
-            </View>
-
-            {/**COMMENT BUTTON */}
-            <View>
-              <TouchableOpacity
-                style={[styles.storyStats, { paddingLeft: 8 }]}
-                onPress={() => {
-                  /** TODO go to comment section */
-                }}
-              >
-                <Ionicons
-                  name="chatbox-outline"
-                  size={30}
-                  color={Colors.black}
-                />
-              </TouchableOpacity>
-            </View>
-
-            {/**SHARE BUTTON */}
-            <View>
-              <TouchableOpacity
-                style={styles.storyStats}
-                onPress={() => {
-                  onShare();
-                }}
-              >
-                <Ionicons
-                  name="share-social-outline"
-                  size={30}
-                  color={Colors.black}
-                />
-              </TouchableOpacity>
-            </View>
-            {/** DATE */}
-            <View style={{ flex: 1, alignItems: 'flex-end' }}>
-              <Text>
-                {day} {MONTHS[month]} {year}
-              </Text>
-            </View>
-          </View>
-
-          {/**Chapter list */}
-          <Text
-            style={{
-              marginHorizontal: 15,
-              fontSize: 15,
-              color: Colors.gray,
-              textTransform: 'uppercase',
-            }}
-          >
-            Chapter list
-          </Text>
-          <View
-            style={{
-              maxHeight: 250,
-              minHeight: 200,
-              marginHorizontal: 15,
-              borderWidth: 1,
-              borderColor: Colors.black,
-              borderRadius: 10,
-            }}
-          >
-            <FlatList
-              data={chapterList}
-              renderItem={({ item: { title, description, id, index } }) => {
-                return (
-                  <ChapterItem
-                    title={title}
-                    onPress={() => {
-                      //TODO admob
-                      navigation.navigate('ChatRead', {
-                        storyName: data.title,
-                        storyId: storyId,
-                        chapterId: id,
-                        chapterList: chapterList,
-                      });
-                    }}
-                    id={id}
-                    navigation={navigation}
-                    onDelete={() => removeItemFromLists(id)}
-                    index={index}
-                    currentIndex={chapterIndex}
-                    finished={ended}
-                    list={false}
-                  />
-                );
+            {/**Reviews */}
+            <Text
+              style={{
+                marginHorizontal: 15,
+                marginVertical: 15,
+                fontSize: 15,
+                color: Colors.gray,
+                textTransform: 'uppercase',
               }}
-            />
+            >
+              Reviews
+            </Text>
           </View>
-          {/**Reviews */}
-          <Text
+        )}
+      {!loadingChapterList &&
+        !loadingMetadata &&
+        !loadingStats &&
+        notloaded && (
+          <View
             style={{
-              marginHorizontal: 15,
-              marginVertical: 15,
-              fontSize: 15,
-              color: Colors.gray,
-              textTransform: 'uppercase',
+              alignItems: 'center',
+              flex: 1,
+              padding: 15,
+              justifyContent: 'center',
             }}
           >
-            Reviews
-          </Text>
-        </View>
-      )}
-      {!loadingChapterList && !loadingMetadata && !loadingStats && notloaded && (
-        <View
-          style={{
-            alignItems: 'center',
-            flex: 1,
-            padding: 15,
-            justifyContent: 'center',
-          }}
-        >
-          <Text>We are sorry!😭</Text>
-          <Text> There has been an error while loading your story😥</Text>
-          <Text> We hope to fix it as soon as possible</Text>
-          <Text> Try again later</Text>
-        </View>
-      )}
+            <Text>We are sorry!😭</Text>
+            <Text> There has been an error while loading your story😥</Text>
+            <Text> We hope to fix it as soon as possible</Text>
+            <Text> Try again later</Text>
+          </View>
+        )}
       {loadingChapterList && loadingMetadata && loadingStats && loading && (
         <View
           style={{

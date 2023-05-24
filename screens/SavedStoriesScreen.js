@@ -13,10 +13,7 @@ import ProfileHeader from '../components/Profile/ProfileHeader';
 import StoryContainer from '../components/StoryContainer';
 import Colors from '../constants/Colors';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { firestore, auth } from '@react-native-firebase/app';
 import GENRES from '../constants/Genres';
-import * as firebase from '@react-native-firebase/app';
-import * as Analytics from 'expo-firebase-analytics';
 
 const images = {
   terror: require('../assets/terror.jpg'),
@@ -31,54 +28,9 @@ export default ({ navigation }) => {
   const [loading, setloading] = useState(true);
   const [storyCount, setStoryCount] = useState(0);
   //Get user information
-  const storyRef = firestore().collection('stories');
 
   useEffect(() => {
-    const unsubscribeStories = firestore()
-      .collection('users')
-      .doc(auth().currentUser.uid) // TODO ESTO HAY QUE CAMBIARLO POR EL ID DE USUARIO!
-      .collection('savedStories')
-      .orderBy('date', 'desc')
-      .onSnapshot(
-        (querySnapshot) => {
-          var fetchedStories = [];
-          if (querySnapshot.size === 0) {
-            setloading(false);
-          }
-          console.log('Stories found: ' + querySnapshot.size);
-          setStoryCount(querySnapshot.size);
-          console.log('Story count: ' + storyCount);
-          querySnapshot.forEach((doc) => {
-            //Fetching every story from DB
-            storyRef
-              .doc(doc.id)
-              .get()
-              .then((doc) => {
-                if (doc.exists) {
-                  fetchedStories.push(doc.data());
-                  console.log('Story loaded with id: ', doc.id);
-                  setStories(fetchedStories);
-                  setloading(false);
-                } else {
-                  // doc.data() will be undefined in this case
-                  setloading(false);
-                  console.log('No such document!');
-                }
-              })
-              .catch((error) => {
-                console.log('Error getting document:', error);
-              });
-          });
-
-          console.log(stories);
-        },
-        (error) => {
-          setloading(false);
-          console.log(error);
-        }
-      );
-
-    return unsubscribeStories;
+    // get liked stories metadata
   }, []);
 
   return (
