@@ -1,64 +1,61 @@
 import { fetchWithAuth } from '../services/fetchWithAuth';
 import { BASE_PATH, API_VERSION } from './apiconfig';
-
-class UserApi {
-  static async createUser(user) {
+class ChapterApi {
+  static async createChapter(chapter) {
+    console.log('Sending chapter to db');
+    console.log(chapter);
     const response = await fetchWithAuth(
-      `${BASE_PATH}/${API_VERSION}/create-user`,
+      `${BASE_PATH}/${API_VERSION}/chapters`,
       {
         method: 'POST',
-        body: JSON.stringify(user),
+        body: JSON.stringify(chapter),
         headers: { 'Content-Type': 'application/json' },
       }
     );
     return response;
   }
 
-  static async getUserById(userId) {
+  static async getChapterById(chapterId) {
     const response = await fetchWithAuth(
-      `${BASE_PATH}/${API_VERSION}/get-user/${userId}`,
+      `${BASE_PATH}/${API_VERSION}/chapters/${chapterId}`,
       {
         method: 'GET',
       }
     );
-
     return response;
   }
 
-  static async updateUser(userId, updatedUser) {
+  static async updateChapter(chapterId, updatedChapter) {
     const response = await fetchWithAuth(
-      `${BASE_PATH}/${API_VERSION}/api/update-user/${userId}`,
+      `${BASE_PATH}/${API_VERSION}/chapters/${chapterId}`,
       {
         method: 'PUT',
-        body: JSON.stringify(updatedUser),
+        body: JSON.stringify(updatedChapter),
         headers: { 'Content-Type': 'application/json' },
       }
     );
-
     return response;
   }
 
-  static async deleteUser(userId) {
+  static async deleteChapter(chapterId) {
     const response = await fetchWithAuth(
-      `${BASE_PATH}/${API_VERSION}/api/delete-user/${userId}`,
+      `${BASE_PATH}/${API_VERSION}/chapters/${chapterId}`,
       {
         method: 'DELETE',
       }
     );
-
     return response;
   }
 
-  static async getUsername(userId) {
+  static async getChaptersForStory(storyId) {
     const response = await fetchWithAuth(
-      `${BASE_PATH}/${API_VERSION}/get-user/${userId}/username`,
+      `${BASE_PATH}/${API_VERSION}/story/${storyId}/chapters`,
       {
         method: 'GET',
       }
     );
-
     return response;
   }
 }
 
-export default UserApi;
+export default ChapterApi;

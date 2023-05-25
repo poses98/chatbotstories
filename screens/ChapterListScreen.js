@@ -10,35 +10,41 @@ import Colors from '../constants/Colors';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { ScrollView } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import ChapterApi from '../api/chapter';
 import { ChapterItem } from '../components/ChapterItem';
-
-/**
- * This function renders the right icon in the stack bar and
- * updates database when the icon is pressed
- */
-const renderStackBarIconRight = (navigation, addItemToLists) => {
-  return (
-    <View style={{ flexDirection: 'row' }}>
-      <TouchableOpacity
-        onPress={() => {
-          navigation.navigate('ChapterDetails', {
-            saveChanges: addItemToLists,
-          });
-        }}
-        style={{ paddingRight: 5 }}
-      >
-        <Ionicons name="add-circle-outline" size={26} color={Colors.black} />
-      </TouchableOpacity>
-    </View>
-  );
-};
 
 export default ({ navigation, route }) => {
   const [newItem, setNewItem] = useState();
   const [chapterList, setChapterList] = useState([]);
 
   // get chapters api
-  useEffect(() => {}, []);
+  useEffect(() => {
+    ChapterApi.getChaptersForStory(route.params.storyId).then((response) => {
+      console.log(response);
+      setChapterList(response);
+    });
+  }, []);
+
+  /**
+   * This function renders the right icon in the stack bar and
+   * updates database when the icon is pressed
+   */
+  const renderStackBarIconRight = (addItemToLists) => {
+    return (
+      <View style={{ flexDirection: 'row' }}>
+        <TouchableOpacity
+          onPress={() => {
+            navigation.navigate('ChapterDetails', {
+              storyId: route.params.storyId,
+            });
+          }}
+          style={{ paddingRight: 5 }}
+        >
+          <Ionicons name="add-circle-outline" size={26} color={Colors.black} />
+        </TouchableOpacity>
+      </View>
+    );
+  };
 
   const addItemToLists = ({
     title,
@@ -79,20 +85,20 @@ export default ({ navigation, route }) => {
     <View style={styles.container}>
       <FlatList
         data={chapterList}
-        renderItem={({ item: { title, description, id, index } }) => {
+        renderItem={({ item: { title, description, _id, index } }) => {
           return (
             <ChapterItem
               title={title}
               onPress={() => {
                 navigation.navigate('Chat', {
-                  chapterId: id,
+                  chapterId: _id,
                   storyId: route.params.storyId,
                   saveChanges: addItemToLists,
                 });
               }}
-              id={id}
+              id={_id}
               navigation={navigation}
-              onDelete={() => removeItemFromLists(id)}
+              onDelete={() => removeItemFromLists(_id)}
               index={index}
               finished={true}
               list={true}

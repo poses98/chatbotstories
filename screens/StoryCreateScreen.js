@@ -21,6 +21,8 @@ import { Picker } from '@react-native-picker/picker';
 import Button from '../components/Button';
 import { Label } from '../components/Label';
 import { StatusSelector } from '../components/StatusSelector';
+import StoryApi from '../api/story';
+import useAuth from '../hooks/useAuth';
 
 export default ({ route, navigation }) => {
   /** STORY ID IN CASE IS UPDATE MODE */
@@ -49,14 +51,15 @@ export default ({ route, navigation }) => {
     errorMessage: '',
     text: '',
   });
-  const [interactive, setinteractive] = useState(false); // interactivity of the story
+  const [interactive, setInteractive] = useState(false); // interactivity of the story
   const [oldInteractive, setOldInteractive] = useState(false); //check variable for old interactivity
-  const [status, setstatus] = useState(0); // status of the story
-  const [language, setlanguage] = useState(0); // language of the story
+  const [status, setStatus] = useState(0); // status of the story
+  const [language, setLanguage] = useState(0); // language of the story
   const [memberNumber, setMemberNumber] = useState(2); //number of the members of the story
+  const { authUser } = useAuth();
 
   const updateStatus = (value) => {
-    setstatus(value);
+    setStatus(value);
   };
   /** Getting the metadata of the story */
   useEffect(() => {
@@ -70,7 +73,16 @@ export default ({ route, navigation }) => {
    *
    * @param {form data}} data
    */
-  const createStory = (data) => {};
+  const createStory = (data) => {
+    StoryApi.createStory(data)
+      .then((response) => {
+        console.log('Story created!');
+        console.log(response);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
   /** GENRE BUBBLE TEMPLATE */
   const GenreBubble = ({ image, verboseName, genreKey }) => {
     return (
@@ -162,7 +174,7 @@ export default ({ route, navigation }) => {
               <Button
                 text="Yes"
                 onPress={() => {
-                  setinteractive(true);
+                  setInteractive(true);
                 }}
                 buttonStyle={{
                   flex: 0.5,
@@ -180,7 +192,7 @@ export default ({ route, navigation }) => {
               <Button
                 text="No"
                 onPress={() => {
-                  setinteractive(false);
+                  setInteractive(false);
                 }}
                 buttonStyle={{
                   flex: 0.5,
@@ -218,7 +230,7 @@ export default ({ route, navigation }) => {
               }}
               dropdownIconColor={Colors.black}
               selectedValue={language}
-              onValueChange={(itemValue, itemIndex) => setlanguage(itemValue)}
+              onValueChange={(itemValue, itemIndex) => setLanguage(itemValue)}
             >
               <Picker.Item
                 label={LANGUAGES.en.verboseName}
@@ -254,9 +266,9 @@ export default ({ route, navigation }) => {
                     /(\r\n|\n|\r)/gm,
                     ''
                   ),
-                  categoryMain: categoryMain,
+                  genre: categoryMain,
                   date: Date.now(),
-                  author: auth().currentUser.uid,
+                  author: authUser._id,
                   interactive: interactive,
                   status: status,
                   language: language,

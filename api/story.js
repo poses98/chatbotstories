@@ -77,6 +77,17 @@ class StoryApi {
     );
     return response;
   }
+
+  static async getUserStories(userId) {
+    console.log(userId);
+    const response = await fetchWithAuth(
+      `${BASE_PATH}/${API_VERSION}/stories/user/${userId}/`,
+      {
+        method: 'GET',
+      }
+    );
+    return response;
+  }
 }
 
 export default StoryApi;

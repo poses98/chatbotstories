@@ -88,7 +88,8 @@ export default () => {
     createUserWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
         // Signed in
-        const user = userCredential.user;
+        const user = userCredential.user.uid;
+        data.uid = user;
         // create account API
         UserApi.createUser(data)
           .then((response) => {

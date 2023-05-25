@@ -1,11 +1,10 @@
-import React, { useEffect, useState } from 'react';
-import { NavigationContainer, DarkTheme } from '@react-navigation/native';
-import { AuthStackScreen, UserStackScreen } from './components/Navigation';
+import React, { useEffect } from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { UserStackScreen } from './components/Navigation';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import FirebaseProvider from './providers/FirebaseProvider';
-import LoadingScreen from './screens/LoadingScreen';
+import AuthProvider from './providers/AuthProvider';
 import { getApps } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
 
 async function changeScreenOrientation() {
   await ScreenOrientation.lockAsync(
@@ -25,7 +24,9 @@ export default function App() {
   return (
     <NavigationContainer>
       <FirebaseProvider>
-        <UserStackScreen />
+        <AuthProvider>
+          <UserStackScreen />
+        </AuthProvider>
       </FirebaseProvider>
     </NavigationContainer>
   );

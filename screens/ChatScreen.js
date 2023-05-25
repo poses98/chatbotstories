@@ -15,33 +15,51 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { ScrollView, TextInput } from 'react-native-gesture-handler';
 import { MessageBubble } from '../components/MessageBubble';
 import { AuthorButtonSelector } from '../components/AuthorButtonSelector';
+import CharacterApi from '../api/character';
+import MessageApi from '../api/message';
+import StoryApi from '../api/story';
 import Swipeable from 'react-native-swipeable';
+import ChapterApi from '../api/chapter';
 
 export default ({ navigation, route }) => {
   const [messages, setMessages] = useState([]);
-  const [characterList, setCharacterList] = useState([]);
+  const [characterList, setCharacterList] = useState(null);
   const [senderId, setSenderId] = useState('');
   const [messageEdit, setMessageEdit] = useState('');
   const [messageEditId, setMessageEditId] = useState('');
   const [messageEditIndex, setMessageEditIndex] = useState(0);
   const [messageEditMode, setMessageEditMode] = useState(false);
   const [canBeMain, setCanBeMain] = useState(false);
-
+  const storyId = route.params.storyId;
+  const chapterId = route.params.chapterId;
   const scrollViewRef = useRef();
 
   /**Getting the characters from the db */
-  useEffect(() => {}, []);
+  useEffect(() => {
+    StoryApi.getStoryById(storyId)
+      .then((response) => {
+        const characterListTmp = response.characters;
+        setCharacterList(characterListTmp);
+        console.log(response.characters);
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  }, []);
   /**Getting the messages from the db */
-  useEffect(() => {}, []);
+  useEffect(() => {
+    ChapterApi.getChapterById(chapterId).then((response) => {
+      setMessages(response.messages);
+    });
+  }, []);
 
   const getCanBeMain = () => {
-    let check = true;
     characterList.forEach((element) => {
       if (element.main) {
-        check = false;
+        return false;
       }
     });
-    return check;
+    return true;
   };
 
   /**
@@ -65,16 +83,40 @@ export default ({ navigation, route }) => {
       { cancelable: true }
     );
 
-  const updateCharacterList = ({ id, name, color, main }) => {};
+  const updateCharacterList = ({ id, name, color, main }) => {
+    const character = { _id: id, name: name, color: color, main: main };
+    CharacterApi.updateCharacterForStory(storyId, character._id, character)
+      .then((response) => {
+        console.log(response);
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  };
 
-  const addCharacterToList = ({ name, color, main }) => {};
+  const addCharacterToList = ({ name, color, main }) => {
+    const character = { name: name, color: color, main: main };
+    console.log('Creating character');
+    CharacterApi.createCharacterForStory(storyId, character)
+      .then((response) => {
+        console.log(response);
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  };
 
   const updateMessage = ({ id, messageBody, sender, index }) => {};
 
   const addMessageToList = ({ messageBody, sender }) => {
     const index =
       messages.length >= 1 ? messages[messages.length - 1].index + 1 : 0;
-    console.log(messageBody);
+    const message = { body: messageBody, sender, index };
+    console.log(chapterId);
+    console.log(message);
+    MessageApi.createMessageForChapter(chapterId, message).then((response) => {
+      console.log(response);
+    });
   };
 
   const removeMessage = ({ id }) => {};
@@ -91,63 +133,14 @@ export default ({ navigation, route }) => {
         >
           <FlatList
             data={messages}
-            keyExtractor={(item) => item.id.toString()}
-            renderItem={({ item: { messageBody, sender, id, index } }) => {
+            keyExtractor={(item) => item._id.toString()}
+            renderItem={({ item: { body, sender, _id, index } }) => {
               return (
-                <Swipeable
-                  rightButtons={[
-                    <TouchableOpacity
-                      style={{
-                        backgroundColor: Colors.orange,
-                        justifyContent: 'center',
-                        width: 45,
-                        height: 45,
-                        borderRadius: 15,
-                        marginHorizontal: 0,
-                      }}
-                      onPress={() => {
-                        navigation.navigate('MessageEdit', {
-                          messageBody: messageBody,
-                          sender: sender,
-                          id: id,
-                          index: index,
-                          saveChanges: updateMessage,
-                          characterList: characterList,
-                        });
-                      }}
-                    >
-                      <Ionicons
-                        name="pencil-outline"
-                        size={26}
-                        style={{ alignSelf: 'center', color: 'white' }}
-                      />
-                    </TouchableOpacity>,
-                    <TouchableOpacity
-                      style={{
-                        backgroundColor: Colors.red,
-                        justifyContent: 'center',
-                        width: 45,
-                        height: 45,
-                        borderRadius: 15,
-                      }}
-                      onPress={() => {
-                        changesWillNotBeSavedAlert({ id });
-                      }}
-                    >
-                      <Ionicons
-                        name="trash-bin-outline"
-                        size={26}
-                        style={{ alignSelf: 'center', color: 'white' }}
-                      />
-                    </TouchableOpacity>,
-                  ]}
-                >
-                  <MessageBubble
-                    messageBody={messageBody}
-                    sender={sender}
-                    characterList={characterList}
-                  />
-                </Swipeable>
+                <MessageBubble
+                  messageBody={body}
+                  sender={sender}
+                  characterList={characterList}
+                />
               );
             }}
           />
@@ -170,22 +163,22 @@ export default ({ navigation, route }) => {
             horizontal
             showsHorizontalScrollIndicator={false}
             data={characterList}
-            keyExtractor={(item) => item.id.toString()}
-            renderItem={({ item: { name, color, id, main } }) => {
+            keyExtractor={(item) => item._id.toString()}
+            renderItem={({ item: { name, color, _id, main } }) => {
               return (
                 <AuthorButtonSelector
                   name={name}
                   color={color}
-                  _id={id}
+                  _id={_id}
                   onPress={() => {
-                    setSenderId(id);
+                    setSenderId(_id);
                   }}
                   onLongPress={() =>
                     navigation.navigate('CharacterCreation', {
                       saveChanges: updateCharacterList,
                       characterName: name,
                       characterColor: color,
-                      characterId: id,
+                      characterId: _id,
                       isMain: main,
                       canBeMain: getCanBeMain(),
                     })

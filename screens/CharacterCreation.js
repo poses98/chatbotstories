@@ -86,7 +86,6 @@ export default ({ navigation, route }) => {
             navigation.dispatch(CommonActions.goBack());
           } else {
             console.log('ERROR: Name length < 1');
-
             setValidity(false);
           }
         }}

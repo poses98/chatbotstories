@@ -1,15 +1,15 @@
-import React from "react";
-import { Appearance } from "react-native";
+import React from 'react';
+import { Appearance } from 'react-native';
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
   ImageBackground,
-} from "react-native";
-import Colors from "../constants/Colors";
-import Ionicons from "@expo/vector-icons/Ionicons";
-import GENRES from "../constants/Genres";
+} from 'react-native';
+import Colors from '../constants/Colors';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import GENRES from '../constants/Genres';
 
 export default StoryContainer = ({
   interactive,
@@ -54,11 +54,11 @@ export default StoryContainer = ({
             <Text style={styles.storyDescription}>"{description}"</Text>
           </View>
           {/**STATS */}
-          <View style={{ alignSelf: "flex-end" }}>
+          <View style={{ alignSelf: 'flex-end' }}>
             <View
               style={{
-                flexDirection: "row",
-                alignItems: "center",
+                flexDirection: 'row',
+                alignItems: 'center',
               }}
             >
               <View style={styles.storyStats}>
@@ -84,58 +84,57 @@ export default StoryContainer = ({
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: '#fff',
+    height: 230,
   },
   image: {
-    flex: 1,
-    justifyContent: "center",
+    justifyContent: 'center',
     height: 230,
-    width: "100%",
+    width: '100%',
   },
   storyContainer: {
-    flexDirection: "column",
-    justifyContent: "space-between",
+    flexDirection: 'column',
+    justifyContent: 'space-between',
     height: 230,
     padding: 15,
     borderColor: Colors.gray,
-    backgroundColor: "rgba(52, 52, 52, 0.6)",
+    backgroundColor: 'rgba(52, 52, 52, 0.6)',
   },
   storyBar: {
-    alignSelf: "flex-start",
+    alignSelf: 'flex-start',
     padding: 0,
-    flexDirection: "row",
+    flexDirection: 'row',
   },
   storyTag: {
     borderWidth: 1,
-    borderColor: "#fafafa", //TODO
+    borderColor: '#fafafa', //TODO
     padding: 5,
     borderRadius: 5,
     marginHorizontal: 3,
   },
   storyTitle: {
     fontSize: 26,
-    fontWeight: "bold",
-    color: "#fafafa",
+    fontWeight: 'bold',
+    color: '#fafafa',
   },
   storyDescription: {
     color: Colors.lightGray,
   },
   storyMainInfoContainer: {
     flex: 1,
-    alignItems: "flex-start",
-    alignContent: "center",
-    justifyContent: "center",
-    flexDirection: "column",
-    color: "#fafafa",
+    alignItems: 'flex-start',
+    alignContent: 'center',
+    justifyContent: 'center',
+    flexDirection: 'column',
+    color: '#fafafa',
   },
   storyStats: {
-    flexDirection: "row",
+    flexDirection: 'row',
     marginRight: 15,
-    alignItems: "center",
+    alignItems: 'center',
   },
-  readStatusText : {
+  readStatusText: {
     fontSize: 12,
-    color:Colors.lightGray
-  }
+    color: Colors.lightGray,
+  },
 });

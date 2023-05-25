@@ -1,48 +1,50 @@
-import React from "react";
-import { moderateScale } from "react-native-size-matters";
-import { StyleSheet, Text, View } from "react-native";
-import Colors from "../constants/Colors";
+import React, { useEffect, useState } from 'react';
+import { moderateScale } from 'react-native-size-matters';
+import { StyleSheet, Text, View } from 'react-native';
+import Colors from '../constants/Colors';
 
-export const MessageBubble = ({
-  messageBody,
-  sender,
-  characterList
-}) => {
-  let verboseName = "";
-  let characterColor = "";
-  let main = false;
-  characterList.forEach((element) => {
-    if (sender === element.id) {
-      if (!element.main) {
-        verboseName = element.name;
-        characterColor = element.color;
-      } else {
-        main = true;
-      }
+export const MessageBubble = ({ messageBody, sender, characterList }) => {
+  const [verboseName, setVerboseName] = useState('');
+  const [characterColor, setCharacterColor] = useState('');
+  const [main, setMain] = useState(false);
+  useEffect(() => {
+    if (characterList) {
+      characterList.forEach((element) => {
+        if (sender === element._id) {
+          console.log(element);
+          if (!element.main) {
+            setVerboseName(element.name);
+            setCharacterColor(element.color);
+            setMain(false);
+          } else {
+            setMain(true);
+          }
+        }
+      });
     }
-  });
+  }, [characterList]);
+
   return (
     <View style={[styles.item, verboseName ? styles.itemIn : styles.itemOut]}>
-        <View
-          style={[
-            styles.balloon,
-            { backgroundColor: verboseName ? "#075E54" : "#1084ff" },
-          ]}
-
-        >
-          {!main && (
-            <Text
-              style={{
-                paddingTop: 0,
-                color: characterColor ? characterColor : Colors.green,
-                fontWeight: "bold",
-              }}
-            >
-              {verboseName}
-            </Text>
-          )}
-          <Text style={{ paddingTop: 1, color: "white" }}>{messageBody}</Text>
-        </View>
+      <View
+        style={[
+          styles.balloon,
+          { backgroundColor: verboseName ? '#075E54' : '#1084ff' },
+        ]}
+      >
+        {!main && (
+          <Text
+            style={{
+              paddingTop: 0,
+              color: characterColor ? characterColor : Colors.green,
+              fontWeight: 'bold',
+            }}
+          >
+            {verboseName}
+          </Text>
+        )}
+        <Text style={{ paddingTop: 1, color: 'white' }}>{messageBody}</Text>
+      </View>
     </View>
   );
 };
@@ -50,14 +52,14 @@ export const MessageBubble = ({
 const styles = StyleSheet.create({
   item: {
     marginVertical: moderateScale(4, 2),
-    flexDirection: "row",
+    flexDirection: 'row',
   },
   itemIn: {
-    alignSelf: "flex-start",
+    alignSelf: 'flex-start',
     marginLeft: 10,
   },
   itemOut: {
-    alignSelf: "flex-end",
+    alignSelf: 'flex-end',
     marginRight: 10,
   },
   balloon: {
@@ -69,7 +71,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   arrowContainer: {
-    position: "absolute",
+    position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
@@ -78,13 +80,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   arrowLeftContainer: {
-    justifyContent: "flex-end",
-    alignItems: "flex-start",
+    justifyContent: 'flex-end',
+    alignItems: 'flex-start',
   },
 
   arrowRightContainer: {
-    justifyContent: "flex-end",
-    alignItems: "flex-end",
+    justifyContent: 'flex-end',
+    alignItems: 'flex-end',
   },
 
   arrowLeft: {
@@ -95,9 +97,9 @@ const styles = StyleSheet.create({
     right: moderateScale(-6, 0.5),
   },
   inputContainer: {
-    position: "absolute",
+    position: 'absolute',
     flex: 1,
-    flexDirection: "column-reverse",
-    alignSelf: "baseline",
+    flexDirection: 'column-reverse',
+    alignSelf: 'baseline',
   },
 });

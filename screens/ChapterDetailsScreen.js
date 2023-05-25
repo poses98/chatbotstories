@@ -6,6 +6,8 @@ import LabeledInput from '../components/LabeledInput';
 import Button from '../components/Button';
 import { StatusSelector } from '../components/StatusSelector';
 import { CommonActions } from '@react-navigation/native';
+import ChapterApi from '../api/chapter';
+import useAuth from '../hooks/useAuth';
 
 export default ({ route, navigation }) => {
   const [Owned, setOwned] = useState(false);
@@ -30,10 +32,17 @@ export default ({ route, navigation }) => {
   const updateStatus = (value) => {
     setstatus(value);
   };
+  const { authUser } = useAuth();
 
-  /** SEND CHAPTER TO DB */
   const createChapter = (data) => {
-    a;
+    ChapterApi.createChapter(data)
+      .then((response) => {
+        console.log(response);
+        navigation.dispatch(CommonActions.goBack());
+      })
+      .catch((err) => {
+        console.error(err);
+      });
   };
   return (
     <ScrollView style={styles.container}>
@@ -89,17 +98,18 @@ export default ({ route, navigation }) => {
           }
 
           if (validation) {
-            const data = {
-              title: nameField.text,
-              description: descriptionField.text.replace(/(\r\n|\n|\r)/gm, ''),
-              lastUpdate: Date.now(),
-              author: auth().currentUser.uid,
-              status: status,
-            };
-
             if (!isEditMode) {
-              route.params.saveChanges(data);
-              navigation.dispatch(CommonActions.goBack());
+              createChapter({
+                story: storyId,
+                title: nameField.text,
+                description: descriptionField.text.replace(
+                  /(\r\n|\n|\r)/gm,
+                  ''
+                ),
+                lastUpdate: Date.now(),
+                author: authUser._id,
+                status: status,
+              });
             } else if (isEditMode) {
               //update chapter
             }

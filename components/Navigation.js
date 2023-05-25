@@ -220,6 +220,7 @@ export const UserStackScreen = () => {
         options={({ route }) => {
           return {
             title: 'Chapter details',
+            storyId: route.params.storyId,
           };
         }}
       />
@@ -238,6 +239,7 @@ export const UserStackScreen = () => {
         options={({ route }) => {
           return {
             title: 'Chat',
+            chapterId: route.params.chapterId,
           };
         }}
       />

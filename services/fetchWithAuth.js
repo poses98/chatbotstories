@@ -8,14 +8,12 @@ const fetchWithAuth = async (url, options = {}) => {
     Authorization: `${idToken.toString()}`,
     ...options.headers,
   };
-  console.log(url);
-  console.log({ ...options, headers });
 
   const response = await fetch(url, { ...options, headers });
 
   if (!response.ok) {
     console.log(response.status);
-    throw new Error(`HTTP error! status: ${response.status}`);
+    throw new Error(`HTTP error! status: ${response.status} endpoint: ${url}`);
   } else {
     const data = await response.json();
     return data;
