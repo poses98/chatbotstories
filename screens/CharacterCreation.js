@@ -1,5 +1,5 @@
 import { CommonActions } from '@react-navigation/native';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { StyleSheet, View, Switch } from 'react-native';
 import Colors from '../constants/Colors';
 import ColorSelector from '../components/ColorSelector';
@@ -30,6 +30,9 @@ export default ({ navigation, route }) => {
   );
   const [isValid, setValidity] = useState(true);
 
+  useEffect(() => {
+    console.log(`Main: ${main}\nCanBeMain:${canBeMain}`);
+  }, [main, canBeMain]);
   return (
     <View style={styles.container}>
       <View>
@@ -81,6 +84,7 @@ export default ({ navigation, route }) => {
               const id = characterId;
               route.params.saveChanges({ id, name, color, main });
             } else {
+              console.log(main);
               route.params.saveChanges({ name, color, main });
             }
             navigation.dispatch(CommonActions.goBack());

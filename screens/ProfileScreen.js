@@ -104,9 +104,9 @@ export default ({ navigation }) => {
               name={data.name || ''}
               web={data.website || ''}
               description={data.description || ''}
-              posts={storyCont || ''}
-              followers={data.followers || ''}
-              following={data.following || ''}
+              posts={stories.length || ''}
+              followers={data.followers || 0}
+              following={data.following || 0}
               navigation={navigation}
               userId={data.userId}
               image={image}
@@ -121,6 +121,8 @@ export default ({ navigation }) => {
                   id={item.storyId}
                   categoryMain={item.genre}
                   date={item.date}
+                  likes={item.likes.count}
+                  views="0"
                   onPress={() => {
                     navigation.navigate('StoryInfo', {
                       title: item.title,

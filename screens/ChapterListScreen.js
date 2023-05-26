@@ -23,7 +23,7 @@ export default ({ navigation, route }) => {
       console.log(response);
       setChapterList(response);
     });
-  }, []);
+  }, [newItem]);
 
   /**
    * This function renders the right icon in the stack bar and
@@ -36,6 +36,7 @@ export default ({ navigation, route }) => {
           onPress={() => {
             navigation.navigate('ChapterDetails', {
               storyId: route.params.storyId,
+              addItemToLists: addItemToLists,
             });
           }}
           style={{ paddingRight: 5 }}
@@ -46,18 +47,9 @@ export default ({ navigation, route }) => {
     );
   };
 
-  const addItemToLists = ({
-    title,
-    description,
-    lastUpdate,
-    status,
-    author,
-  }) => {
-    const index =
-      chapterList.length >= 1
-        ? chapterList[chapterList.length - 1].index + 1
-        : 0;
-    // add chapter
+  const addItemToLists = () => {
+    console.log('received');
+    setNewItem(!newItem);
   };
 
   const removeItemFromLists = (id) => {
@@ -77,21 +69,18 @@ export default ({ navigation, route }) => {
     });
   });
 
-  if (newItem) {
-    chapterList = [newItem, ...chapterList];
-  }
-
   return (
     <View style={styles.container}>
       <FlatList
         data={chapterList}
-        renderItem={({ item: { title, description, _id, index } }) => {
+        renderItem={({ item: { title, description, _id }, index }) => {
           return (
             <ChapterItem
               title={title}
               onPress={() => {
                 navigation.navigate('Chat', {
                   chapterId: _id,
+                  title: title,
                   storyId: route.params.storyId,
                   saveChanges: addItemToLists,
                 });

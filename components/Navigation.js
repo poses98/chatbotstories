@@ -178,13 +178,11 @@ export const UserStackScreen = () => {
           },
         })}
       />
-      {
-        <UserStack.Screen
-          name="ProfileEdit"
-          component={ProfileEditScreen}
-          options={{ title: 'Edit profile' }}
-        />
-      }
+      <UserStack.Screen
+        name="ProfileEdit"
+        component={ProfileEditScreen}
+        options={{ title: 'Edit profile' }}
+      />
       <UserStack.Screen
         name="StoryInfo"
         component={StoryInfoScreen}
@@ -238,7 +236,7 @@ export const UserStackScreen = () => {
         component={ChatScreen}
         options={({ route }) => {
           return {
-            title: 'Chat',
+            title: route.params.title,
             chapterId: route.params.chapterId,
           };
         }}

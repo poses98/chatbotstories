@@ -75,12 +75,12 @@ export default ({ route, navigation }) => {
    */
   const createStory = (data) => {
     StoryApi.createStory(data)
-      .then((response) => {
-        console.log('Story created!');
-        console.log(response);
+      .then(() => {
+        navigation.dispatch(CommonActions.goBack());
       })
       .catch((err) => {
         console.log(err);
+        /**TODO Handle error */
       });
   };
   /** GENRE BUBBLE TEMPLATE */

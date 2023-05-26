@@ -26,8 +26,10 @@ class UserApi {
   }
 
   static async updateUser(userId, updatedUser) {
+    console.log(userId);
+    console.log(updatedUser);
     const response = await fetchWithAuth(
-      `${BASE_PATH}/${API_VERSION}/api/update-user/${userId}`,
+      `${BASE_PATH}/${API_VERSION}/update-user/${userId}`,
       {
         method: 'PUT',
         body: JSON.stringify(updatedUser),
@@ -40,7 +42,7 @@ class UserApi {
 
   static async deleteUser(userId) {
     const response = await fetchWithAuth(
-      `${BASE_PATH}/${API_VERSION}/api/delete-user/${userId}`,
+      `${BASE_PATH}/${API_VERSION}/delete-user/${userId}`,
       {
         method: 'DELETE',
       }

@@ -12,6 +12,7 @@ export default ({
   followers,
   following,
   image,
+  navigation,
   ...data
 }) => {
   const EditProfileButton = () => {
@@ -20,7 +21,7 @@ export default ({
         text="Edit profile"
         textStyle={{ fontWeight: 'bold' }}
         onPress={() => {
-          data.navigation.navigate('ProfileEdit');
+          navigation.navigate('ProfileEdit');
         }}
         buttonStyle={{ marginTop: 10 }}
       />

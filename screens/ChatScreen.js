@@ -23,6 +23,7 @@ import ChapterApi from '../api/chapter';
 
 export default ({ navigation, route }) => {
   const [messages, setMessages] = useState([]);
+  const [refreshChat, setRefreshChat] = useState(false);
   const [characterList, setCharacterList] = useState(null);
   const [senderId, setSenderId] = useState('');
   const [messageEdit, setMessageEdit] = useState('');
@@ -45,17 +46,17 @@ export default ({ navigation, route }) => {
       .catch((err) => {
         console.error(err);
       });
-  }, []);
+  }, [refreshChat]);
   /**Getting the messages from the db */
   useEffect(() => {
     ChapterApi.getChapterById(chapterId).then((response) => {
       setMessages(response.messages);
     });
-  }, []);
+  }, [refreshChat]);
 
   const getCanBeMain = () => {
     characterList.forEach((element) => {
-      if (element.main) {
+      if (element.isMain) {
         return false;
       }
     });
@@ -84,9 +85,10 @@ export default ({ navigation, route }) => {
     );
 
   const updateCharacterList = ({ id, name, color, main }) => {
-    const character = { _id: id, name: name, color: color, main: main };
+    const character = { _id: id, name: name, color: color, isMain: main };
     CharacterApi.updateCharacterForStory(storyId, character._id, character)
       .then((response) => {
+        setRefreshChat(!refreshChat);
         console.log(response);
       })
       .catch((err) => {
@@ -95,10 +97,11 @@ export default ({ navigation, route }) => {
   };
 
   const addCharacterToList = ({ name, color, main }) => {
-    const character = { name: name, color: color, main: main };
-    console.log('Creating character');
+    const character = { name: name, color: color, isMain: main };
+    console.log(`Creating character: ${character}`);
     CharacterApi.createCharacterForStory(storyId, character)
       .then((response) => {
+        setRefreshChat(!refreshChat);
         console.log(response);
       })
       .catch((err) => {
@@ -116,6 +119,7 @@ export default ({ navigation, route }) => {
     console.log(message);
     MessageApi.createMessageForChapter(chapterId, message).then((response) => {
       console.log(response);
+      setRefreshChat(!refreshChat);
     });
   };
 
@@ -179,7 +183,7 @@ export default ({ navigation, route }) => {
                       characterName: name,
                       characterColor: color,
                       characterId: _id,
-                      isMain: main,
+                      isMain: main ? true : false,
                       canBeMain: getCanBeMain(),
                     })
                   }

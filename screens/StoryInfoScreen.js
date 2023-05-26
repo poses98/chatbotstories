@@ -60,7 +60,7 @@ export default ({ navigation, route }) => {
   /** Getting the metadata of the story */
   useEffect(() => {
     if (!data && authUser) {
-      StoryApi.getStoryById(storyId)
+      StoryApi.getStoryAndChaptersById(storyId)
         .then((response) => {
           console.log('Metada received');
           var date = new Date(response.date);
@@ -68,6 +68,7 @@ export default ({ navigation, route }) => {
           response.day = date.getDate();
           response.year = date.getFullYear();
           setdata(response);
+          setChapterList(response.chapters);
 
           if (authUser._id === response.author) setowned(true);
           setloading(false);

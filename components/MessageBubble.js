@@ -12,7 +12,7 @@ export const MessageBubble = ({ messageBody, sender, characterList }) => {
       characterList.forEach((element) => {
         if (sender === element._id) {
           console.log(element);
-          if (!element.main) {
+          if (!element.isMain) {
             setVerboseName(element.name);
             setCharacterColor(element.color);
             setMain(false);

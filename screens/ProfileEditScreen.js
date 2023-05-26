@@ -15,79 +15,77 @@ import LabeledInput from '../components/LabeledInput';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import * as ImagePicker from 'expo-image-picker';
 import UserApi from '../api/user';
-import useFirebase from '../hooks/useFirebase';
+import useAuth from '../hooks/useAuth';
 
 export default ({ navigation }) => {
-  const { user } = useFirebase();
+  const { authUser } = useAuth();
   const [hasBeenChanges, setHasBeenChanges] = useState(false);
-  const [data, setdata] = useState({
+  const [data, setData] = useState({
     username: {
       errorMessage: '',
     },
   });
-  const [errorMessage, seterrorMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
   const [loading, setloading] = useState(false);
-  const [oldUsername, setoldUsername] = useState('');
   /**
    * Getting the user data to show in the form
    */
-  useEffect(() => {}, []);
+  useEffect(() => {
+    if (authUser) {
+      setData(authUser);
+    }
+  }, [authUser]);
   /**
    * This function renders the icons in headerbar
    */
   useLayoutEffect(() => {
+    const renderStackBarIconRight = () => {
+      return (
+        <View style={{ flexDirection: 'row' }}>
+          <TouchableOpacity
+            onPress={() => {
+              data.description = data.description
+                ? data.description.replace(/\r?\n|\r/, '').trim()
+                : '';
+              setData({ ...data });
+              // check if username is available
+              console.log('Updating user...');
+              UserApi.updateUser(authUser._id, data).then((response) => {});
+            }}
+            style={{ paddingRight: 5 }}
+          >
+            <Ionicons name="checkmark-outline" size={26} color={Colors.black} />
+          </TouchableOpacity>
+        </View>
+      );
+    };
+    const backButtonProfileEdit = () => {
+      return (
+        <View style={{ flexDirection: 'row' }}>
+          <TouchableOpacity
+            onPress={() => {
+              if (hasBeenChanges) {
+                changesWillNotBeSavedAlert();
+              } else {
+                navigation.dispatch(CommonActions.goBack());
+              }
+            }}
+            style={{ paddingLeft: 10 }}
+          >
+            <Ionicons name="close-outline" size={26} color={Colors.black} />
+          </TouchableOpacity>
+        </View>
+      );
+    };
     navigation.setOptions({
-      headerRight: () => renderStackBarIconRight(navigation),
-      headerLeft: () => backButtonProfileEdit(navigation),
+      headerRight: renderStackBarIconRight,
+      headerLeft: backButtonProfileEdit,
       headerRightContainerStyle: {
         paddingRight: 10,
       },
     });
-  });
-  /**
-   * This function renders the right icon in the stack bar and
-   * updates database when the icon is pressed
-   */
-  const renderStackBarIconRight = async () => {
-    return (
-      <View style={{ flexDirection: 'row' }}>
-        <TouchableOpacity
-          onPress={() => {
-            data.description = data.description
-              ? data.description.replace(/\r?\n|\r/, '').trim()
-              : '';
-            setdata({ ...data });
-            // check if username is available
-            UserApi.updateUser(user.uid, data);
-          }}
-          style={{ paddingRight: 5 }}
-        >
-          <Ionicons name="checkmark-outline" size={26} color={Colors.black} />
-        </TouchableOpacity>
-      </View>
-    );
-  };
-  /**
-   * This function renders the back button in the stack screen
-   */
-  const backButtonProfileEdit = () => {
-    return (
-      <View style={{ flexDirection: 'row' }}>
-        <TouchableOpacity
-          onPress={() => {
-            if (hasBeenChanges) {
-              changesWillNotBeSavedAlert(navigation);
-            } else {
-              navigation.dispatch(CommonActions.goBack());
-            }
-          }}
-          style={{ paddingLeft: 10 }}
-        >
-          <Ionicons name="close-outline" size={26} color={Colors.black} />
-        </TouchableOpacity>
-      </View>
-    );
-  };
+  }, []);
+
   /**
    * This functioin shows an alert box alerting that changes won't be saved
    */
@@ -124,7 +122,6 @@ export default ({ navigation }) => {
       }
     })();
   }, []);
-  /** Function that selects an image form the library */
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images, //type of media that is uploading
@@ -178,7 +175,7 @@ export default ({ navigation }) => {
     return await snapshot.ref.getDownloadURL();
   }
 
-  async function downloadImage(userId) {
+  /* async function downloadImage(userId) {
     const ref = firebase
       .storage()
       .ref()
@@ -217,7 +214,7 @@ export default ({ navigation }) => {
             break;
         }
       });
-  }
+  } */
   return (
     <ScrollView style={styles.container}>
       {!loading && data && (
@@ -240,12 +237,11 @@ export default ({ navigation }) => {
             </Text>
           </TouchableOpacity>
 
-          {/**Name */}
           <LabeledInput
             label="Name"
             text={data.name}
             onChangeText={(text) => {
-              setdata({ ...data, name: text });
+              setData({ ...data, name: text });
               setHasBeenChanges(true);
             }}
             autoCompleteType={'name'}
@@ -253,13 +249,12 @@ export default ({ navigation }) => {
             maxLength={30}
             defaultValue={data.name}
           />
-          {/**User name */}
           <LabeledInput
             label="Username"
             text={data.username}
             errorMessage={errorMessage}
             onChangeText={(text) => {
-              setdata({ ...data, username: text });
+              setData({ ...data, username: text });
               setHasBeenChanges(true);
             }}
             placeholder="Your username"
@@ -267,12 +262,11 @@ export default ({ navigation }) => {
             autoCapitalize="none"
             value={data.username}
           />
-          {/**Web */}
           <LabeledInput
             label="Website"
             text={data.website}
             onChangeText={(text) => {
-              setdata({ ...data, website: text });
+              setData({ ...data, website: text });
               setHasBeenChanges(true);
             }}
             placeholder="Your personal or professional website"
@@ -280,14 +274,13 @@ export default ({ navigation }) => {
             autoCapitalize="none"
             value={data.website}
           />
-          {/**Description */}
           <LabeledInput
             label={`Description ${
               data.description ? data.description.length : 0
             }/200`}
             text={data.description}
             onChangeText={(text) => {
-              setdata({ ...data, description: text });
+              setData({ ...data, description: text });
               setHasBeenChanges(true);
             }}
             placeholder="Present yourself to other people"

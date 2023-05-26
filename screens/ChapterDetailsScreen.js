@@ -35,14 +35,15 @@ export default ({ route, navigation }) => {
   const { authUser } = useAuth();
 
   const createChapter = (data) => {
-    ChapterApi.createChapter(data)
+    route.params.addItemToList;
+    /* ChapterApi.createChapter(data)
       .then((response) => {
-        console.log(response);
+        
         navigation.dispatch(CommonActions.goBack());
       })
       .catch((err) => {
         console.error(err);
-      });
+      }); */
   };
   return (
     <ScrollView style={styles.container}>

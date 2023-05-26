@@ -19,6 +19,8 @@ export default StoryContainer = ({
   onPress,
   categoryMain,
   readStatus, //for saved stories view
+  likes,
+  views,
 }) => {
   const handleError = (e) => {
     console.log(e.nativeEvent.error);
@@ -67,11 +69,11 @@ export default StoryContainer = ({
                   size={20}
                   color={Colors.lightGray}
                 />
-                <Text style={{ color: Colors.lightGray }}>44</Text>
+                <Text style={{ color: Colors.lightGray }}>{views}</Text>
               </View>
               <View style={styles.storyStats}>
                 <Ionicons name="heart" size={20} color={Colors.red} />
-                <Text style={{ color: Colors.lightGray }}>15</Text>
+                <Text style={{ color: Colors.lightGray }}>{likes}</Text>
               </View>
             </View>
           </View>

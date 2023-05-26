@@ -37,7 +37,7 @@ const FirebaseProvider = ({ children }) => {
 
   useEffect(() => {
     try {
-      const token = getData('idToken');
+      const token = null; //getData('idToken');
       if (token !== null) {
         if (!user) {
           console.log(token);
