@@ -48,9 +48,14 @@ export default ({ navigation }) => {
                 ? data.description.replace(/\r?\n|\r/, '').trim()
                 : '';
               setData({ ...data });
-              // check if username is available
-              console.log('Updating user...');
-              UserApi.updateUser(authUser._id, data).then((response) => {});
+              /**TODO check if username available */
+              UserApi.updateUser(authUser._id, data)
+                .then((response) => {
+                  /**TODO set authUser? */
+                })
+                .catch((err) => {
+                  /**TODO handle error */
+                });
             }}
             style={{ paddingRight: 5 }}
           >

@@ -61,6 +61,17 @@ class UserApi {
 
     return response;
   }
+
+  static async checkUsername(username) {
+    const response = await fetchWithAuth(
+      `${BASE_PATH}/${API_VERSION}/user/${username}`,
+      {
+        method: 'GET',
+      }
+    );
+
+    return response;
+  }
 }
 
 export default UserApi;
