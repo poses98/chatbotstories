@@ -18,7 +18,7 @@ import { AuthorButtonSelector } from '../components/AuthorButtonSelector';
 import CharacterApi from '../api/character';
 import MessageApi from '../api/message';
 import StoryApi from '../api/story';
-import Swipeable from 'react-native-swipeable';
+import SwipeableComponent from '../components/misc/SwipeableComponent';
 import ChapterApi from '../api/chapter';
 
 export default ({ navigation, route }) => {
@@ -109,16 +109,22 @@ export default ({ navigation, route }) => {
       });
   };
 
-  const updateMessage = ({ id, messageBody, sender, index }) => {};
+  const updateMessage = ({ id, messageBody, sender, index }) => {
+    const message = { id, body: messageBody, sender, index };
+    MessageApi.updateMessage(chapterId, id, message)
+      .then((response) => {
+        setRefreshChat(!refreshChat);
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  };
 
   const addMessageToList = ({ messageBody, sender }) => {
     const index =
       messages.length >= 1 ? messages[messages.length - 1].index + 1 : 0;
     const message = { body: messageBody, sender, index };
-    console.log(chapterId);
-    console.log(message);
     MessageApi.createMessageForChapter(chapterId, message).then((response) => {
-      console.log(response);
       setRefreshChat(!refreshChat);
     });
   };
@@ -135,19 +141,25 @@ export default ({ navigation, route }) => {
             scrollViewRef.current.scrollToEnd({ animated: true })
           }
         >
-          <FlatList
-            data={messages}
-            keyExtractor={(item) => item._id.toString()}
-            renderItem={({ item: { body, sender, _id, index } }) => {
-              return (
+          {messages &&
+            messages.map(({ _id, body, sender, index }) => (
+              <SwipeableComponent
+                onRightSwipe={() => {
+                  setMessageEditId(_id);
+                  setMessageEditMode(true);
+                  setMessageEdit(body);
+                  setSenderId(sender);
+                }}
+                leftSwipeComponent={<Ionicons name="create" size={24} />}
+              >
                 <MessageBubble
+                  key={_id.toString()}
                   messageBody={body}
                   sender={sender}
                   characterList={characterList}
                 />
-              );
-            }}
-          />
+              </SwipeableComponent>
+            ))}
         </ScrollView>
       </KeyboardAvoidingView>
       <KeyboardAvoidingView style={styles.typeBar}>

@@ -82,6 +82,7 @@ export default ({ navigation, route }) => {
           date.year = date.getFullYear();
           setdata(response);
           setChapterList(response.chapters);
+          console.log(response.chapters);
 
           if (authUser._id === response.author) setowned(true);
           setloading(false);
@@ -114,13 +115,9 @@ export default ({ navigation, route }) => {
   /** Finding out if the user has already saved this story to check the saved button */
   useEffect(() => {
     if (user) {
-      console.log(user.savedStories);
       user.savedStories.forEach((story) => {
-        console.log(story._id);
-        console.log(storyId);
         if (story._id === storyId) {
           setIsSaved(true);
-          console.log('Story is saved');
         }
       });
     }
@@ -134,7 +131,6 @@ export default ({ navigation, route }) => {
           <TouchableOpacity
             onPress={() => {
               setIsSaved(!isSaved);
-
               StoryApi.saveStory(storyId, authUser._id)
                 .then((response) => {
                   console.log(response);
@@ -175,7 +171,7 @@ export default ({ navigation, route }) => {
       },
     });
   });
-  /** Likes a story if it is possible, if it is already liked deletes the like */
+  /** Likes a story */
   const likeStory = () => {
     StoryApi.likeStory(data._id, authUser._id)
       .then((response) => {
@@ -211,8 +207,7 @@ export default ({ navigation, route }) => {
         // dismissed
       }
     } catch (error) {
-      console.log(error.message);
-      alert(error.message);
+      console.error(error.message);
     }
   };
   /** Finding out if the user has already started this story to continue reading */
@@ -288,7 +283,11 @@ export default ({ navigation, route }) => {
                     ? 'Read again'
                     : 'Continue reading'
                 }
-                textStyle={{ fontWeight: 'bold', color: Colors.lightGray }}
+                textStyle={{
+                  fontWeight: 'bold',
+                  color: Colors.lightGray,
+                  padding: 10,
+                }}
                 onPress={() => {
                   //TODO admob
                   navigation.navigate('ChatRead', {
@@ -296,7 +295,7 @@ export default ({ navigation, route }) => {
                     storyId: storyId,
                     chapterId: !(chapterId === '')
                       ? chapterId
-                      : chapterList[0].id,
+                      : chapterList[0]._id,
                     chapterList: chapterList,
                   });
                 }}
@@ -391,20 +390,20 @@ export default ({ navigation, route }) => {
             }}
           >
             {chapterList &&
-              chapterList.map(({ title, description, id, index }) => (
+              chapterList.map(({ title, description, _id, index }) => (
                 <ChapterItem
-                  key={id}
+                  key={_id}
                   title={title}
                   onPress={() => {
                     // TODO admob
                     navigation.navigate('ChatRead', {
                       storyName: data.title,
                       storyId: storyId,
-                      chapterId: id,
+                      chapterId: _id,
                       chapterList: chapterList,
                     });
                   }}
-                  id={id}
+                  id={_id}
                   navigation={navigation}
                   onDelete={() => removeItemFromLists(id)}
                   index={index}
@@ -440,9 +439,8 @@ export default ({ navigation, route }) => {
               justifyContent: 'center',
             }}
           >
-            <Text>We are sorry!😭</Text>
-            <Text> There has been an error while loading your story😥</Text>
-            <Text> We hope to fix it as soon as possible</Text>
+            <Text>Ooops!</Text>
+            <Text> There has been an error while loading your story 😥</Text>
             <Text> Try again later</Text>
           </View>
         )}

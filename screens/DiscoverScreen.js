@@ -1,24 +1,26 @@
 import * as React from 'react';
-import { View, Text } from 'react-native';
-import { TouchableHighlight } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import SwipeableComponent from '../components/misc/SwipeableComponent';
 
 export default () => {
   const leftContent = <Text>Pull to activate</Text>;
 
   const rightButtons = [
-    <TouchableHighlight>
+    <TouchableOpacity key="button1">
       <Text>Button 1</Text>
-    </TouchableHighlight>,
-    <TouchableHighlight>
+    </TouchableOpacity>,
+    <TouchableOpacity key="button2">
       <Text>Button 2</Text>
-    </TouchableHighlight>,
+    </TouchableOpacity>,
   ];
+
   return (
     <SwipeableComponent
       onRightSwipe={() => {
-        console.log('Right swipe');
+        console.log('Right');
       }}
+      leftSwipeComponent={rightButtons}
+      rightSwipeComponent={rightButtons}
     >
       <Text>My swipeable content</Text>
     </SwipeableComponent>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useLayoutEffect } from 'react';
 import { View, Text, StyleSheet, Image, ScrollView } from 'react-native';
 import ProfileHeader from '../components/Profile/ProfileHeader';
 import StoryContainer from '../components/StoryContainer';
@@ -15,13 +15,14 @@ const images = {
   snow: require('../assets/snow.jpg'),
 };
 
-export default ({ navigation }) => {
+export default ({ route, navigation }) => {
   // TODO isLoading for every single item from DB to be totally loaded!
   const testId = '';
   const TEST = false;
   const { authUser } = useAuth();
   const [owned, setOwned] = useState(false);
   const [stories, setStories] = useState(null);
+  const [reloadStories, setReloadStories] = useState(false);
   const [storyCont, setStoryCont] = useState(0);
   const [data, setData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -34,7 +35,7 @@ export default ({ navigation }) => {
   }, [authUser]);
 
   useEffect(() => {
-    if (!stories && authUser) {
+    if (authUser) {
       console.log(authUser._id);
       StoryApi.getUserStories(authUser._id)
         .then((response) => {
@@ -46,7 +47,7 @@ export default ({ navigation }) => {
           /**TODO handle error */
         });
     }
-  }, [authUser]);
+  }, [authUser, route.params]);
 
   useEffect(() => {
     if (data && stories) {
@@ -104,7 +105,7 @@ export default ({ navigation }) => {
               name={data.name || ''}
               web={data.website || ''}
               description={data.description || ''}
-              posts={stories.length || ''}
+              posts={stories.length || 0}
               followers={data.followers || 0}
               following={data.following || 0}
               navigation={navigation}

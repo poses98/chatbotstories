@@ -10,10 +10,11 @@ import Button from '../components/Button';
 import Colors from '../constants/Colors';
 import StoryStatus from '../constants/StoryStatus';
 import ChapterApi from '../api/chapter';
+import StoryApi from '../api/story';
 
 export default ({ navigation, route }) => {
-  const [messages, setMessages] = useState([]);
-  const [characterList, setCharacterList] = useState([]);
+  const [messages, setMessages] = useState(null);
+  const [characterList, setCharacterList] = useState(null);
   const [readingMessages, setReadingMessages] = useState([]);
   const [readingIndex, setReadingIndex] = useState(0);
   const [finished, setFinished] = useState(false);
@@ -47,13 +48,27 @@ export default ({ navigation, route }) => {
   const scrollViewRef = useRef();
 
   /**Getting the characters from the db */
-  useEffect(() => {}, []);
+  useEffect(() => {
+    if (route.params && route.params.storyId && !characterList) {
+      StoryApi.getStoryById(route.params.storyId)
+        .then((response) => {
+          setCharacterList(response.characters);
+        })
+        .catch((err) => {
+          /**TODO handle error */
+          console.error(err);
+        });
+    }
+  });
   /**Getting the messages from the db */
   useEffect(() => {
-    ChapterApi.getChapterById(route.params.chapterId).then((response) => {
-      console.log(response);
-    });
-  }, []);
+    if (route.params && route.params.chapterId && !messages) {
+      ChapterApi.getChapterById(route.params.chapterId).then((response) => {
+        console.log(response.messages);
+        setMessages(response.messages);
+      });
+    }
+  });
 
   const updateReadingMessages = () => {
     if (!finished) {
@@ -81,19 +96,14 @@ export default ({ navigation, route }) => {
           scrollViewRef.current.scrollToEnd({ animated: true })
         }
       >
-        <FlatList
-          data={readingMessages}
-          keyExtractor={(item) => item.id.toString()}
-          renderItem={({ item: { messageBody, sender } }) => {
-            return (
-              <MessageBubble
-                messageBody={messageBody}
-                sender={sender}
-                characterList={characterList}
-              />
-            );
-          }}
-        />
+        {readingMessages.map(({ _id, body, sender }) => (
+          <MessageBubble
+            key={_id.toString()}
+            messageBody={body}
+            sender={sender}
+            characterList={characterList}
+          />
+        ))}
         {finished && (
           <View
             style={{

@@ -92,7 +92,7 @@ export default ({ route, navigation }) => {
   const createStory = (data) => {
     StoryApi.createStory(data)
       .then(() => {
-        navigation.dispatch(CommonActions.goBack());
+        navigation.navigate('Profile', { shouldRerender: true });
       })
       .catch((err) => {
         console.log(err);
