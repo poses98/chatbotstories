@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { View, Text } from 'react-native';
 import { TouchableHighlight } from 'react-native';
-import Swipeable from 'react-native-swipeable';
+import SwipeableComponent from '../components/misc/SwipeableComponent';
 
 export default () => {
   const leftContent = <Text>Pull to activate</Text>;
@@ -15,8 +15,12 @@ export default () => {
     </TouchableHighlight>,
   ];
   return (
-    <Swipeable leftContent={leftContent} rightButtons={rightButtons}>
+    <SwipeableComponent
+      onRightSwipe={() => {
+        console.log('Right swipe');
+      }}
+    >
       <Text>My swipeable content</Text>
-    </Swipeable>
+    </SwipeableComponent>
   );
 };

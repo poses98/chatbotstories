@@ -32,7 +32,13 @@ export default ({ navigation }) => {
    */
   useEffect(() => {
     if (authUser) {
-      setData(authUser);
+      UserApi.getUserById(authUser._id)
+        .then((response) => {
+          setData(response);
+        })
+        .catch((err) => {
+          /**TODO handle error */
+        });
     }
   }, [authUser]);
   /**
@@ -43,15 +49,22 @@ export default ({ navigation }) => {
       return (
         <View style={{ flexDirection: 'row' }}>
           <TouchableOpacity
-            onPress={() => {
+            onPress={async () => {
               data.description = data.description
                 ? data.description.replace(/\r?\n|\r/, '').trim()
                 : '';
               setData({ ...data });
-              /**TODO check if username available */
+
+              let usernameAvailable = true;
+
+              if (data.username !== authUser.username) {
+                usernameAvailable = await UserApi.getUsername(data.username);
+                console.log(usernameAvailable);
+              }
+
               UserApi.updateUser(authUser._id, data)
                 .then((response) => {
-                  /**TODO set authUser? */
+                  navigation.navigator.dispatch(CommonActions.goBack);
                 })
                 .catch((err) => {
                   /**TODO handle error */

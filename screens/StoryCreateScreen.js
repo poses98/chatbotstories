@@ -31,7 +31,7 @@ export default ({ route, navigation }) => {
   );
   const [isEditMode, setEditMode] = useState(false);
 
-  navigation.setOptions({ title: storyId ? 'Story detail' : 'Create story' });
+  //navigation.setOptions({ title: storyId ? 'Edit story' : 'Create story' });
 
   /** STATE ATRIBUTTES */
   const [owned, setowned] = useState(false); // owner of the story
@@ -64,11 +64,27 @@ export default ({ route, navigation }) => {
   /** Getting the metadata of the story */
   useEffect(() => {
     if (storyId != '') {
-      // get story API
+      setEditMode(true);
+      console.log('Getting metada as storyId is not empty');
+      StoryApi.getStoryById(storyId)
+        .then((response) => {
+          console.log(response);
+          setLanguage(response.language);
+          setStatus(response.status);
+          setInteractive(response.interactive);
+          setdescriptionField({ text: response.description, errorMessage: '' });
+          setcategoryMain(response.genre);
+          setnameField({ text: response.title, errorMessage: '' });
+          setloading(false);
+          setowned(response.author === authUser._id);
+        })
+        .catch((err) => {
+          /**TODO handle error */
+        });
     } else {
       setloading(false);
     }
-  }, []);
+  }, [storyId]);
   /**Creates a new story from the data written by the user in the form
    *
    * @param {form data}} data
@@ -82,6 +98,14 @@ export default ({ route, navigation }) => {
         console.log(err);
         /**TODO Handle error */
       });
+  };
+
+  const updateStory = (data) => {
+    console.log(data);
+    StoryApi.updateStory(storyId, data).then((response) => {
+      console.log(response);
+      navigation.dispatch(CommonActions.goBack);
+    });
   };
   /** GENRE BUBBLE TEMPLATE */
   const GenreBubble = ({ image, verboseName, genreKey }) => {
@@ -279,7 +303,9 @@ export default ({ route, navigation }) => {
                   console.log('Creating new story! : ' + data);
                 } else if (isEditMode) {
                   //update story
-                  console.log('Updating an existing story! : ' + data);
+                  console.log('Updating an existing story! : ');
+                  console.log(data);
+                  updateStory(data);
                 }
               }
             }}

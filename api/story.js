@@ -25,6 +25,7 @@ class StoryApi {
   }
 
   static async updateStory(storyId, updatedStory) {
+    console.log(updatedStory);
     const response = await fetchWithAuth(
       `${BASE_PATH}/${API_VERSION}/stories/${storyId}`,
       {
@@ -59,6 +60,18 @@ class StoryApi {
   static async likeStory(storyId, userId) {
     const response = await fetchWithAuth(
       `${BASE_PATH}/${API_VERSION}/stories/${storyId}/like`,
+      {
+        method: 'POST',
+        body: JSON.stringify({ userId }),
+        headers: { 'Content-Type': 'application/json' },
+      }
+    );
+    return response;
+  }
+
+  static async saveStory(storyId, userId) {
+    const response = await fetchWithAuth(
+      `${BASE_PATH}/${API_VERSION}/stories/${storyId}/save`,
       {
         method: 'POST',
         body: JSON.stringify({ userId }),

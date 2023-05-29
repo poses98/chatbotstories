@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
-import { UserStackScreen } from './components/Navigation';
+import { UserStackScreen } from './routes/Navigation';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import FirebaseProvider from './providers/FirebaseProvider';
 import AuthProvider from './providers/AuthProvider';

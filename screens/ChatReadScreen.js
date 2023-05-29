@@ -9,6 +9,7 @@ import { MessageBubble } from '../components/MessageBubble';
 import Button from '../components/Button';
 import Colors from '../constants/Colors';
 import StoryStatus from '../constants/StoryStatus';
+import ChapterApi from '../api/chapter';
 
 export default ({ navigation, route }) => {
   const [messages, setMessages] = useState([]);
@@ -48,7 +49,11 @@ export default ({ navigation, route }) => {
   /**Getting the characters from the db */
   useEffect(() => {}, []);
   /**Getting the messages from the db */
-  useEffect(() => {}, []);
+  useEffect(() => {
+    ChapterApi.getChapterById(route.params.chapterId).then((response) => {
+      console.log(response);
+    });
+  }, []);
 
   const updateReadingMessages = () => {
     if (!finished) {

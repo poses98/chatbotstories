@@ -32,6 +32,7 @@ export default ({ navigation, route }) => {
   const [loadingChapterList, setLoadingChapterList] = useState(true);
   const [loadingReviewList, setLoadingReviewList] = useState(true);
   const [loadingStats, setLoadingStats] = useState(true);
+  const [user, setUser] = useState(null);
   const [data, setdata] = useState(null);
   const [storyId, setstoryId] = useState(route.params.storyId || '');
   const [owned, setowned] = useState(false);
@@ -57,16 +58,28 @@ export default ({ navigation, route }) => {
           });
       }
   }, [data]);
+
+  useEffect(() => {
+    if (authUser)
+      UserApi.getUserById(authUser._id)
+        .then((response) => {
+          setUser(response);
+        })
+        .catch((err) => {
+          /** TODO handle error */
+          console.error(err);
+        });
+  }, [authUser]);
+
   /** Getting the metadata of the story */
   useEffect(() => {
     if (!data && authUser) {
       StoryApi.getStoryAndChaptersById(storyId)
         .then((response) => {
-          console.log('Metada received');
           var date = new Date(response.date);
-          response.month = date.getMonth();
-          response.day = date.getDate();
-          response.year = date.getFullYear();
+          date.month = date.getMonth();
+          date.day = date.getDate();
+          date.year = date.getFullYear();
           setdata(response);
           setChapterList(response.chapters);
 
@@ -100,13 +113,18 @@ export default ({ navigation, route }) => {
   }, [data]);
   /** Finding out if the user has already saved this story to check the saved button */
   useEffect(() => {
-    if (storyId != '') {
-      setIsSaved(true);
-    } else {
-      setnotloaded(true);
-      setloading(false);
+    if (user) {
+      console.log(user.savedStories);
+      user.savedStories.forEach((story) => {
+        console.log(story._id);
+        console.log(storyId);
+        if (story._id === storyId) {
+          setIsSaved(true);
+          console.log('Story is saved');
+        }
+      });
     }
-  }, []);
+  }, [storyId, user]);
   /** Rendering the top bar icons */
   const renderStackBarIconRight = () => {
     return (
@@ -116,12 +134,15 @@ export default ({ navigation, route }) => {
           <TouchableOpacity
             onPress={() => {
               setIsSaved(!isSaved);
-              /**TODO Save story into user's account */
-              if (!isSaved) {
-                // save story
-              } else if (isSaved) {
-                // delete story
-              }
+
+              StoryApi.saveStory(storyId, authUser._id)
+                .then((response) => {
+                  console.log(response);
+                })
+                .catch((err) => {
+                  /**TODO handle error */
+                  console.error(err);
+                });
             }}
             style={{ paddingRight: 8 }}
           >
