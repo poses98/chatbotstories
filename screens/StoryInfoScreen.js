@@ -23,27 +23,24 @@ import { moderateScale } from 'react-native-size-matters';
 import StoryApi from '../api/story';
 import UserApi from '../api/user';
 import useAuth from '../hooks/useAuth';
+import ReadStatusApi from '../api/readstatus';
 
 export default ({ navigation, route }) => {
   /** STATE OBJECTS */
   const [isSaved, setIsSaved] = useState(false);
   const [loading, setloading] = useState(true);
-  const [loadingMetadata, setLoadingMetadata] = useState(true);
-  const [loadingChapterList, setLoadingChapterList] = useState(true);
-  const [loadingReviewList, setLoadingReviewList] = useState(true);
-  const [loadingStats, setLoadingStats] = useState(true);
   const [user, setUser] = useState(null);
   const [data, setdata] = useState(null);
-  const [storyId, setstoryId] = useState(route.params.storyId || '');
   const [owned, setowned] = useState(false);
-  const [notloaded, setnotloaded] = useState(false);
   const [stats, setstats] = useState({});
   const [canLike, setcanLike] = useState(true);
   const [authorUserName, setAuthorUserName] = useState('');
-  const [chapterId, setChapterId] = useState('');
+  const [chapterList, setChapterList] = useState(null);
   const [chapterIndex, setChapterIndex] = useState(0);
-  const [ended, setEnded] = useState(false);
+  const [readStatus, setReadStatus] = useState(null);
+  const [error, setError] = useState(false);
   const { authUser } = useAuth();
+  const { storyId } = route.params;
 
   /**Getting the author name */
   useEffect(() => {
@@ -54,11 +51,11 @@ export default ({ navigation, route }) => {
             setAuthorUserName(response.username || null);
           })
           .catch((err) => {
+            setError(true);
             console.log(`Getting author name: ${err}`);
           });
       }
   }, [data]);
-
   useEffect(() => {
     if (authUser)
       UserApi.getUserById(authUser._id)
@@ -67,40 +64,30 @@ export default ({ navigation, route }) => {
         })
         .catch((err) => {
           /** TODO handle error */
+          setError(true);
           console.error(err);
         });
   }, [authUser]);
-
   /** Getting the metadata of the story */
   useEffect(() => {
     if (!data && authUser) {
       StoryApi.getStoryAndChaptersById(storyId)
         .then((response) => {
-          var date = new Date(response.date);
-          date.month = date.getMonth();
-          date.day = date.getDate();
-          date.year = date.getFullYear();
+          /* var date = new Date(response.date);
+          data.month = date.getMonth();
+          data.day = date.getDate();
+          data.year = date.getFullYear(); */
           setdata(response);
           setChapterList(response.chapters);
-          console.log(response.chapters);
-
           if (authUser._id === response.author) setowned(true);
-          setloading(false);
         })
         .catch((err) => {
+          setError(true);
           console.error(err);
         });
     }
   }, [authUser]);
-  /** Getting the stats of the story */
-  useEffect(() => {
-    if (storyId != '') {
-      // get story stats
-    } else {
-      setnotloaded(true);
-      setloading(false);
-    }
-  }, []);
+
   /** Finding out if the user has already liked this story to enable the like button */
   useEffect(() => {
     if (data)
@@ -126,39 +113,44 @@ export default ({ navigation, route }) => {
   const renderStackBarIconRight = () => {
     return (
       <View style={{ flexDirection: 'row' }}>
-        {/** save story button */}
-        {
-          <TouchableOpacity
-            onPress={() => {
-              setIsSaved(!isSaved);
-              StoryApi.saveStory(storyId, authUser._id)
-                .then((response) => {
-                  console.log(response);
-                })
-                .catch((err) => {
-                  /**TODO handle error */
-                  console.error(err);
-                });
-            }}
-            style={{ paddingRight: 8 }}
-          >
-            <Ionicons
-              name={!isSaved ? 'bookmark-outline' : 'bookmark'}
-              size={26}
-              color={Colors.black}
-            />
-          </TouchableOpacity>
-        }
-        {/**Only render if it's owner*/}
-        {owned && (
-          <TouchableOpacity
-            onPress={() => {
-              navigation.navigate('StorySettings', { storyId: storyId });
-            }}
-            style={{ paddingRight: 8 }}
-          >
-            <Ionicons name="settings-outline" size={26} color={Colors.black} />
-          </TouchableOpacity>
+        {!loading && (
+          <>
+            {
+              <TouchableOpacity
+                onPress={() => {
+                  setIsSaved(!isSaved);
+                  StoryApi.saveStory(storyId, authUser._id)
+                    .then((response) => {})
+                    .catch((err) => {
+                      /**TODO handle error */
+                      console.error(err);
+                    });
+                }}
+                style={{ paddingRight: 8 }}
+              >
+                <Ionicons
+                  name={!isSaved ? 'bookmark-outline' : 'bookmark'}
+                  size={26}
+                  color={Colors.black}
+                />
+              </TouchableOpacity>
+            }
+            {/**Only render if it's owner*/}
+            {owned && (
+              <TouchableOpacity
+                onPress={() => {
+                  navigation.navigate('StorySettings', { storyId: storyId });
+                }}
+                style={{ paddingRight: 8 }}
+              >
+                <Ionicons
+                  name="settings-outline"
+                  size={26}
+                  color={Colors.black}
+                />
+              </TouchableOpacity>
+            )}
+          </>
         )}
       </View>
     );
@@ -174,9 +166,7 @@ export default ({ navigation, route }) => {
   /** Likes a story */
   const likeStory = () => {
     StoryApi.likeStory(data._id, authUser._id)
-      .then((response) => {
-        console.log(response);
-      })
+      .then((response) => {})
       .catch((err) => {});
 
     if (canLike) {
@@ -212,24 +202,66 @@ export default ({ navigation, route }) => {
   };
   /** Finding out if the user has already started this story to continue reading */
   useEffect(() => {
-    if (storyId != '') {
-    } else {
-      setnotloaded(true);
-      setloading(false);
+    const readStatusObj = getReadStatus(storyId);
+    if (readStatusObj && !readStatus) {
+      ReadStatusApi.getReadStatusById(readStatusObj)
+        .then((response) => {
+          setReadStatus(response);
+          console.log(response);
+        })
+        .catch((err) => {
+          setError(true);
+          console.error(err);
+        });
+    } else if (chapterList && user && chapterList && !readStatusObj) {
+      createReadStatus();
     }
-  }, []);
-  /**Chapter list */
-  const [chapterList, setChapterList] = useState([]);
+  }, [user, storyId, chapterList]);
+
+  const createReadStatus = () => {
+    const newReadStatus = {
+      user: user._id,
+      story: storyId,
+      finished: false,
+      nextChapter: chapterList[0]._id,
+      previousChapter: null,
+    };
+    setReadStatus(newReadStatus);
+    ReadStatusApi.createReadStatus(newReadStatus).then((response) => {
+      setReadStatus(response);
+    });
+  };
+
+  const getReadStatus = (storyId) => {
+    if (user && user.readStatuses) {
+      const readStatusObj = user.readStatuses.find((e) => e.story === storyId);
+      if (readStatusObj) {
+        return readStatusObj.readStatusId;
+      } else {
+        return undefined;
+      }
+    }
+  };
 
   useEffect(() => {
-    // get chapters and sort them by index
-  }, []);
+    if (data && readStatus) {
+      const chapterToRead = data.chapters.findIndex(
+        (e) => e._id === readStatus.nextChapter
+      );
+      console.log(`chapterToRead:${chapterToRead}`);
+      setChapterIndex(chapterToRead);
+    }
+  }, [readStatus, data]);
 
   /**Review list */
   const [reviewList, setReviewList] = useState([]);
+  /**Check if loaded */
   useEffect(() => {
-    // get chapter list
-  }, []);
+    if (data && chapterList && readStatus && authorUserName) {
+      setloading(false);
+    }
+  }, [data, chapterList, readStatus, authorUserName]);
+
   return (
     <ScrollView style={styles.container}>
       {!loading && (
@@ -275,37 +307,40 @@ export default ({ navigation, route }) => {
               {/**STORY DESCRIPTION */}
               <Text style={styles.storyDescription}>"{data.description}"</Text>
               {/** CONTINUE/START READING BUTTON */}
-              <Button
-                text={
-                  chapterId === ''
-                    ? 'Start reading'
-                    : ended
-                    ? 'Read again'
-                    : 'Continue reading'
-                }
-                textStyle={{
-                  fontWeight: 'bold',
-                  color: Colors.lightGray,
-                  padding: 10,
-                }}
-                onPress={() => {
-                  //TODO admob
-                  navigation.navigate('ChatRead', {
-                    storyName: data.title,
-                    storyId: storyId,
-                    chapterId: !(chapterId === '')
-                      ? chapterId
-                      : chapterList[0]._id,
-                    chapterList: chapterList,
-                  });
-                }}
-                buttonStyle={{
-                  marginVertical: 15,
-                  marginHorizontal: 15,
-                  height: 45,
-                  borderColor: Colors.lightGray,
-                }}
-              />
+              {readStatus && !readStatus.finished && (
+                <Button
+                  text={
+                    readStatus.nextChapter === ''
+                      ? 'Read story'
+                      : readStatus.finished
+                      ? 'Read again'
+                      : 'Read story'
+                  }
+                  textStyle={{
+                    fontWeight: 'bold',
+                    color: Colors.lightGray,
+                    padding: 10,
+                  }}
+                  onPress={() => {
+                    //TODO admob
+                    navigation.navigate('ChatRead', {
+                      storyName: data.title,
+                      storyId: storyId,
+                      chapterId: readStatus.nextChapter._id,
+                      chapterList: data.chapters,
+                      chapterIndex: chapterIndex,
+                      readStatus: readStatus,
+                      setReadStatus: setReadStatus,
+                    });
+                  }}
+                  buttonStyle={{
+                    marginVertical: 15,
+                    marginHorizontal: 15,
+                    height: 45,
+                    borderColor: Colors.lightGray,
+                  }}
+                />
+              )}
             </View>
           </ImageBackground>
           {/** SOCIAL INTERACTIONS  */}
@@ -390,17 +425,21 @@ export default ({ navigation, route }) => {
             }}
           >
             {chapterList &&
-              chapterList.map(({ title, description, _id, index }) => (
+              data &&
+              readStatus &&
+              chapterList.map(({ title, description, _id }, index) => (
                 <ChapterItem
                   key={_id}
                   title={title}
                   onPress={() => {
-                    // TODO admob
                     navigation.navigate('ChatRead', {
                       storyName: data.title,
                       storyId: storyId,
                       chapterId: _id,
-                      chapterList: chapterList,
+                      chapterList: data.chapters,
+                      chapterIndex: index,
+                      readStatus: readStatus,
+                      setReadStatus: setReadStatus,
                     });
                   }}
                   id={_id}
@@ -408,7 +447,7 @@ export default ({ navigation, route }) => {
                   onDelete={() => removeItemFromLists(id)}
                   index={index}
                   currentIndex={chapterIndex}
-                  finished={ended}
+                  finished={readStatus.finished}
                   list={false}
                 />
               ))}
@@ -427,24 +466,21 @@ export default ({ navigation, route }) => {
           </Text>
         </View>
       )}
-      {!loadingChapterList &&
-        !loadingMetadata &&
-        !loadingStats &&
-        notloaded && (
-          <View
-            style={{
-              alignItems: 'center',
-              flex: 1,
-              padding: 15,
-              justifyContent: 'center',
-            }}
-          >
-            <Text>Ooops!</Text>
-            <Text> There has been an error while loading your story 😥</Text>
-            <Text> Try again later</Text>
-          </View>
-        )}
-      {loadingChapterList && loadingMetadata && loadingStats && loading && (
+      {error && !loading && (
+        <View
+          style={{
+            alignItems: 'center',
+            flex: 1,
+            padding: 15,
+            justifyContent: 'center',
+          }}
+        >
+          <Text>Ooops!</Text>
+          <Text> There has been an error while loading your story 😥</Text>
+          <Text> Try again later</Text>
+        </View>
+      )}
+      {loading && (
         <View
           style={{
             flex: 1,

@@ -8,6 +8,7 @@ import {
   KeyboardAvoidingView,
   DEVICE_WIDTH,
   Alert,
+  Keyboard,
 } from 'react-native';
 import Colors from '../constants/Colors';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -20,6 +21,7 @@ import MessageApi from '../api/message';
 import StoryApi from '../api/story';
 import SwipeableComponent from '../components/misc/SwipeableComponent';
 import ChapterApi from '../api/chapter';
+import * as Haptics from 'expo-haptics';
 
 export default ({ navigation, route }) => {
   const [messages, setMessages] = useState([]);
@@ -34,6 +36,22 @@ export default ({ navigation, route }) => {
   const storyId = route.params.storyId;
   const chapterId = route.params.chapterId;
   const scrollViewRef = useRef();
+  const textInputRef = useRef(null);
+
+  useEffect(() => {
+    // Focus on the text input when the text changes
+    if (textInputRef.current) {
+      console.log('Focusing');
+      textInputRef.current.focus();
+      Keyboard.addListener('keyboardDidShow', handleKeyboardShow);
+    }
+    return () => {
+      Keyboard.removeAllListeners('keyboardDidShow', handleKeyboardShow);
+    };
+  }, [textInputRef.current, messageEdit]);
+  const handleKeyboardShow = () => {
+    // Keyboard is shown
+  };
 
   /**Getting the characters from the db */
   useEffect(() => {
@@ -41,16 +59,18 @@ export default ({ navigation, route }) => {
       .then((response) => {
         const characterListTmp = response.characters;
         setCharacterList(characterListTmp);
-        console.log(response.characters);
+        setRefreshChat(false);
       })
       .catch((err) => {
         console.error(err);
       });
   }, [refreshChat]);
+
   /**Getting the messages from the db */
   useEffect(() => {
     ChapterApi.getChapterById(chapterId).then((response) => {
       setMessages(response.messages);
+      setRefreshChat(false);
     });
   }, [refreshChat]);
 
@@ -109,23 +129,35 @@ export default ({ navigation, route }) => {
       });
   };
 
-  const updateMessage = ({ id, messageBody, sender, index }) => {
-    const message = { id, body: messageBody, sender, index };
+  const updateMessage = ({ id, messageBody, sender }) => {
+    const message = { id, body: messageBody, sender };
     MessageApi.updateMessage(chapterId, id, message)
       .then((response) => {
-        setRefreshChat(!refreshChat);
+        let messages_copy = messages;
+        setMessages(null);
+        messages_copy.forEach((e) => {
+          if (e._id === id) {
+            e.body = messageBody;
+            e.sender = sender;
+          }
+        });
+        setMessages(messages_copy);
       })
       .catch((err) => {
         console.error(err);
       });
   };
 
+  useEffect(() => {
+    if (messages) console.log(messages);
+  }, [messages]);
+
   const addMessageToList = ({ messageBody, sender }) => {
     const index =
       messages.length >= 1 ? messages[messages.length - 1].index + 1 : 0;
     const message = { body: messageBody, sender, index };
     MessageApi.createMessageForChapter(chapterId, message).then((response) => {
-      setRefreshChat(!refreshChat);
+      setRefreshChat(true);
     });
   };
 
@@ -142,7 +174,7 @@ export default ({ navigation, route }) => {
           }
         >
           {messages &&
-            messages.map(({ _id, body, sender, index }) => (
+            messages.map(({ _id, body, sender }) => (
               <SwipeableComponent
                 onRightSwipe={() => {
                   setMessageEditId(_id);
@@ -189,7 +221,8 @@ export default ({ navigation, route }) => {
                   onPress={() => {
                     setSenderId(_id);
                   }}
-                  onLongPress={() =>
+                  onLongPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                     navigation.navigate('CharacterCreation', {
                       saveChanges: updateCharacterList,
                       characterName: name,
@@ -197,8 +230,8 @@ export default ({ navigation, route }) => {
                       characterId: _id,
                       isMain: main ? true : false,
                       canBeMain: getCanBeMain(),
-                    })
-                  }
+                    });
+                  }}
                   selectedId={senderId}
                 />
               );
@@ -225,12 +258,14 @@ export default ({ navigation, route }) => {
             onChangeText={(text) => {
               setMessageEdit(text);
             }}
+            ref={textInputRef}
             placeholder={'Message'}
             multiline={true}
           />
           <TouchableOpacity
             style={styles.sendButton}
             onPress={() => {
+              Keyboard.dismiss();
               if (messageEdit.length > 0 && !(senderId === '')) {
                 console.log('MessageId:' + messageEditId);
                 if (messageEditId === '') {

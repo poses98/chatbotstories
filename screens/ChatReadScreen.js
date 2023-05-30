@@ -11,6 +11,8 @@ import Colors from '../constants/Colors';
 import StoryStatus from '../constants/StoryStatus';
 import ChapterApi from '../api/chapter';
 import StoryApi from '../api/story';
+import ReadStatusApi from '../api/readstatus';
+import * as Haptics from 'expo-haptics';
 
 export default ({ navigation, route }) => {
   const [messages, setMessages] = useState(null);
@@ -22,27 +24,51 @@ export default ({ navigation, route }) => {
   const [isEnded, setIsEnded] = useState(true);
 
   const nextChapter = () => {
-    let thisChapterIndex = '';
+    const { chapterList, chapterIndex, readStatus } = route.params;
+    console.log(chapterIndex);
     let isFinished = true;
-    route.params.chapterList.forEach((element) => {
-      if (route.params.chapterId === element.id) {
-        thisChapterIndex = element.index;
+    const nextIndex = chapterIndex + 1;
+    console.log(`Finding nextIndex:${chapterIndex + 1}`);
+    const nextChapter = chapterList[nextIndex];
+    console.log(`NextChapter: ${nextChapter ? nextChapter.title : NaN}`);
+    console.log(readStatus.finished);
+    if (nextChapter) {
+      console.log('setting next chapter');
+      setIsEnded(false);
+      isFinished = false;
+      setNextChapterId(nextChapter._id);
+      // Make the API call to update the read status
+      if (!readStatus.finished) {
+        updateReadStatus(nextChapter._id);
       }
-      if (element.index === thisChapterIndex + 1) {
-        setIsEnded(false);
-        isFinished = false;
-        setNextChapterId(element.id);
-        updateReadingStoriesFromUser(isFinished, element.id);
-      }
-    });
-    if (isFinished) {
+    }
+    if ((isFinished || readStatus.finished) && !nextChapter) {
+      setIsEnded(true);
       setNextChapterId(null);
-      updateReadingStoriesFromUser(isFinished, null);
+      updateReadStatus(chapterList[0], isFinished);
     }
   };
 
-  const updateReadingStoriesFromUser = (isEnded, p_nextChapterId) => {
-    // update story reading status
+  const updateReadStatus = (chapterId, finished) => {
+    const { readStatus, setReadStatus } = route.params;
+    if (!readStatus.finished) {
+      const updatedReadStatus = {
+        ...readStatus,
+        previousChapter: route.params.chapterId,
+        nextChapter: route.params.chapterId,
+        finished: finished,
+      };
+      ReadStatusApi.updateReadStatusById(readStatus._id, updatedReadStatus)
+        .then((response) => {
+          console.log(response);
+          // Update the readStatus object in the parent component's state
+          setReadStatus(updatedReadStatus);
+        })
+        .catch((error) => {
+          console.error(error);
+          // Handle error
+        });
+    }
   };
 
   const scrollViewRef = useRef();
@@ -64,7 +90,6 @@ export default ({ navigation, route }) => {
   useEffect(() => {
     if (route.params && route.params.chapterId && !messages) {
       ChapterApi.getChapterById(route.params.chapterId).then((response) => {
-        console.log(response.messages);
         setMessages(response.messages);
       });
     }
@@ -72,14 +97,15 @@ export default ({ navigation, route }) => {
 
   const updateReadingMessages = () => {
     if (!finished) {
-      if (messages.length > readingIndex) {
+      if (messages && messages.length > readingIndex) {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
         let temp_readMessages = [...readingMessages];
         temp_readMessages.push(messages[readingIndex]);
         setReadingMessages(temp_readMessages);
         setReadingIndex(readingIndex + 1);
-      } else if (messages.length === readingMessages.length) {
+      } else if (messages && messages.length === readingMessages.length) {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
         setFinished(true);
-        console.log('Se ha terminado el capitulo: ' + true);
         nextChapter();
       }
     }
@@ -122,9 +148,11 @@ export default ({ navigation, route }) => {
                 textTransform: 'uppercase',
               }}
             >
-              {isEnded ? '- End of the story -' : '- End of the chapter -'}
+              {isEnded && !nextChapterId
+                ? '- End of the story -'
+                : '- End of the chapter -'}
             </Text>
-            {!isEnded && (
+            {!isEnded && nextChapter && (
               <Button
                 text="Next chapter"
                 buttonStyle={{
@@ -135,9 +163,12 @@ export default ({ navigation, route }) => {
                 onPress={() => {
                   navigation.replace('ChatRead', {
                     storyName: route.params.storyName,
+                    chapterIndex: route.params.chapterIndex + 1,
                     storyId: route.params.storyId,
                     chapterId: nextChapterId,
                     chapterList: route.params.chapterList,
+                    readStatus: route.params.readStatus,
+                    setReadStatus: route.params.setReadStatus,
                   });
                 }}
               />

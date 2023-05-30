@@ -37,7 +37,7 @@ export default ({ navigation }) => {
           setData(response);
         })
         .catch((err) => {
-          /**TODO handle error */
+          /** TODO handle error */
         });
     }
   }, [authUser]);
@@ -67,7 +67,7 @@ export default ({ navigation }) => {
                   navigation.navigator.dispatch(CommonActions.goBack);
                 })
                 .catch((err) => {
-                  /**TODO handle error */
+                  /** TODO handle error */
                 });
             }}
             style={{ paddingRight: 5 }}
