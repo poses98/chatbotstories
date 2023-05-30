@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { StyleSheet, ScrollView } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { StyleSheet, ScrollView, TouchableHighlight, Text } from 'react-native';
 import Colors from '../constants/Colors';
 import _STATUS_ from '../constants/StoryStatus';
 import LabeledInput from '../components/LabeledInput';
@@ -11,8 +11,10 @@ import useAuth from '../hooks/useAuth';
 
 export default ({ route, navigation }) => {
   const [Owned, setOwned] = useState(false);
-  const [Data, setData] = useState([]);
-  const [isEditMode, setEditMode] = useState(false);
+  const [data, setData] = useState(null);
+  const [isEditMode, setEditMode] = useState(
+    route.params.chapterId ? true : false
+  );
   const [storyId, setStoryId] = useState(
     route.params ? route.params.storyId : ''
   );
@@ -29,17 +31,64 @@ export default ({ route, navigation }) => {
   const [memberNumber, setMemberNumber] = useState(2);
   const [index, setIndex] = useState(0);
   const [status, setstatus] = useState(0); // status of the chapter
+  const { chapterId } = route.params;
+
   const updateStatus = (value) => {
     setstatus(value);
   };
   const { authUser } = useAuth();
 
+  useEffect(() => {
+    if (chapterId)
+      ChapterApi.getChapterById(chapterId)
+        .then((response) => {
+          setData(response);
+          setdescriptionField({ text: response.description });
+          setnameField({ text: response.title });
+          setstatus(response.status);
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+  }, []);
+
   const createChapter = (data) => {
     ChapterApi.createChapter(data)
       .then((response) => {
-        navigation.dispatch(CommonActions.goBack());
+        navigation.navigate('ChapterList', {
+          storyId: storyId,
+          newItem: true,
+        });
       })
       .catch((err) => {
+        console.error(err);
+      });
+  };
+
+  const updateChapter = (data) => {
+    ChapterApi.updateChapter(chapterId, data)
+      .then((response) => {
+        navigation.navigate('Chat', {
+          storyId: storyId,
+          updated: true,
+        });
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  };
+
+  const handleChapterDelete = () => {
+    ChapterApi.deleteChapter(chapterId)
+      .then((response) => {
+        navigation.navigate('ChapterList', {
+          storyId: storyId,
+          shouldRefresh: true,
+        });
+      })
+      .catch((err) => {
+        /**TODO handle error */
+        console.log('oops');
         console.error(err);
       });
   };
@@ -110,7 +159,15 @@ export default ({ route, navigation }) => {
                 status: status,
               });
             } else if (isEditMode) {
-              //update chapter
+              updateChapter({
+                title: nameField.text,
+                description: descriptionField.text.replace(
+                  /(\r\n|\n|\r)/gm,
+                  ''
+                ),
+                lastUpdate: Date.now(),
+                status: status,
+              });
             }
           }
         }}
@@ -121,6 +178,13 @@ export default ({ route, navigation }) => {
           borderColor: Colors.black,
         }}
       />
+
+      {/** Delete chapter */}
+      {isEditMode && (
+        <TouchableHighlight onPress={handleChapterDelete}>
+          <Text style={{ color: Colors.red }}>Delete chapter</Text>
+        </TouchableHighlight>
+      )}
     </ScrollView>
   );
 };

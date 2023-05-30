@@ -14,16 +14,15 @@ import ChapterApi from '../api/chapter';
 import { ChapterItem } from '../components/ChapterItem';
 
 export default ({ navigation, route }) => {
-  const [newItem, setNewItem] = useState();
   const [chapterList, setChapterList] = useState([]);
-
+  const { shouldRefresh, newItem } = route.params;
   // get chapters api
   useEffect(() => {
     ChapterApi.getChaptersForStory(route.params.storyId).then((response) => {
       console.log(response);
       setChapterList(response);
     });
-  }, [newItem]);
+  }, [newItem, shouldRefresh]);
 
   /**
    * This function renders the right icon in the stack bar and
@@ -49,7 +48,6 @@ export default ({ navigation, route }) => {
 
   const addItemToLists = () => {
     console.log('received');
-    setNewItem(!newItem);
   };
 
   const removeItemFromLists = (id) => {

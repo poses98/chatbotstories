@@ -38,6 +38,7 @@ class ChapterApi {
   }
 
   static async deleteChapter(chapterId) {
+    console.log(chapterId);
     const response = await fetchWithAuth(
       `${BASE_PATH}/${API_VERSION}/chapters/${chapterId}`,
       {

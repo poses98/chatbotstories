@@ -111,72 +111,111 @@ export default ({ navigation, route }) => {
     }
   };
   return (
-    <View
-      style={{ flex: 1, backgroundColor: '#fafafa' }}
-      onStartShouldSetResponder={() => updateReadingMessages()}
-    >
-      {/**MESSAGE SCROLLVIEW */}
-      <ScrollView
-        ref={scrollViewRef}
-        onContentSizeChange={() =>
-          scrollViewRef.current.scrollToEnd({ animated: true })
-        }
+    <>
+      <View
+        style={{ flex: 1, backgroundColor: '#fafafa', marginBottom: 100 }}
+        onStartShouldSetResponder={() => updateReadingMessages()}
       >
-        {readingMessages.map(({ _id, body, sender }) => (
-          <MessageBubble
-            key={_id.toString()}
-            messageBody={body}
-            sender={sender}
-            characterList={characterList}
-          />
-        ))}
-        {finished && (
+        {readingMessages.length === 0 && (
           <View
             style={{
-              marginVertical: 20,
               flex: 1,
-              borderTopWidth: 1,
-              borderColor: Colors.lightGray,
-              paddingTop: 15,
-              marginHorizontal: 15,
+              alignItems: 'center',
+              justifyContent: 'center',
             }}
           >
-            <Text
-              style={{
-                alignSelf: 'center',
-                color: Colors.gray,
-                textTransform: 'uppercase',
-              }}
-            >
-              {isEnded && !nextChapterId
-                ? '- End of the story -'
-                : '- End of the chapter -'}
-            </Text>
-            {!isEnded && nextChapter && (
-              <Button
-                text="Next chapter"
-                buttonStyle={{
-                  maxHeight: 100,
-                  minHeight: 50,
-                  marginTop: 15,
-                }}
-                onPress={() => {
-                  navigation.replace('ChatRead', {
-                    storyName: route.params.storyName,
-                    chapterIndex: route.params.chapterIndex + 1,
-                    storyId: route.params.storyId,
-                    chapterId: nextChapterId,
-                    chapterList: route.params.chapterList,
-                    readStatus: route.params.readStatus,
-                    setReadStatus: route.params.setReadStatus,
-                  });
-                }}
-              />
-            )}
+            <Text>Touch the screen to start the story!</Text>
           </View>
         )}
-      </ScrollView>
-    </View>
+        {/**MESSAGE SCROLLVIEW */}
+        <ScrollView
+          ref={scrollViewRef}
+          onContentSizeChange={() =>
+            scrollViewRef.current.scrollToEnd({ animated: true })
+          }
+          style={{ paddingBottom: 100 }}
+        >
+          {readingMessages.map(({ _id, body, sender }) => (
+            <MessageBubble
+              key={_id.toString()}
+              messageBody={body}
+              sender={sender}
+              characterList={characterList}
+            />
+          ))}
+
+          {finished && (
+            <View
+              style={{
+                marginVertical: 20,
+                flex: 1,
+                borderTopWidth: 1,
+                borderColor: Colors.lightGray,
+                paddingTop: 15,
+                marginHorizontal: 15,
+              }}
+            >
+              <Text
+                style={{
+                  alignSelf: 'center',
+                  color: Colors.gray,
+                  textTransform: 'uppercase',
+                }}
+              >
+                {isEnded && !nextChapterId
+                  ? '- End of the story -'
+                  : '- End of the chapter -'}
+              </Text>
+              {!isEnded && nextChapter && (
+                <Button
+                  text="Next chapter"
+                  buttonStyle={{
+                    maxHeight: 100,
+                    minHeight: 50,
+                    marginTop: 15,
+                  }}
+                  onPress={() => {
+                    navigation.replace('ChatRead', {
+                      storyName: route.params.storyName,
+                      chapterIndex: route.params.chapterIndex + 1,
+                      storyId: route.params.storyId,
+                      chapterId: nextChapterId,
+                      chapterList: route.params.chapterList,
+                      readStatus: route.params.readStatus,
+                      setReadStatus: route.params.setReadStatus,
+                    });
+                  }}
+                />
+              )}
+            </View>
+          )}
+        </ScrollView>
+      </View>
+      <View
+        style={{
+          position: 'absolute',
+          height: 100,
+          backgroundColor: Colors.lightGray,
+          width: '100%',
+          bottom: 0,
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+        onStartShouldSetResponder={() => updateReadingMessages()}
+      >
+        <TouchableOpacity disabled={finished}>
+          <Text
+            style={{
+              textTransform: 'uppercase',
+              color: Colors.blueGray,
+              fontSize: 20,
+            }}
+          >
+            {!finished ? 'Next message' : 'No more messages'}
+          </Text>
+        </TouchableOpacity>
+      </View>
+    </>
   );
 };
 

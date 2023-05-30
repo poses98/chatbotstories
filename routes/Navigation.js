@@ -218,6 +218,7 @@ export const UserStackScreen = () => {
           return {
             title: 'Chapter details',
             storyId: route.params.storyId,
+            chapterId: route.params.chapterId,
           };
         }}
       />
@@ -227,6 +228,7 @@ export const UserStackScreen = () => {
         options={({ route }) => {
           return {
             title: 'Chapter list',
+            shouldRefresh: route.params.shouldRefresh,
           };
         }}
       />
@@ -237,6 +239,7 @@ export const UserStackScreen = () => {
           return {
             title: route.params.title,
             chapterId: route.params.chapterId,
+            setShouldRefresh: route.params.setShouldRefresh,
           };
         }}
       />

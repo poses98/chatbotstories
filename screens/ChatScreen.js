@@ -32,11 +32,36 @@ export default ({ navigation, route }) => {
   const [messageEditId, setMessageEditId] = useState('');
   const [messageEditIndex, setMessageEditIndex] = useState(0);
   const [messageEditMode, setMessageEditMode] = useState(false);
-  const [canBeMain, setCanBeMain] = useState(false);
-  const storyId = route.params.storyId;
-  const chapterId = route.params.chapterId;
+  const { storyId, chapterId } = route.params;
   const scrollViewRef = useRef();
   const textInputRef = useRef(null);
+
+  /** Rendering the top bar icons */
+  const renderStackBarIconRight = () => {
+    return (
+      <View style={{ flexDirection: 'row' }}>
+        <TouchableOpacity
+          onPress={() => {
+            navigation.navigate('ChapterDetails', {
+              storyId: storyId,
+              chapterId: chapterId,
+            });
+          }}
+          style={{ paddingRight: 8 }}
+        >
+          <Ionicons name="settings-outline" size={26} color={Colors.black} />
+        </TouchableOpacity>
+      </View>
+    );
+  };
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => renderStackBarIconRight(),
+      headerRightContainerStyle: {
+        paddingRight: 10,
+      },
+    });
+  });
 
   const handleKeyboardShow = () => {
     // Keyboard is shown
