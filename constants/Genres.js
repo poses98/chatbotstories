@@ -16,4 +16,14 @@ export default [
     verboseName: 'Test',
     image: require('../assets/adventure.jpg'),
   },
+  {
+    genreKey: 5,
+    verboseName: 'Test',
+    image: require('../assets/adventure.jpg'),
+  },
+  {
+    genreKey: 6,
+    verboseName: 'Test',
+    image: require('../assets/adventure.jpg'),
+  },
 ];

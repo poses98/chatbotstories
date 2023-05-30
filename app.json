@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Bookster",
-    "slug": "bookster",
+    "name": "ChatStory",
+    "slug": "chatstory",
     "version": "1.0.5",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -24,7 +24,7 @@
         "foregroundImage": "./assets/icon.png",
         "backgroundColor": "#FFFFFF"
       },
-      "package": "com.bookcraft.bookcraft"
+      "package": "com.chatstory.chatstory"
     },
     "web": {
       "favicon": "./assets/favicon.png",

@@ -1,6 +1,6 @@
-import React from "react";
-import { Text, TouchableOpacity } from "react-native";
-import Colors from "../constants/Colors";
+import React from 'react';
+import { Text, TouchableOpacity } from 'react-native';
+import Colors from '../../constants/Colors';
 
 export const AuthorButtonSelector = ({
   _id,
@@ -21,12 +21,12 @@ export const AuthorButtonSelector = ({
         borderColor: color ? color : Colors.blue,
         marginVertical: 5,
         marginHorizontal: 5,
-        backgroundColor: selected ? color : "#fafafa",
+        backgroundColor: selected ? color : '#fafafa',
       }}
       onPress={onPress}
       onLongPress={onLongPress}
     >
-      <Text style={{ color: selected ? "#fafafa" : color }}>{name}</Text>
+      <Text style={{ color: selected ? '#fafafa' : color }}>{name}</Text>
     </TouchableOpacity>
   );
 };

@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useState, useEffect } from 'react';
+import React, { useLayoutEffect, useState, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -23,6 +23,53 @@ import { Label } from '../components/Label';
 import { StatusSelector } from '../components/StatusSelector';
 import StoryApi from '../api/story';
 import useAuth from '../hooks/useAuth';
+
+const GenreList = ({ GENRES, setcategoryMain, categoryMain }) => {
+  return (
+    <FlatList
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      data={GENRES}
+      keyExtractor={(item) => item.genreKey.toString()}
+      renderItem={({ item: { image, verboseName, genreKey } }) => (
+        <GenreBubble
+          verboseName={verboseName}
+          image={image}
+          genreKey={genreKey}
+          setcategoryMain={setcategoryMain}
+          categoryMain={categoryMain}
+        />
+      )}
+    />
+  );
+};
+
+const GenreBubble = React.memo(
+  ({ image, verboseName, genreKey, setcategoryMain, categoryMain }) => {
+    const imageSource = useMemo(() => image, [image]);
+
+    return (
+      <View style={{ flex: 1, flexDirection: 'row', marginHorizontal: 10 }}>
+        <TouchableOpacity
+          style={styles.genreContainer}
+          onPress={() => {
+            setcategoryMain(genreKey);
+          }}
+        >
+          <Image
+            style={
+              genreKey === categoryMain
+                ? styles.genrePicSelected
+                : styles.genrePic
+            }
+            source={imageSource}
+          />
+          <Text style={styles.genreText}>{verboseName}</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+);
 
 export default ({ route, navigation }) => {
   /** STORY ID IN CASE IS UPDATE MODE */
@@ -108,28 +155,6 @@ export default ({ route, navigation }) => {
     });
   };
   /** GENRE BUBBLE TEMPLATE */
-  const GenreBubble = ({ image, verboseName, genreKey }) => {
-    return (
-      <View style={{ flex: 1, flexDirection: 'row', marginHorizontal: 10 }}>
-        <TouchableOpacity
-          style={styles.genreContainer}
-          onPress={() => {
-            setcategoryMain(genreKey);
-          }}
-        >
-          <Image
-            style={
-              genreKey == categoryMain
-                ? styles.genrePicSelected
-                : styles.genrePic
-            }
-            source={image}
-          />
-          <Text style={styles.genreText}>{verboseName}</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  };
 
   return (
     <ScrollView style={styles.container}>
@@ -170,20 +195,10 @@ export default ({ route, navigation }) => {
           />
           <Label text="Choose main category " icon="layers-outline" />
           {/** GENRE BUBBLES FILLED FROM CONSTANT FILE */}
-          <FlatList
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            data={GENRES}
-            keyExtractor={(item) => item.genreKey.toString()}
-            renderItem={({ item: { image, verboseName, genreKey } }) => {
-              return (
-                <GenreBubble
-                  verboseName={verboseName}
-                  image={image}
-                  genreKey={genreKey}
-                />
-              );
-            }}
+          <GenreList
+            GENRES={GENRES}
+            categoryMain={categoryMain}
+            setcategoryMain={setcategoryMain}
           />
           {/** INTERACTIVE BUTTON SELECTOR */}
           <View style={{ flex: 1, marginTop: 15 }}>

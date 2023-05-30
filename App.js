@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
-import { NavigationContainer } from '@react-navigation/native';
+import { DarkTheme, NavigationContainer } from '@react-navigation/native';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { UserStackScreen } from './routes/Navigation';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import FirebaseProvider from './providers/FirebaseProvider';

@@ -219,17 +219,19 @@ export default ({ navigation, route }) => {
   }, [user, storyId, chapterList]);
 
   const createReadStatus = () => {
-    const newReadStatus = {
-      user: user._id,
-      story: storyId,
-      finished: false,
-      nextChapter: chapterList[0]._id,
-      previousChapter: null,
-    };
-    setReadStatus(newReadStatus);
-    ReadStatusApi.createReadStatus(newReadStatus).then((response) => {
-      setReadStatus(response);
-    });
+    if (chapterList[0]) {
+      const newReadStatus = {
+        user: user._id,
+        story: storyId,
+        finished: false,
+        nextChapter: chapterList[0]._id,
+        previousChapter: null,
+      };
+      setReadStatus(newReadStatus);
+      ReadStatusApi.createReadStatus(newReadStatus).then((response) => {
+        setReadStatus(response);
+      });
+    }
   };
 
   const getReadStatus = (storyId) => {
@@ -257,7 +259,7 @@ export default ({ navigation, route }) => {
   const [reviewList, setReviewList] = useState([]);
   /**Check if loaded */
   useEffect(() => {
-    if (data && chapterList && readStatus && authorUserName) {
+    if (data && chapterList && authorUserName) {
       setloading(false);
     }
   }, [data, chapterList, readStatus, authorUserName]);
@@ -414,7 +416,7 @@ export default ({ navigation, route }) => {
           >
             Chapter list
           </Text>
-          <View
+          <ScrollView
             style={{
               maxHeight: 250,
               minHeight: 200,
@@ -422,11 +424,13 @@ export default ({ navigation, route }) => {
               borderWidth: 1,
               borderColor: Colors.black,
               borderRadius: 10,
+              overflow: 'scroll',
             }}
           >
             {chapterList &&
               data &&
               readStatus &&
+              chapterList.length > 0 &&
               chapterList.map(({ title, description, _id }, index) => (
                 <ChapterItem
                   key={_id}
@@ -451,7 +455,19 @@ export default ({ navigation, route }) => {
                   list={false}
                 />
               ))}
-          </View>
+            {chapterList.length === 0 && (
+              <View
+                style={{
+                  flex: 1,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: Colors.gray,
+                }}
+              >
+                <Text>There are no chapters for this story!</Text>
+              </View>
+            )}
+          </ScrollView>
           {/**Reviews */}
           <Text
             style={{

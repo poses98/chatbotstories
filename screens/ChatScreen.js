@@ -15,7 +15,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 
 import { ScrollView, TextInput } from 'react-native-gesture-handler';
 import { MessageBubble } from '../components/MessageBubble';
-import { AuthorButtonSelector } from '../components/AuthorButtonSelector';
+import { AuthorButtonSelector } from '../components/ChatScreen/AuthorButtonSelector';
 import CharacterApi from '../api/character';
 import MessageApi from '../api/message';
 import StoryApi from '../api/story';
@@ -38,17 +38,6 @@ export default ({ navigation, route }) => {
   const scrollViewRef = useRef();
   const textInputRef = useRef(null);
 
-  useEffect(() => {
-    // Focus on the text input when the text changes
-    if (textInputRef.current) {
-      console.log('Focusing');
-      textInputRef.current.focus();
-      Keyboard.addListener('keyboardDidShow', handleKeyboardShow);
-    }
-    return () => {
-      Keyboard.removeAllListeners('keyboardDidShow', handleKeyboardShow);
-    };
-  }, [textInputRef.current, messageEdit]);
   const handleKeyboardShow = () => {
     // Keyboard is shown
   };
@@ -166,9 +155,15 @@ export default ({ navigation, route }) => {
   return (
     <View style={{ flex: 1, backgroundColor: '#fafafa' }}>
       {/**MESSAGE SCROLLVIEW */}
-      <KeyboardAvoidingView style={{ marginBottom: 100 }}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        style={{ marginBottom: 100 }}
+        keyboardVerticalOffset={180}
+      >
         <ScrollView
           ref={scrollViewRef}
+          contentContainerStyle={{ flexGrow: 1 }}
+          keyboardShouldPersistTaps={'handled'}
           onContentSizeChange={() =>
             scrollViewRef.current.scrollToEnd({ animated: true })
           }
@@ -194,7 +189,11 @@ export default ({ navigation, route }) => {
             ))}
         </ScrollView>
       </KeyboardAvoidingView>
-      <KeyboardAvoidingView style={styles.typeBar}>
+      <KeyboardAvoidingView
+        style={styles.typeBar}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        keyboardVerticalOffset={90}
+      >
         {/**INPUT BAR & AUTHOR SELECTOR */}
         {/**AUTHOR SELECTOR */}
         <View
@@ -258,7 +257,6 @@ export default ({ navigation, route }) => {
             onChangeText={(text) => {
               setMessageEdit(text);
             }}
-            ref={textInputRef}
             placeholder={'Message'}
             multiline={true}
           />
@@ -326,7 +324,7 @@ const styles = StyleSheet.create({
     flex: 0.2,
     justifyContent: 'space-around',
     marginHorizontal: 10,
-    marginBottom: 0,
+    paddingBottom: 20,
     backgroundColor: '#fafafa',
   },
   sendButton: {

@@ -50,25 +50,28 @@ export default ({ navigation }) => {
         <View style={{ flexDirection: 'row' }}>
           <TouchableOpacity
             onPress={async () => {
-              data.description = data.description
+              /* data.description = data.description
                 ? data.description.replace(/\r?\n|\r/, '').trim()
                 : '';
-              setData({ ...data });
+              setData({ ...data, description }); */
 
               let usernameAvailable = true;
 
               if (data.username !== authUser.username) {
-                usernameAvailable = await UserApi.getUsername(data.username);
-                console.log(usernameAvailable);
+                usernameAvailable = await UserApi.checkUsername(data.username);
               }
-
-              UserApi.updateUser(authUser._id, data)
-                .then((response) => {
-                  navigation.navigator.dispatch(CommonActions.goBack);
-                })
-                .catch((err) => {
-                  /** TODO handle error */
-                });
+              if (!usernameAvailable.exists) {
+                UserApi.updateUser(authUser._id, data)
+                  .then((response) => {
+                    console.log(response);
+                    navigation.navigator.dispatch(CommonActions.goBack);
+                  })
+                  .catch((err) => {
+                    /** TODO handle error */
+                  });
+              } else {
+                setErrorMessage('Username is taken');
+              }
             }}
             style={{ paddingRight: 5 }}
           >
@@ -161,7 +164,9 @@ export default ({ navigation }) => {
     uploadImageAsync(image, auth().currentUser.uid);
     navigation.dispatch(CommonActions.goBack());
   };
-
+  useEffect(() => {
+    console.log(data);
+  }, [data]);
   async function uploadImageAsync(uri, name) {
     // Why are we using XMLHttpRequest? See:
     // https://github.com/expo/expo/issues/2402#issuecomment-443726662
