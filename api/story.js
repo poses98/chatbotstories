@@ -101,6 +101,51 @@ class StoryApi {
     );
     return response;
   }
+  static async getSavedStories(userId) {
+    try {
+      const savedResponse = await fetchWithAuth(
+        `${BASE_PATH}/${API_VERSION}/stories/user/${userId}/saved`,
+        {
+          method: 'GET',
+        }
+      );
+
+      return savedResponse.savedStories;
+    } catch (error) {
+      console.error(error);
+      throw new Error('Failed to fetch saved stories');
+    }
+  }
+  static async getLikedStories(userId) {
+    try {
+      const likedResponse = await fetchWithAuth(
+        `${BASE_PATH}/${API_VERSION}/stories/user/${userId}/liked`,
+        {
+          method: 'GET',
+        }
+      );
+
+      return likedResponse.likedStories;
+    } catch (error) {
+      console.error(error);
+      throw new Error('Failed to fetch liked stories');
+    }
+  }
+  static async getReadStories(userId) {
+    try {
+      const readResponse = await fetchWithAuth(
+        `${BASE_PATH}/${API_VERSION}/stories/user/${userId}/read`,
+        {
+          method: 'GET',
+        }
+      );
+
+      return readResponse.readStories;
+    } catch (error) {
+      console.error(error);
+      throw new Error('Failed to fetch read stories');
+    }
+  }
 }
 
 export default StoryApi;

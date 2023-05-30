@@ -17,7 +17,7 @@ export default StoryContainer = ({
   description,
   storyId,
   onPress,
-  categoryMain,
+  genre,
   readStatus,
   likes,
   views,
@@ -26,9 +26,14 @@ export default StoryContainer = ({
     console.log(e.nativeEvent.error);
   };
   return (
-    <TouchableOpacity onPress={onPress} activeOpacity={0.8} delayPressIn={10}>
+    <TouchableOpacity
+      style={{ width: 230, margin: 6 }}
+      onPress={onPress}
+      activeOpacity={0.8}
+      delayPressIn={10}
+    >
       <ImageBackground
-        source={GENRES[categoryMain].image}
+        source={GENRES[genre].image}
         resizeMode="cover"
         onError={handleError}
         style={styles.image}
@@ -45,7 +50,7 @@ export default StoryContainer = ({
             )}
             <View style={styles.storyTag}>
               <Text style={{ color: Colors.lightGray }}>
-                {GENRES[categoryMain].verboseName}
+                {GENRES[genre].verboseName}
               </Text>
             </View>
           </View>
@@ -87,17 +92,18 @@ export default StoryContainer = ({
 const styles = StyleSheet.create({
   container: {
     backgroundColor: '#fff',
-    height: 230,
+    height: 350,
   },
   image: {
     justifyContent: 'center',
-    height: 230,
-    width: '100%',
+    height: 350,
+    width: 230,
   },
   storyContainer: {
+    width: 230,
     flexDirection: 'column',
-    justifyContent: 'space-between',
-    height: 230,
+    margin: 0,
+    height: 350,
     padding: 15,
     borderColor: Colors.gray,
     backgroundColor: 'rgba(52, 52, 52, 0.6)',
@@ -126,7 +132,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'flex-start',
     alignContent: 'center',
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
     flexDirection: 'column',
     color: '#fafafa',
   },

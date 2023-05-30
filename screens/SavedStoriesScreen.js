@@ -14,6 +14,9 @@ import StoryContainer from '../components/StoryContainer';
 import Colors from '../constants/Colors';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import GENRES from '../constants/Genres';
+import StoryApi from '../api/story';
+import useAuth from '../hooks/useAuth';
+import StoryContainerLibrary from '../components/StoryContainerLibrary';
 
 const images = {
   terror: require('../assets/terror.jpg'),
@@ -24,71 +27,191 @@ const images = {
 
 export default ({ navigation }) => {
   const [stories, setStories] = useState([]);
+  const [likedStories, setLikedStories] = useState(null);
+  const [savedStories, setSavedStories] = useState(null);
+  const [readStories, setReadStories] = useState(null);
   const [data, setdata] = useState({});
   const [loading, setloading] = useState(true);
   const [storyCount, setStoryCount] = useState(0);
+  const { authUser } = useAuth();
   //Get user information
 
   useEffect(() => {
-    // get liked stories metadata
-  }, []);
-
+    if (!likedStories && !savedStories && !readStories && authUser) {
+      StoryApi.getLikedStories(authUser._id)
+        .then((likedResponse) => {
+          setLikedStories(likedResponse);
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+      StoryApi.getReadStories(authUser._id)
+        .then((readResponse) => {
+          setReadStories(readResponse);
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+      StoryApi.getSavedStories(authUser._id)
+        .then((savedResponse) => {
+          setSavedStories(savedResponse);
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+    }
+  }, [authUser]);
+  useEffect(() => {
+    if (savedStories && likedStories && readStories) {
+      setloading(false);
+    }
+  }, [likedStories, savedStories, readStories]);
   return (
     <ScrollView style={styles.container}>
-      {!loading && (
-        <View>
-          {console.log(stories)}
-          {!(storyCount === 0) && (
-            <FlatList
-              data={stories}
-              renderItem={({
-                item: {
-                  interactive,
-                  title,
-                  description,
-                  storyId,
-                  date,
-                  categoryMain,
-                  author,
-                },
-              }) => {
-                return (
-                  <StoryContainer
-                    interactive={interactive}
-                    title={title}
-                    description={description}
-                    id={storyId}
-                    categoryMain={categoryMain}
-                    date={date}
-                    onPress={() => {
-                      navigation.navigate('StoryInfo', {
-                        title,
-                        storyId,
-                        username: author,
-                      });
-                    }}
-                  />
-                );
-              }}
-            />
-          )}
-          {storyCount == 0 && (
+      <View>
+        {!loading && readStories && readStories.length > 0 && (
+          <View>
+            <Text style={styles.title}>Continue reading</Text>
+            <ScrollView horizontal>
+              <View style={{ flexDirection: 'row' }}>
+                {readStories.map((story) => {
+                  const {
+                    interactive,
+                    title,
+                    description,
+                    _id,
+                    date,
+                    genre,
+                    author,
+                    likes,
+                  } = story;
+                  return (
+                    <StoryContainerLibrary
+                      key={_id}
+                      interactive={interactive}
+                      title={title}
+                      description={description}
+                      id={_id}
+                      genre={genre}
+                      date={date}
+                      onPress={() => {
+                        navigation.navigate('StoryInfo', {
+                          title,
+                          storyId: _id,
+                          username: author,
+                        });
+                      }}
+                      likes={likes.count}
+                    />
+                  );
+                })}
+              </View>
+            </ScrollView>
+          </View>
+        )}
+        {!loading && likedStories && likedStories.length > 0 && (
+          <View>
+            <Text style={styles.title}>Liked stories</Text>
+            <ScrollView horizontal>
+              <View style={{ flexDirection: 'row' }}>
+                {likedStories.map((story) => {
+                  const {
+                    interactive,
+                    title,
+                    description,
+                    _id,
+                    date,
+                    genre,
+                    author,
+                    likes,
+                  } = story;
+                  return (
+                    <StoryContainerLibrary
+                      key={_id}
+                      interactive={interactive}
+                      title={title}
+                      description={description}
+                      id={_id}
+                      genre={genre}
+                      date={date}
+                      onPress={() => {
+                        navigation.navigate('StoryInfo', {
+                          title,
+                          storyId: _id,
+                          username: author,
+                        });
+                      }}
+                      likes={likes.count}
+                    />
+                  );
+                })}
+              </View>
+            </ScrollView>
+          </View>
+        )}
+        {!loading && savedStories && savedStories.length > 0 && (
+          <View>
             <View
-              style={{
-                flex: 1,
-                justifyContent: 'center',
-                alignContent: 'center',
-                alignSelf: 'center',
-                opacity: 0.5,
-                alignItems: 'center',
-                height: 300,
-              }}
+              styles={{ borderBottomWidth: 1, borderBottomColor: Colors.gray }}
             >
-              <Text>Save some stories and they will show up here! 💾</Text>
+              <Text style={styles.title}>Saved stories</Text>
             </View>
-          )}
-        </View>
-      )}
+            <ScrollView horizontal>
+              <View style={{ flexDirection: 'row' }}>
+                {savedStories.map((story) => {
+                  const {
+                    interactive,
+                    title,
+                    description,
+                    _id,
+                    date,
+                    genre,
+                    author,
+                    likes,
+                  } = story;
+                  return (
+                    <StoryContainerLibrary
+                      key={_id}
+                      interactive={interactive}
+                      title={title}
+                      description={description}
+                      id={_id}
+                      genre={genre}
+                      date={date}
+                      onPress={() => {
+                        navigation.navigate('StoryInfo', {
+                          title,
+                          storyId: _id,
+                          username: author,
+                        });
+                      }}
+                      likes={likes.count}
+                    />
+                  );
+                })}
+              </View>
+            </ScrollView>
+          </View>
+        )}
+
+        {!likedStories && !savedStories && !readStories && !loading && (
+          <View
+            style={{
+              flex: 1,
+              justifyContent: 'center',
+              alignContent: 'center',
+              alignSelf: 'center',
+              opacity: 0.5,
+              alignItems: 'center',
+              height: 300,
+            }}
+          >
+            <Text>
+              Save, like or read some stories and they will show up here! 💾
+            </Text>
+          </View>
+        )}
+      </View>
       {loading && (
         <View
           style={{
@@ -109,55 +232,11 @@ export default ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  image: {
-    flex: 1,
-    justifyContent: 'center',
-    height: 230,
-    width: '100%',
-  },
-  storyContainer: {
-    flexDirection: 'column',
-    justifyContent: 'space-between',
-    height: 230,
-    padding: 15,
-    borderColor: Colors.gray,
-    backgroundColor: 'rgba(52, 52, 52, 0.6)',
-  },
-  storyBar: {
-    alignSelf: 'flex-start',
-    padding: 0,
-    flexDirection: 'row',
-  },
-  storyTag: {
-    borderWidth: 1,
-    borderColor: '#fafafa', //TODO
-    padding: 5,
-    borderRadius: 5,
-    marginHorizontal: 3,
-  },
-  storyTitle: {
-    fontSize: 26,
-    fontWeight: 'bold',
-    color: '#fafafa',
-  },
-  storyDescription: {
-    color: Colors.lightGray,
-  },
-  storyMainInfoContainer: {
-    flex: 1,
-    alignItems: 'flex-start',
-    alignContent: 'center',
-    justifyContent: 'center',
-    flexDirection: 'column',
-    color: '#fafafa',
-  },
-  storyStats: {
-    flexDirection: 'row',
-    marginRight: 15,
-    alignItems: 'center',
+  title: {
+    fontSize: 24,
+    fontWeight: '200',
+    margin: 6,
+    width: '70%',
+    color: Colors.gray,
   },
 });
