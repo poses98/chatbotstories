@@ -5,6 +5,7 @@ import { UserStackScreen } from './routes/Navigation';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import FirebaseProvider from './providers/FirebaseProvider';
 import AuthProvider from './providers/AuthProvider';
+import StoryProvider from './providers/StoryProvider';
 import { getApps } from 'firebase/app';
 
 async function changeScreenOrientation() {
@@ -26,7 +27,9 @@ export default function App() {
     <NavigationContainer>
       <FirebaseProvider>
         <AuthProvider>
-          <UserStackScreen />
+          <StoryProvider>
+            <UserStackScreen />
+          </StoryProvider>
         </AuthProvider>
       </FirebaseProvider>
     </NavigationContainer>
