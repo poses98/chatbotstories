@@ -1,5 +1,5 @@
-import React from 'react';
-import { Appearance } from 'react-native';
+import React, { useState } from 'react';
+import { Platform, Animated } from 'react-native';
 import {
   View,
   Text,
@@ -22,15 +22,35 @@ export default StoryContainer = ({
   likes,
   views,
 }) => {
+  const [scaleValue] = useState(new Animated.Value(1));
+
+  const handlePressIn = () => {
+    Animated.spring(scaleValue, {
+      toValue: 0.95,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const handlePressOut = () => {
+    Animated.spring(scaleValue, {
+      toValue: 1,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const animatedStyle = {
+    transform: [{ scale: scaleValue }],
+  };
   const handleError = (e) => {
     console.log(e.nativeEvent.error);
   };
   return (
     <TouchableOpacity
-      style={{ width: 230, margin: 6 }}
+      style={[styles.container, animatedStyle]}
       onPress={onPress}
+      onPressIn={handlePressIn}
+      onPressOut={handlePressOut}
       activeOpacity={0.8}
-      delayPressIn={10}
     >
       <ImageBackground
         source={GENRES[genre].image}
@@ -91,8 +111,19 @@ export default StoryContainer = ({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#fff',
-    height: 350,
+    width: 230,
+    margin: 6,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 2, height: 2 },
+        shadowOpacity: 0.8,
+        shadowRadius: 3,
+      },
+      android: {
+        elevation: 4,
+      },
+    }),
   },
   image: {
     justifyContent: 'center',
@@ -132,7 +163,8 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'flex-start',
     alignContent: 'center',
-    justifyContent: 'flex-start',
+    justifyContent: 'center',
+    paddingBottom: 35,
     flexDirection: 'column',
     color: '#fafafa',
   },
