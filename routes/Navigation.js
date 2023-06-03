@@ -28,11 +28,11 @@ const getHeaderTitle = (route) => {
 
   switch (routeName) {
     case 'Home':
-      return 'News feed';
+      return 'Home';
     case 'Profile':
       return 'My profile';
     case 'SavedStories':
-      return 'Saved Stories';
+      return 'My Library';
     case 'Discover':
       return 'Discover';
     case 'Create':
