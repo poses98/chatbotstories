@@ -37,7 +37,9 @@ const StoryProvider = ({ children }) => {
   }, [authUser]);
 
   return (
-    <StoryContext.Provider value={{ userStories }}>
+    <StoryContext.Provider
+      value={{ userStories, likedStories, savedStories, readStories }}
+    >
       {children}
     </StoryContext.Provider>
   );
