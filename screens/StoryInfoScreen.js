@@ -22,8 +22,10 @@ import { ChapterItem } from '../components/ChapterItem';
 import { moderateScale } from 'react-native-size-matters';
 import StoryApi from '../api/story';
 import UserApi from '../api/user';
-import useAuth from '../hooks/useAuth';
 import ReadStatusApi from '../api/readstatus';
+import useAuth from '../hooks/useAuth';
+import useStories from '../hooks/useStories';
+import * as Haptics from 'expo-haptics';
 
 export default ({ navigation, route }) => {
   /** STATE OBJECTS */
@@ -40,6 +42,7 @@ export default ({ navigation, route }) => {
   const [readStatus, setReadStatus] = useState(null);
   const [error, setError] = useState(false);
   const { authUser } = useAuth();
+  const { fetchStories } = useStories();
   const { storyId } = route.params;
 
   /**Getting the author name */
@@ -73,10 +76,6 @@ export default ({ navigation, route }) => {
     if (!data && authUser) {
       StoryApi.getStoryAndChaptersById(storyId)
         .then((response) => {
-          /* var date = new Date(response.date);
-          data.month = date.getMonth();
-          data.day = date.getDate();
-          data.year = date.getFullYear(); */
           setdata(response);
           setChapterList(response.chapters);
           if (authUser._id === response.author) setowned(true);
@@ -87,7 +86,6 @@ export default ({ navigation, route }) => {
         });
     }
   }, [authUser]);
-
   /** Finding out if the user has already liked this story to enable the like button */
   useEffect(() => {
     if (data)
@@ -102,8 +100,8 @@ export default ({ navigation, route }) => {
   /** Finding out if the user has already saved this story to check the saved button */
   useEffect(() => {
     if (user) {
-      user.savedStories.forEach((story) => {
-        if (story._id === storyId) {
+      user.savedStories.forEach((savedStory) => {
+        if (savedStory.story === storyId) {
           setIsSaved(true);
         }
       });
@@ -118,9 +116,14 @@ export default ({ navigation, route }) => {
             {
               <TouchableOpacity
                 onPress={() => {
+                  Haptics.notificationAsync(
+                    Haptics.NotificationFeedbackType.Success
+                  );
                   setIsSaved(!isSaved);
                   StoryApi.saveStory(storyId, authUser._id)
-                    .then((response) => {})
+                    .then(() => {
+                      fetchStories();
+                    })
                     .catch((err) => {
                       /**TODO handle error */
                       console.error(err);
@@ -165,9 +168,18 @@ export default ({ navigation, route }) => {
   });
   /** Likes a story */
   const likeStory = () => {
+    if (canLike) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    } else {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+    }
     StoryApi.likeStory(data._id, authUser._id)
-      .then((response) => {})
-      .catch((err) => {});
+      .then(() => {
+        fetchStories();
+      })
+      .catch((err) => {
+        console.error(err);
+      });
 
     if (canLike) {
       data.likes.count += 1;

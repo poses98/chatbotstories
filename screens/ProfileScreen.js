@@ -7,6 +7,7 @@ import UserApi from '../api/user';
 import StoryApi from '../api/story';
 import useFirebase from '../hooks/useFirebase';
 import useAuth from '../hooks/useAuth';
+import useStories from '../hooks/useStories';
 
 const images = {
   terror: require('../assets/terror.jpg'),
@@ -20,6 +21,7 @@ export default ({ route, navigation }) => {
   const testId = '';
   const TEST = false;
   const { authUser } = useAuth();
+  const { userStories } = useStories();
   const [owned, setOwned] = useState(false);
   const [stories, setStories] = useState(null);
   const [reloadStories, setReloadStories] = useState(false);
@@ -34,7 +36,7 @@ export default ({ route, navigation }) => {
     }
   }, [authUser]);
 
-  useEffect(() => {
+  /*   useEffect(() => {
     if (authUser) {
       console.log(authUser._id);
       StoryApi.getUserStories(authUser._id)
@@ -44,10 +46,20 @@ export default ({ route, navigation }) => {
         })
         .catch((err) => {
           console.log(err);
-          /**TODO handle error */
+          
         });
     }
-  }, [authUser, route.params]);
+  }, [authUser, route.params]);  */
+
+  useEffect(() => {
+    console.log('Getting stories from hook');
+    console.log(userStories);
+    if (userStories) {
+      setStories(userStories);
+    } else {
+      console.log('No stories');
+    }
+  }, [userStories]);
 
   useEffect(() => {
     if (data && stories) {

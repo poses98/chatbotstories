@@ -1,6 +1,5 @@
 import React, { useState, useEffect, createContext } from 'react';
 import useAuth from '../hooks/useAuth';
-import useStory from '../hooks/useStory';
 import StoryApi from '../api/story';
 // create a context for the Firebase user and ID token
 export const StoryContext = createContext();
@@ -12,33 +11,58 @@ const StoryProvider = ({ children }) => {
   const [readStories, setReadStories] = useState(null);
   const { authUser } = useAuth();
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        if (authUser) {
-          const userStories = await StoryApi.getUserStories(authUser._id);
-          setUserStories(userStories);
+  const fetchStories = async () => {
+    try {
+      console.log('Getting user stories');
+      if (authUser) {
+        StoryApi.getUserStories(authUser._id)
+          .then((response) => {
+            setUserStories(response);
+          })
+          .catch((err) => {
+            console.error(err);
+          });
 
-          const likedStories = await StoryApi.getLikedStories(authUser._id);
-          setLikedStories(likedStories);
-
-          const readStories = await StoryApi.getReadStories(authUser._id);
-          setReadStories(readStories);
-
-          const savedStories = await StoryApi.getSavedStories(authUser._id);
-          setSavedStories(savedStories);
-        }
-      } catch (err) {
-        console.error(err);
+        StoryApi.getLikedStories(authUser._id)
+          .then((likedResponse) => {
+            setLikedStories(likedResponse);
+          })
+          .catch((err) => {
+            console.error(err);
+          });
+        StoryApi.getReadStories(authUser._id)
+          .then((readResponse) => {
+            setReadStories(readResponse);
+          })
+          .catch((err) => {
+            console.error(err);
+          });
+        StoryApi.getSavedStories(authUser._id)
+          .then((savedResponse) => {
+            setSavedStories(savedResponse);
+          })
+          .catch((err) => {
+            console.error(err);
+          });
       }
-    };
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
-    fetchData();
+  useEffect(() => {
+    fetchStories();
   }, [authUser]);
 
   return (
     <StoryContext.Provider
-      value={{ userStories, likedStories, savedStories, readStories }}
+      value={{
+        userStories,
+        likedStories,
+        savedStories,
+        readStories,
+        fetchStories,
+      }}
     >
       {children}
     </StoryContext.Provider>

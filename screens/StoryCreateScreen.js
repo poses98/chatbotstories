@@ -23,6 +23,7 @@ import { Label } from '../components/Label';
 import { StatusSelector } from '../components/StatusSelector';
 import StoryApi from '../api/story';
 import useAuth from '../hooks/useAuth';
+import useStories from '../hooks/useStories';
 
 const GenreList = ({ GENRES, setcategoryMain, categoryMain }) => {
   return (
@@ -104,6 +105,7 @@ export default ({ route, navigation }) => {
   const [language, setLanguage] = useState(0); // language of the story
   const [memberNumber, setMemberNumber] = useState(2); //number of the members of the story
   const { authUser } = useAuth();
+  const { fetchStories } = useStories();
 
   const updateStatus = (value) => {
     setStatus(value);
@@ -139,7 +141,8 @@ export default ({ route, navigation }) => {
   const createStory = (data) => {
     StoryApi.createStory(data)
       .then(() => {
-        navigation.navigate('Profile', { shouldRerender: true });
+        fetchStories();
+        navigation.navigate('Profile');
       })
       .catch((err) => {
         console.log(err);
@@ -150,7 +153,7 @@ export default ({ route, navigation }) => {
   const updateStory = (data) => {
     console.log(data);
     StoryApi.updateStory(storyId, data).then((response) => {
-      console.log(response);
+      fetchStories();
       navigation.dispatch(CommonActions.goBack);
     });
   };

@@ -1,66 +1,14 @@
-import React, { useLayoutEffect, useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  Image,
-  ScrollView,
-  TouchableOpacity,
-  FlatList,
-  ImageBackground,
-} from 'react-native';
-import ProfileHeader from '../components/Profile/ProfileHeader';
-import StoryContainer from '../components/StoryContainer';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, Image, ScrollView } from 'react-native';
 import Colors from '../constants/Colors';
-import Ionicons from '@expo/vector-icons/Ionicons';
-import GENRES from '../constants/Genres';
-import StoryApi from '../api/story';
-import useAuth from '../hooks/useAuth';
+import useStories from '../hooks/useStories';
 import StoryContainerLibrary from '../components/StoryContainerLibrary';
 
-const images = {
-  terror: require('../assets/terror.jpg'),
-  adventure: require('../assets/adventure.jpg'),
-  drama: require('../assets/drama.jpg'),
-  snow: require('../assets/snow.jpg'),
-};
-
 export default ({ navigation }) => {
-  const [stories, setStories] = useState([]);
-  const [likedStories, setLikedStories] = useState(null);
-  const [savedStories, setSavedStories] = useState(null);
-  const [readStories, setReadStories] = useState(null);
-  const [data, setdata] = useState({});
   const [loading, setloading] = useState(true);
-  const [storyCount, setStoryCount] = useState(0);
-  const { authUser } = useAuth();
-  //Get user information
 
-  useEffect(() => {
-    if (!likedStories && !savedStories && !readStories && authUser) {
-      StoryApi.getLikedStories(authUser._id)
-        .then((likedResponse) => {
-          setLikedStories(likedResponse);
-        })
-        .catch((err) => {
-          console.error(err);
-        });
-      StoryApi.getReadStories(authUser._id)
-        .then((readResponse) => {
-          setReadStories(readResponse);
-        })
-        .catch((err) => {
-          console.error(err);
-        });
-      StoryApi.getSavedStories(authUser._id)
-        .then((savedResponse) => {
-          setSavedStories(savedResponse);
-        })
-        .catch((err) => {
-          console.error(err);
-        });
-    }
-  }, [authUser]);
+  const { likedStories, readStories, savedStories } = useStories();
+
   useEffect(() => {
     if (savedStories && likedStories && readStories) {
       setloading(false);

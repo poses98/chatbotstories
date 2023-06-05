@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   FlatList,
   KeyboardAvoidingView,
-  DEVICE_WIDTH,
   Alert,
   Keyboard,
 } from 'react-native';

@@ -24,10 +24,9 @@ export default ({ navigation, route }) => {
   );
   const [main, setMain] = useState(route.params.isMain || false);
   const [canBeMain, setCanBeMain] = useState(route.params.canBeMain || false);
-  const [characterId, setCharacterId] = useState(route.params.characterId);
-  const [isEditMode, setIsEditMode] = useState(
-    route.params.characterId ? true : false
-  );
+  const characterId = route.params.characterId;
+  const isEditMode = route.params.characterId ? true : false;
+
   const [isValid, setValidity] = useState(true);
 
   useEffect(() => {
