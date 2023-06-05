@@ -146,6 +146,20 @@ class StoryApi {
       throw new Error('Failed to fetch read stories');
     }
   }
+  static async getPersonalizedFeed(userId) {
+    try {
+      const response = await fetchWithAuth(
+        `${BASE_PATH}/${API_VERSION}/stories/feed/user/${userId}`,
+        {
+          method: 'GET',
+        }
+      );
+      return response;
+    } catch (error) {
+      console.error(error);
+      throw new Error('Failed to fetch read stories');
+    }
+  }
 }
 
 export default StoryApi;

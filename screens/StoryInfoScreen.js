@@ -231,7 +231,8 @@ export default ({ navigation, route }) => {
     }
   }, [user, storyId, chapterList]);
 
-  const createReadStatus = () => {
+  const createReadStatus = async () => {
+    console.log('Creating read status');
     if (chapterList[0]) {
       const newReadStatus = {
         user: user._id,
@@ -240,8 +241,8 @@ export default ({ navigation, route }) => {
         nextChapter: chapterList[0]._id,
         previousChapter: null,
       };
-      setReadStatus(newReadStatus);
-      ReadStatusApi.createReadStatus(newReadStatus).then((response) => {
+
+      await ReadStatusApi.createReadStatus(newReadStatus).then((response) => {
         setReadStatus(response);
       });
     }

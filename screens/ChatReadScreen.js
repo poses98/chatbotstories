@@ -23,9 +23,14 @@ export default ({ navigation, route }) => {
   const [nextChapterId, setNextChapterId] = useState('');
   const [isEnded, setIsEnded] = useState(true);
 
+  const { readStatus } = route.params;
+
+  useEffect(() => {
+    console.log(readStatus);
+  }, readStatus);
+
   const nextChapter = () => {
     const { chapterList, chapterIndex, readStatus } = route.params;
-    console.log(chapterIndex);
     let isFinished = true;
     const nextIndex = chapterIndex + 1;
     console.log(`Finding nextIndex:${chapterIndex + 1}`);
@@ -33,12 +38,12 @@ export default ({ navigation, route }) => {
     console.log(`NextChapter: ${nextChapter ? nextChapter.title : NaN}`);
     console.log(readStatus.finished);
     if (nextChapter) {
-      console.log('setting next chapter');
       setIsEnded(false);
       isFinished = false;
       setNextChapterId(nextChapter._id);
       // Make the API call to update the read status
       if (!readStatus.finished) {
+        console.log('setting next chapter ' + nextChapter._id);
         updateReadStatus(nextChapter._id);
       }
     }
@@ -50,7 +55,7 @@ export default ({ navigation, route }) => {
   };
 
   const updateReadStatus = (chapterId, finished) => {
-    const { readStatus, setReadStatus } = route.params;
+    const { setReadStatus } = route.params;
     if (!readStatus.finished) {
       const updatedReadStatus = {
         ...readStatus,
@@ -58,6 +63,7 @@ export default ({ navigation, route }) => {
         nextChapter: route.params.chapterId,
         finished: finished,
       };
+
       ReadStatusApi.updateReadStatusById(readStatus._id, updatedReadStatus)
         .then((response) => {
           console.log(response);

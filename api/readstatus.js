@@ -25,6 +25,7 @@ class ReadStatusApi {
   }
 
   static async updateReadStatusById(readStatusId, updatedReadStatus) {
+    console.log(`${BASE_PATH}/${API_VERSION}/read-status/${readStatusId}`);
     const response = await fetchWithAuth(
       `${BASE_PATH}/${API_VERSION}/read-status/${readStatusId}`,
       {
