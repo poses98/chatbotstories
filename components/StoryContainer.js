@@ -9,15 +9,14 @@ import {
 } from 'react-native';
 import Colors from '../constants/Colors';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import GENRES from '../constants/Genres';
+import GENRES from '../constants/Genres_';
 
 export default StoryContainer = ({
   interactive,
   title,
   description,
-  storyId,
   onPress,
-  categoryMain,
+  genre,
   readStatus,
   likes,
   views,
@@ -27,11 +26,10 @@ export default StoryContainer = ({
   };
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.8} delayPressIn={10}>
-      <ImageBackground
-        source={GENRES[categoryMain].image}
+      <View
         resizeMode="cover"
         onError={handleError}
-        style={styles.image}
+        style={[styles.image, { backgroundColor: GENRES[genre].color }]}
       >
         <View style={[styles.storyContainer]}>
           {/**CATEGORIES */}
@@ -45,7 +43,7 @@ export default StoryContainer = ({
             )}
             <View style={styles.storyTag}>
               <Text style={{ color: Colors.lightGray }}>
-                {GENRES[categoryMain].verboseName}
+                {GENRES[genre].name}
               </Text>
             </View>
           </View>
@@ -77,9 +75,8 @@ export default StoryContainer = ({
               </View>
             </View>
           </View>
-          {/**TODO --> STATUS BAND */}
         </View>
-      </ImageBackground>
+      </View>
     </TouchableOpacity>
   );
 };
@@ -100,7 +97,7 @@ const styles = StyleSheet.create({
     height: 230,
     padding: 15,
     borderColor: Colors.gray,
-    backgroundColor: 'rgba(52, 52, 52, 0.6)',
+    backgroundColor: 'rgba(52, 52, 52, 0.2)',
   },
   storyBar: {
     alignSelf: 'flex-start',

@@ -9,7 +9,8 @@ import {
 } from 'react-native';
 import Colors from '../constants/Colors';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import GENRES from '../constants/Genres';
+import GENRES from '../constants/Genres_';
+import OldBookBackground from './OldBookBackground';
 
 export default StoryContainer = ({
   interactive,
@@ -52,59 +53,68 @@ export default StoryContainer = ({
       onPressOut={handlePressOut}
       activeOpacity={0.8}
     >
-      <ImageBackground
-        source={GENRES[genre].image}
-        resizeMode="cover"
-        onError={handleError}
-        style={styles.image}
+      <View
+        style={{
+          justifyContent: 'center',
+          height: 350,
+          width: 230,
+          backgroundColor: GENRES[genre].color,
+        }}
       >
-        <View style={[styles.storyContainer]}>
-          {/**CATEGORIES */}
-          <View style={styles.storyBar}>
-            {interactive && (
+        <ImageBackground
+          source={require('../assets/old_notebook_texture.png')}
+          resizeMode="cover"
+          onError={handleError}
+          style={styles.textureOverlay}
+        >
+          <View style={[styles.storyContainer]}>
+            {/**CATEGORIES */}
+            <View style={styles.storyBar}>
+              {interactive && (
+                <View
+                  style={[styles.storyTag, { backgroundColor: Colors.green }]}
+                >
+                  <Text style={{ color: Colors.lightGray }}>Interactive</Text>
+                </View>
+              )}
+              <View style={styles.storyTag}>
+                <Text style={{ color: Colors.lightGray }}>
+                  {GENRES[genre].name}
+                </Text>
+              </View>
+            </View>
+            {/**STORY TITLE & DESCRIPTION */}
+            <View style={styles.storyMainInfoContainer}>
+              {/**<Text style={styles.readStatusText}>{/**readStatus*In progress</Text>}*/}
+              <Text style={styles.storyTitle}>{title}</Text>
+              <Text style={styles.storyDescription}>"{description}"</Text>
+            </View>
+            {/**STATS */}
+            <View style={{ alignSelf: 'flex-end' }}>
               <View
-                style={[styles.storyTag, { backgroundColor: Colors.green }]}
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                }}
               >
-                <Text style={{ color: Colors.lightGray }}>Interactive</Text>
-              </View>
-            )}
-            <View style={styles.storyTag}>
-              <Text style={{ color: Colors.lightGray }}>
-                {GENRES[genre].verboseName}
-              </Text>
-            </View>
-          </View>
-          {/**STORY TITLE & DESCRIPTION */}
-          <View style={styles.storyMainInfoContainer}>
-            {/**<Text style={styles.readStatusText}>{/**readStatus*In progress</Text>}*/}
-            <Text style={styles.storyTitle}>{title}</Text>
-            <Text style={styles.storyDescription}>"{description}"</Text>
-          </View>
-          {/**STATS */}
-          <View style={{ alignSelf: 'flex-end' }}>
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-              }}
-            >
-              <View style={styles.storyStats}>
-                <Ionicons
-                  name="eye-outline"
-                  size={20}
-                  color={Colors.lightGray}
-                />
-                <Text style={{ color: Colors.lightGray }}>{views}</Text>
-              </View>
-              <View style={styles.storyStats}>
-                <Ionicons name="heart" size={20} color={Colors.red} />
-                <Text style={{ color: Colors.lightGray }}>{likes}</Text>
+                <View style={styles.storyStats}>
+                  <Ionicons
+                    name="eye-outline"
+                    size={20}
+                    color={Colors.lightGray}
+                  />
+                  <Text style={{ color: Colors.lightGray }}>{views}</Text>
+                </View>
+                <View style={styles.storyStats}>
+                  <Ionicons name="heart" size={20} color={Colors.red} />
+                  <Text style={{ color: Colors.lightGray }}>{likes}</Text>
+                </View>
               </View>
             </View>
+            {/**TODO --> STATUS BAND */}
           </View>
-          {/**TODO --> STATUS BAND */}
-        </View>
-      </ImageBackground>
+        </ImageBackground>
+      </View>
     </TouchableOpacity>
   );
 };
@@ -137,7 +147,7 @@ const styles = StyleSheet.create({
     height: 350,
     padding: 15,
     borderColor: Colors.gray,
-    backgroundColor: 'rgba(52, 52, 52, 0.6)',
+    /* backgroundColor: 'rgba(52, 52, 52, 0.6)', */
   },
   storyBar: {
     alignSelf: 'flex-start',
@@ -176,5 +186,13 @@ const styles = StyleSheet.create({
   readStatusText: {
     fontSize: 12,
     color: Colors.lightGray,
+  },
+  textureOverlay: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.2)', // Adjust the opacity to control the texture intensity
   },
 });

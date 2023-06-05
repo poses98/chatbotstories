@@ -1,194 +1,51 @@
+const altColor = '#000';
 export default [
-  {
-    name: 'Action',
-    color: '#FF0000',
-  },
-  {
-    name: 'Adventure',
-    color: '#008000',
-  },
-  {
-    name: 'Biography',
-    color: '#8B4513',
-  },
-  {
-    name: 'Children',
-    color: '#FFFF00',
-  },
-  {
-    name: 'Comedy',
-    color: '#FFA500',
-  },
-  {
-    name: 'Crime',
-    color: '#000000',
-  },
-  {
-    name: 'Drama',
-    color: '#800080',
-  },
-  {
-    name: 'Erotic',
-    color: '#8B0000',
-  },
-  {
-    name: 'Fantasy',
-    color: '#0000FF',
-  },
-  {
-    name: 'Historical',
-    color: '#704214',
-  },
-  {
-    name: 'Horror',
-    color: '#333333',
-  },
-  {
-    name: 'Mystery',
-    color: '#800000',
-  },
-  {
-    name: 'Non-Fiction',
-    color: '#808080',
-  },
-  {
-    name: 'Poetry',
-    color: '#800080',
-  },
-  {
-    name: 'Romance',
-    color: '#FF69B4',
-  },
-  {
-    name: 'Science Fiction',
-    color: '#00FFFF',
-  },
-  {
-    name: 'Short Story',
-    color: '#FFD700',
-  },
-  {
-    name: 'Suspense',
-    color: '#800000',
-  },
-  {
-    name: 'Thriller',
-    color: '#FF0000',
-  },
-  {
-    name: 'Western',
-    color: '#D2B48C',
-  },
-  {
-    name: 'Young Adult',
-    color: '#FFC0CB',
-  },
-  {
-    name: 'Fairy Tale',
-    color: '#FF69B4',
-  },
-  {
-    name: 'Superhero',
-    color: '#FFD700',
-  },
-  {
-    name: 'Paranormal',
-    color: '#9400D3',
-  },
-  {
-    name: 'Steampunk',
-    color: '#C0C0C0',
-  },
-  {
-    name: 'Time Travel',
-    color: '#00CED1',
-  },
-  {
-    name: 'Dystopian',
-    color: '#696969',
-  },
-  {
-    name: 'Historical Fiction',
-    color: '#8B4513',
-  },
-  {
-    name: 'Urban Fantasy',
-    color: '#008080',
-  },
-  {
-    name: 'Magical Realism',
-    color: '#9932CC',
-  },
-  {
-    name: 'Post-Apocalyptic',
-    color: '#2F4F4F',
-  },
-  {
-    name: 'Cyberpunk',
-    color: '#00CED1',
-  },
-  {
-    name: 'Alternate History',
-    color: '#D2B48C',
-  },
-  {
-    name: 'Mythology',
-    color: '#CD853F',
-  },
-  {
-    name: 'Psychological',
-    color: '#800080',
-  },
-  {
-    name: 'Gothic',
-    color: '#000000',
-  },
-  {
-    name: 'Literary Fiction',
-    color: '#808080',
-  },
-  {
-    name: 'Chick Lit',
-    color: '#FF69B4',
-  },
-  {
-    name: 'Coming of Age',
-    color: '#FFD700',
-  },
-  {
-    name: 'Satire',
-    color: '#FFA500',
-  },
-  {
-    name: 'Historical Romance',
-    color: '#8B4513',
-  },
-  {
-    name: 'Legal',
-    color: '#000000',
-  },
-  {
-    name: 'Medical',
-    color: '#4169E1',
-  },
-  {
-    name: 'Sports',
-    color: '#FFA500',
-  },
-  {
-    name: 'War',
-    color: '#8B0000',
-  },
-  {
-    name: 'Cooking',
-    color: '#FF4500',
-  },
-  {
-    name: 'Travel',
-    color: '#008080',
-  },
-  {
-    name: 'Self-Help',
-    color: '#FFFF00',
-  },
+  { name: 'Action', color: '#f44336', genreKey: 0 },
+  { name: 'Adventure', color: '#4caf50', genreKey: 1 },
+  { name: 'Biography', color: '#795548', genreKey: 2 },
+  { name: 'Children', color: '#FF9800', genreKey: 3 },
+  { name: 'Comedy', color: '#ffc107', genreKey: 4 },
+  { name: 'Crime', color: '#607d8b', genreKey: 5 },
+  { name: 'Drama', color: '#9c27b0', genreKey: 6 },
+  { name: 'Erotic', color: '#e91e63', genreKey: 7 },
+  { name: 'Fantasy', color: '#2196f3', genreKey: 8 },
+  { name: 'Historical', color: '#795548', genreKey: 9 },
+  { name: 'Horror', color: '#616161', genreKey: 10 },
+  { name: 'Mystery', color: '#9c27b0', genreKey: 11 },
+  { name: 'Non-Fiction', color: '#bdbdbd', genreKey: 12 },
+  { name: 'Poetry', color: '#9c27b0', genreKey: 13 },
+  { name: 'Romance', color: '#e91e63', genreKey: 14 },
+  { name: 'Science Fiction', color: '#03a9f4', genreKey: 15 },
+  { name: 'Short Story', color: '#ffc107', genreKey: 16 },
+  { name: 'Suspense', color: '#9c27b0', genreKey: 17 },
+  { name: 'Thriller', color: '#f44336', genreKey: 18 },
+  { name: 'Western', color: '#8d6e63', genreKey: 19 },
+  { name: 'Young Adult', color: '#f06292', genreKey: 20 },
+  { name: 'Fairy Tale', color: '#e91e63', genreKey: 21 },
+  { name: 'Superhero', color: '#ffc107', genreKey: 22 },
+  { name: 'Paranormal', color: '#673ab7', genreKey: 23 },
+  { name: 'Steampunk', color: '#9e9e9e', genreKey: 24 },
+  { name: 'Time Travel', color: '#00bcd4', genreKey: 25 },
+  { name: 'Dystopian', color: '#424242', genreKey: 26 },
+  { name: 'Historical Fiction', color: '#795548', genreKey: 27 },
+  { name: 'Urban Fantasy', color: '#00897b', genreKey: 28 },
+  { name: 'Magical Realism', color: '#673ab7', genreKey: 29 },
+  { name: 'Post-Apocalyptic', color: '#455a64', genreKey: 30 },
+  { name: 'Cyberpunk', color: '#00bcd4', genreKey: 31 },
+  { name: 'Alternate History', color: '#8d6e63', genreKey: 32 },
+  { name: 'Mythology', color: '#795548', genreKey: 33 },
+  { name: 'Psychological', color: '#9c27b0', genreKey: 34 },
+  { name: 'Gothic', color: '#000000', genreKey: 35 },
+  { name: 'Literary Fiction', color: '#9e9e9e', genreKey: 36 },
+  { name: 'Chick Lit', color: '#e91e63', genreKey: 37 },
+  { name: 'Coming of Age', color: '#ffc107', genreKey: 38 },
+  { name: 'Satire', color: '#ff9800', genreKey: 39 },
+  { name: 'Historical Romance', color: '#795548', genreKey: 40 },
+  { name: 'Legal', color: '#000000', genreKey: 41 },
+  { name: 'Medical', color: '#2196f3', genreKey: 42 },
+  { name: 'Sports', color: '#ffc107', genreKey: 43 },
+  { name: 'War', color: '#f44336', genreKey: 44 },
+  { name: 'Cooking', color: '#ff5722', genreKey: 45 },
+  { name: 'Travel', color: '#00897b', genreKey: 46 },
+  { name: 'Self-Help', color: '#FF9800', genreKey: 47 },
 ];

@@ -1,12 +1,23 @@
-import React from 'react';
-import { StyleSheet, View, Image, Text } from 'react-native';
+import React, { useRef, useEffect } from 'react';
+import { StyleSheet, View } from 'react-native';
+import LottieView from 'lottie-react-native';
 
 export default () => {
+  const animation = useRef(null);
+  useEffect(() => {
+    // You can control the ref programmatically, rather than using autoPlay
+    // animation.current?.play();
+  }, []);
   return (
     <View style={styles.container}>
-      <Image
-        source={require('../assets/loading.gif')}
-        style={{ width: 200, height: 200 }}
+      <LottieView
+        autoPlay
+        ref={animation}
+        style={{
+          width: 130,
+          height: 130,
+        }}
+        source={require('../assets/lottie/29311-chat-loader.json')}
       />
     </View>
   );
@@ -15,7 +26,7 @@ export default () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: 'transparent',
     justifyContent: 'center',
     alignItems: 'center',
   },

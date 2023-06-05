@@ -52,12 +52,8 @@ export default ({ route, navigation }) => {
   }, [authUser, route.params]);  */
 
   useEffect(() => {
-    console.log('Getting stories from hook');
-    console.log(userStories);
     if (userStories) {
       setStories(userStories);
-    } else {
-      console.log('No stories');
     }
   }, [userStories]);
 
@@ -132,7 +128,7 @@ export default ({ route, navigation }) => {
                   title={item.title}
                   description={item.description}
                   id={item.storyId}
-                  categoryMain={item.genre}
+                  genre={item.genre}
                   date={item.date}
                   likes={item.likes.count}
                   views="0"

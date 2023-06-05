@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import Colors from '../constants/Colors';
-import GENRES from '../constants/Genres';
+import GENRES from '../constants/Genres_';
 import { ScrollView } from 'react-native-gesture-handler';
 import Button from '../components/Button';
 import LANGUAGES from '../constants/Languages';
@@ -26,6 +26,7 @@ import ReadStatusApi from '../api/readstatus';
 import useAuth from '../hooks/useAuth';
 import useStories from '../hooks/useStories';
 import * as Haptics from 'expo-haptics';
+import LoadingScreen from './LoadingScreen';
 
 export default ({ navigation, route }) => {
   /** STATE OBJECTS */
@@ -281,11 +282,12 @@ export default ({ navigation, route }) => {
       {!loading && (
         <View>
           {/**HEADER */}
-          <ImageBackground
-            source={GENRES[data.genre].image}
-            resizeMode="cover"
+          <View
             onError={() => {}}
-            style={styles.image}
+            style={[
+              styles.image,
+              { backgroundColor: GENRES[data.genre].color },
+            ]}
           >
             <View style={styles.storyContainer}>
               {/**STORY NAME */}
@@ -356,7 +358,7 @@ export default ({ navigation, route }) => {
                 />
               )}
             </View>
-          </ImageBackground>
+          </View>
           {/** SOCIAL INTERACTIONS  */}
           <View
             style={{
@@ -508,21 +510,7 @@ export default ({ navigation, route }) => {
           <Text> Try again later</Text>
         </View>
       )}
-      {loading && (
-        <View
-          style={{
-            flex: 1,
-            backgroundColor: '#fff',
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}
-        >
-          <Image
-            source={require('../assets/loading.gif')}
-            style={{ width: 100, height: 100 }}
-          />
-        </View>
-      )}
+      {loading && <LoadingScreen />}
     </ScrollView>
   );
 };

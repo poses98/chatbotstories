@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, Image, ScrollView } from 'react-native';
 import Colors from '../constants/Colors';
 import useStories from '../hooks/useStories';
 import StoryContainerLibrary from '../components/StoryContainerLibrary';
+import StoriesLibraryView from '../components/StoriesLibraryView';
 
 export default ({ navigation }) => {
   const [loading, setloading] = useState(true);
@@ -18,128 +19,25 @@ export default ({ navigation }) => {
     <ScrollView style={styles.container}>
       <View>
         {!loading && readStories && readStories.length > 0 && (
-          <View>
-            <Text style={styles.title}>Continue reading</Text>
-            <ScrollView horizontal>
-              <View style={{ flexDirection: 'row' }}>
-                {readStories.map((story) => {
-                  const {
-                    interactive,
-                    title,
-                    description,
-                    _id,
-                    date,
-                    genre,
-                    author,
-                    likes,
-                  } = story;
-                  return (
-                    <StoryContainerLibrary
-                      key={_id}
-                      interactive={interactive}
-                      title={title}
-                      description={description}
-                      id={_id}
-                      genre={genre}
-                      date={date}
-                      onPress={() => {
-                        navigation.navigate('StoryInfo', {
-                          title,
-                          storyId: _id,
-                          username: author,
-                        });
-                      }}
-                      likes={likes.count}
-                    />
-                  );
-                })}
-              </View>
-            </ScrollView>
-          </View>
+          <StoriesLibraryView
+            libraryTitle="Continue reading"
+            storyList={readStories}
+            navigation={navigation}
+          />
         )}
         {!loading && likedStories && likedStories.length > 0 && (
-          <View>
-            <Text style={styles.title}>Liked stories</Text>
-            <ScrollView horizontal>
-              <View style={{ flexDirection: 'row' }}>
-                {likedStories.map((story) => {
-                  const {
-                    interactive,
-                    title,
-                    description,
-                    _id,
-                    date,
-                    genre,
-                    author,
-                    likes,
-                  } = story;
-                  return (
-                    <StoryContainerLibrary
-                      key={_id}
-                      interactive={interactive}
-                      title={title}
-                      description={description}
-                      id={_id}
-                      genre={genre}
-                      date={date}
-                      onPress={() => {
-                        navigation.navigate('StoryInfo', {
-                          title,
-                          storyId: _id,
-                          username: author,
-                        });
-                      }}
-                      likes={likes.count}
-                    />
-                  );
-                })}
-              </View>
-            </ScrollView>
-          </View>
+          <StoriesLibraryView
+            libraryTitle="Liked stories"
+            storyList={likedStories}
+            navigation={navigation}
+          />
         )}
         {!loading && savedStories && savedStories.length > 0 && (
-          <View>
-            <View
-              styles={{ borderBottomWidth: 1, borderBottomColor: Colors.gray }}
-            >
-              <Text style={styles.title}>Saved stories</Text>
-            </View>
-            <ScrollView horizontal>
-              <View style={{ flexDirection: 'row' }}>
-                {savedStories.map((story) => {
-                  const {
-                    interactive,
-                    title,
-                    description,
-                    _id,
-                    date,
-                    genre,
-                    author,
-                    likes,
-                  } = story;
-                  return (
-                    <StoryContainerLibrary
-                      key={_id}
-                      interactive={interactive}
-                      title={title}
-                      description={description}
-                      id={_id}
-                      genre={genre}
-                      date={date}
-                      onPress={() => {
-                        navigation.navigate('StoryInfo', {
-                          title,
-                          storyId: _id,
-                          username: author,
-                        });
-                      }}
-                      likes={likes.count}
-                    />
-                  );
-                })}
-              </View>
-            </ScrollView>
-          </View>
+          <StoriesLibraryView
+            libraryTitle="Saved stories"
+            storyList={savedStories}
+            navigation={navigation}
+          />
         )}
 
         {!likedStories && !savedStories && !readStories && !loading && (

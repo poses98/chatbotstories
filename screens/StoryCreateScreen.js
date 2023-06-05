@@ -12,7 +12,7 @@ import {
 import { StackActions } from '@react-navigation/native';
 import { CommonActions } from '@react-navigation/native';
 import Colors from '../constants/Colors';
-import GENRES from '../constants/Genres';
+import GENRES from '../constants/Genres_';
 import LANGUAGES from '../constants/Languages';
 import _STATUS_ from '../constants/StoryStatus';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -27,13 +27,83 @@ import useStories from '../hooks/useStories';
 
 const GenreList = ({ GENRES, setcategoryMain, categoryMain }) => {
   return (
+    <View style={{ flexDirection: 'row', flexWrap: 'wrap', margin: 10 }}>
+      {GENRES.map(({ color, name, genreKey, altColor }) => (
+        <GenreBubble
+          key={genreKey.toString()}
+          verboseName={name}
+          color={color}
+          altColor={altColor}
+          genreKey={genreKey}
+          setcategoryMain={setcategoryMain}
+          categoryMain={categoryMain}
+        />
+      ))}
+    </View>
+  );
+};
+
+const GenreBubble = React.memo(
+  ({
+    color,
+    verboseName,
+    genreKey,
+    setcategoryMain,
+    categoryMain,
+    altColor,
+  }) => {
+    return (
+      <View
+        style={{
+          marginHorizontal: 3,
+          marginVertical: 5,
+        }}
+      >
+        <TouchableOpacity
+          style={[
+            styles.genreContainer,
+            { borderColor: color, borderWidth: 1 },
+            genreKey === categoryMain
+              ? { backgroundColor: color }
+              : { backgroundColor: 'transparent' },
+          ]}
+          onPress={() => {
+            setcategoryMain(genreKey);
+          }}
+        >
+          {/* <Image
+            style={
+              genreKey === categoryMain
+                ? styles.genrePicSelected
+                : styles.genrePic
+            }
+            source={imageSource}
+          /> */}
+          <Text
+            style={
+              ([styles.genreText],
+              genreKey === categoryMain
+                ? { color: altColor ? altColor : '#fafafa' }
+                : { color: color })
+            }
+          >
+            {verboseName}
+          </Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+);
+
+const GenreList_Old = ({ GENRES, setcategoryMain, categoryMain }) => {
+  return (
     <FlatList
       horizontal
       showsHorizontalScrollIndicator={false}
       data={GENRES}
       keyExtractor={(item) => item.genreKey.toString()}
       renderItem={({ item: { image, verboseName, genreKey } }) => (
-        <GenreBubble
+        <GenreBubble_Old
           verboseName={verboseName}
           image={image}
           genreKey={genreKey}
@@ -45,7 +115,7 @@ const GenreList = ({ GENRES, setcategoryMain, categoryMain }) => {
   );
 };
 
-const GenreBubble = React.memo(
+const GenreBubble_Old = React.memo(
   ({ image, verboseName, genreKey, setcategoryMain, categoryMain }) => {
     const imageSource = useMemo(() => image, [image]);
 
@@ -165,7 +235,7 @@ export default ({ route, navigation }) => {
         <View>
           {/** TITLE FIELD */}
           <LabeledInput
-            label="Name"
+            label="Title"
             text={nameField.text}
             onChangeText={(text) => {
               setnameField({ text });
@@ -196,7 +266,7 @@ export default ({ route, navigation }) => {
               color: Colors.black,
             }}
           />
-          <Label text="Choose main category " icon="layers-outline" />
+          <Label text="Choose a genre for your story" icon="layers-outline" />
           {/** GENRE BUBBLES FILLED FROM CONSTANT FILE */}
           <GenreList
             GENRES={GENRES}
@@ -369,8 +439,8 @@ const styles = StyleSheet.create({
   },
   genreContainer: {
     alignItems: 'center',
-    paddingVertical: 5,
-    borderRadius: 50,
+    padding: 5,
+    borderRadius: 5,
   },
   labelContainer: {
     flex: 1,
@@ -381,7 +451,7 @@ const styles = StyleSheet.create({
   },
   genreText: {
     fontSize: 10,
-    marginTop: 5,
+    margin: 5,
     textTransform: 'uppercase',
     color: Colors.black,
     fontWeight: 'bold',
