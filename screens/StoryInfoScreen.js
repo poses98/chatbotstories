@@ -1,23 +1,11 @@
 import React, { useLayoutEffect, useState, useEffect } from 'react';
-import {
-  View,
-  TouchableOpacity,
-  StyleSheet,
-  Text,
-  Image,
-  ImageBackground,
-  Share,
-  FlatList,
-} from 'react-native';
+import { View, TouchableOpacity, StyleSheet, Text, Share } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import Colors from '../constants/Colors';
 import GENRES from '../constants/Genres_';
 import { ScrollView } from 'react-native-gesture-handler';
 import Button from '../components/Button';
-import LANGUAGES from '../constants/Languages';
 import MONTHS from '../constants/Months';
-import STORY_STATUS from '../constants/StoryStatus';
-import { StackActions } from '@react-navigation/native';
 import { ChapterItem } from '../components/ChapterItem';
 import { moderateScale } from 'react-native-size-matters';
 import StoryApi from '../api/story';
@@ -28,9 +16,10 @@ import useStories from '../hooks/useStories';
 import * as Haptics from 'expo-haptics';
 import LoadingScreen from './LoadingScreen';
 import LikeButton from '../components/LikeButton';
+import ReviewBox from '../components/ReviewBox';
+import CustomModal from '../components/CustomModal';
 
 export default ({ navigation, route }) => {
-  /** STATE OBJECTS */
   const [isSaved, setIsSaved] = useState(false);
   const [loading, setloading] = useState(true);
   const [user, setUser] = useState(null);
@@ -41,6 +30,7 @@ export default ({ navigation, route }) => {
   const [authorUserName, setAuthorUserName] = useState('');
   const [chapterList, setChapterList] = useState(null);
   const [chapterIndex, setChapterIndex] = useState(0);
+  const [modalVisible, setModalVisible] = useState(false);
   const [readStatus, setReadStatus] = useState(null);
   const [error, setError] = useState(false);
   const { authUser } = useAuth();
@@ -287,8 +277,19 @@ export default ({ navigation, route }) => {
     }
   }, [data, chapterList, readStatus, authorUserName]);
 
+  const handleOpenModal = () => {
+    setModalVisible(true);
+  };
+
+  const handleCloseModal = () => {
+    setModalVisible(false);
+  };
+
   return !loading ? (
     <ScrollView style={styles.container}>
+      <CustomModal visible={modalVisible} onClose={handleCloseModal}>
+        <Text>TODO</Text>
+      </CustomModal>
       <View>
         {/**HEADER */}
         <View
@@ -482,17 +483,30 @@ export default ({ navigation, route }) => {
           )}
         </ScrollView>
         {/**Reviews */}
-        <Text
-          style={{
-            marginHorizontal: 15,
-            marginVertical: 15,
-            fontSize: 15,
-            color: Colors.gray,
-            textTransform: 'uppercase',
-          }}
+        <View
+          style={{ flex: 1, flexDirection: 'row', justifyContent: 'center' }}
         >
-          Reviews
-        </Text>
+          <Text
+            style={{
+              marginHorizontal: 15,
+              marginVertical: 15,
+              fontSize: 15,
+              color: Colors.gray,
+              textTransform: 'uppercase',
+            }}
+          >
+            Reviews
+          </Text>
+          <View style={{ flex: 1, alignSelf: 'center' }}>
+            <TouchableOpacity onPress={handleOpenModal}>
+              <Ionicons
+                name="add-circle-outline"
+                size={26}
+                color={Colors.gray}
+              />
+            </TouchableOpacity>
+          </View>
+        </View>
       </View>
       {error && !loading && (
         <View
