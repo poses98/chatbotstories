@@ -27,6 +27,7 @@ import useAuth from '../hooks/useAuth';
 import useStories from '../hooks/useStories';
 import * as Haptics from 'expo-haptics';
 import LoadingScreen from './LoadingScreen';
+import LikeButton from '../components/LikeButton';
 
 export default ({ navigation, route }) => {
   /** STATE OBJECTS */
@@ -278,225 +279,211 @@ export default ({ navigation, route }) => {
     }
   }, [data, chapterList, readStatus, authorUserName]);
 
-  return (
+  return !loading ? (
     <ScrollView style={styles.container}>
-      {!loading && (
-        <View>
-          {/**HEADER */}
-          <View
-            onError={() => {}}
-            style={[
-              styles.image,
-              { backgroundColor: GENRES[data.genre].color },
-            ]}
-          >
-            <View style={styles.storyContainer}>
-              {/**STORY NAME */}
-              <Text style={styles.storyTitle}>{data.title} </Text>
-              {/**STORY AUTHOR */}
-              <Text
-                style={[
-                  styles.storyDescription,
-                  { fontStyle: 'italic', fontSize: 12, marginBottom: 5 },
-                ]}
-              >
-                Written by {authorUserName}
-              </Text>
-              {/**STORY STATUS */}
+      <View>
+        {/**HEADER */}
+        <View
+          onError={() => {}}
+          style={[styles.image, { backgroundColor: GENRES[data.genre].color }]}
+        >
+          <View style={styles.storyContainer}>
+            {/**STORY NAME */}
+            <Text style={styles.storyTitle}>{data.title} </Text>
+            {/**STORY AUTHOR */}
+            <Text
+              style={[
+                styles.storyDescription,
+                { fontStyle: 'italic', fontSize: 12, marginBottom: 5 },
+              ]}
+            >
+              Written by {authorUserName}
+            </Text>
+            {/**STORY STATUS */}
 
-              {/**STORY STATS */}
-              <View style={{ flexDirection: 'row' }}>
-                <View style={styles.storyStats}>
-                  <Ionicons
-                    name="eye-outline"
-                    size={20}
-                    color={Colors.lightGray}
-                  />
-                  <Text style={{ color: Colors.lightGray }}>{stats.views}</Text>
-                </View>
-                <View style={styles.storyStats}>
-                  <Ionicons name="heart" size={20} color={Colors.red} />
-                  <Text style={{ color: Colors.lightGray }}>
-                    {data.likes.count}
-                  </Text>
-                </View>
+            {/**STORY STATS */}
+            <View style={{ flexDirection: 'row' }}>
+              <View style={styles.storyStats}>
+                <Ionicons
+                  name="eye-outline"
+                  size={20}
+                  color={Colors.lightGray}
+                />
+                <Text style={{ color: Colors.lightGray }}>{stats.views}</Text>
               </View>
-              {/**STORY DESCRIPTION */}
-              <Text style={styles.storyDescription}>"{data.description}"</Text>
-              {/** CONTINUE/START READING BUTTON */}
-              {readStatus && !readStatus.finished && (
-                <Button
-                  text={
-                    readStatus.nextChapter === ''
-                      ? 'Read story'
-                      : readStatus.finished
-                      ? 'Read again'
-                      : 'Read story'
-                  }
-                  textStyle={{
-                    fontWeight: 'bold',
-                    color: Colors.lightGray,
-                    padding: 10,
-                  }}
-                  onPress={() => {
-                    //TODO admob
-                    navigation.navigate('ChatRead', {
-                      storyName: data.title,
-                      storyId: storyId,
-                      chapterId: readStatus.nextChapter._id,
-                      chapterList: data.chapters,
-                      chapterIndex: chapterIndex,
-                      readStatus: readStatus,
-                      setReadStatus: setReadStatus,
-                    });
-                  }}
-                  buttonStyle={{
-                    marginVertical: 15,
-                    marginHorizontal: 15,
-                    height: 45,
-                    borderColor: Colors.lightGray,
-                  }}
-                />
-              )}
-            </View>
-          </View>
-          {/** SOCIAL INTERACTIONS  */}
-          <View
-            style={{
-              flexDirection: 'row',
-              flex: 1,
-              alignItems: 'center',
-              marginVertical: 10,
-              marginHorizontal: 15,
-            }}
-          >
-            {/**LIKE BUTTON */}
-            <View>
-              <TouchableOpacity style={styles.storyStats} onPress={likeStory}>
-                <Ionicons
-                  name={canLike ? 'heart-outline' : 'heart'}
-                  size={30}
-                  color={canLike ? Colors.black : Colors.red}
-                />
-              </TouchableOpacity>
-            </View>
-
-            {/**COMMENT BUTTON */}
-            <View>
-              <TouchableOpacity
-                style={[styles.storyStats, { paddingLeft: 8 }]}
-                onPress={() => {
-                  /** TODO go to comment section */
-                }}
-              >
-                <Ionicons
-                  name="chatbox-outline"
-                  size={30}
-                  color={Colors.black}
-                />
-              </TouchableOpacity>
-            </View>
-
-            {/**SHARE BUTTON */}
-            <View>
-              <TouchableOpacity
-                style={styles.storyStats}
-                onPress={() => {
-                  onShare();
-                }}
-              >
-                <Ionicons
-                  name="share-social-outline"
-                  size={30}
-                  color={Colors.black}
-                />
-              </TouchableOpacity>
-            </View>
-            {/** DATE */}
-            <View style={{ flex: 1, alignItems: 'flex-end' }}>
-              <Text>
-                {data.day} {MONTHS[data.month]} {data.year}
-              </Text>
-            </View>
-          </View>
-
-          {/**Chapter list */}
-          <Text
-            style={{
-              marginHorizontal: 15,
-              fontSize: 15,
-              color: Colors.gray,
-              textTransform: 'uppercase',
-            }}
-          >
-            Chapter list
-          </Text>
-          <ScrollView
-            style={{
-              maxHeight: 250,
-              minHeight: 200,
-              marginHorizontal: 15,
-              borderWidth: 1,
-              borderColor: Colors.black,
-              borderRadius: 10,
-              overflow: 'scroll',
-            }}
-          >
-            {chapterList &&
-              data &&
-              readStatus &&
-              chapterList.length > 0 &&
-              chapterList.map(({ title, description, _id }, index) => (
-                <ChapterItem
-                  key={_id}
-                  title={title}
-                  onPress={() => {
-                    navigation.navigate('ChatRead', {
-                      storyName: data.title,
-                      storyId: storyId,
-                      chapterId: _id,
-                      chapterList: data.chapters,
-                      chapterIndex: index,
-                      readStatus: readStatus,
-                      setReadStatus: setReadStatus,
-                    });
-                  }}
-                  id={_id}
-                  navigation={navigation}
-                  onDelete={() => removeItemFromLists(id)}
-                  index={index}
-                  currentIndex={chapterIndex}
-                  finished={readStatus.finished}
-                  list={false}
-                />
-              ))}
-            {chapterList.length === 0 && (
-              <View
-                style={{
-                  flex: 1,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: Colors.gray,
-                }}
-              >
-                <Text>There are no chapters for this story!</Text>
+              <View style={styles.storyStats}>
+                <Ionicons name="heart" size={20} color={Colors.red} />
+                <Text style={{ color: Colors.lightGray }}>
+                  {data.likes.count}
+                </Text>
               </View>
+            </View>
+            {/**STORY DESCRIPTION */}
+            <Text style={styles.storyDescription}>"{data.description}"</Text>
+            {/** CONTINUE/START READING BUTTON */}
+            {readStatus && !readStatus.finished && (
+              <Button
+                text={
+                  readStatus.nextChapter === ''
+                    ? 'Read story'
+                    : readStatus.finished
+                    ? 'Read again'
+                    : 'Read story'
+                }
+                textStyle={{
+                  fontWeight: 'bold',
+                  color: Colors.lightGray,
+                  padding: 10,
+                }}
+                onPress={() => {
+                  //TODO admob
+                  navigation.navigate('ChatRead', {
+                    storyName: data.title,
+                    storyId: storyId,
+                    chapterId: readStatus.nextChapter._id,
+                    chapterList: data.chapters,
+                    chapterIndex: chapterIndex,
+                    readStatus: readStatus,
+                    setReadStatus: setReadStatus,
+                  });
+                }}
+                buttonStyle={{
+                  marginVertical: 15,
+                  marginHorizontal: 15,
+                  height: 45,
+                  borderColor: Colors.lightGray,
+                }}
+              />
             )}
-          </ScrollView>
-          {/**Reviews */}
-          <Text
-            style={{
-              marginHorizontal: 15,
-              marginVertical: 15,
-              fontSize: 15,
-              color: Colors.gray,
-              textTransform: 'uppercase',
-            }}
-          >
-            Reviews
-          </Text>
+          </View>
         </View>
-      )}
+        {/** SOCIAL INTERACTIONS  */}
+        <View
+          style={{
+            flexDirection: 'row',
+            flex: 1,
+            alignItems: 'center',
+            marginVertical: 10,
+            marginHorizontal: 15,
+          }}
+        >
+          {/**LIKE BUTTON */}
+          <LikeButton
+            styles={styles.storyStats}
+            canLike={canLike}
+            likeStory={likeStory}
+          />
+
+          {/**COMMENT BUTTON */}
+          <View>
+            <TouchableOpacity
+              style={[styles.storyStats, { paddingLeft: 8 }]}
+              onPress={() => {
+                /** TODO go to comment section */
+              }}
+            >
+              <Ionicons name="chatbox-outline" size={30} color={Colors.black} />
+            </TouchableOpacity>
+          </View>
+
+          {/**SHARE BUTTON */}
+          <View>
+            <TouchableOpacity
+              style={styles.storyStats}
+              onPress={() => {
+                onShare();
+              }}
+            >
+              <Ionicons
+                name="share-social-outline"
+                size={30}
+                color={Colors.black}
+              />
+            </TouchableOpacity>
+          </View>
+          {/** DATE */}
+          <View style={{ flex: 1, alignItems: 'flex-end' }}>
+            <Text>
+              {data.day} {MONTHS[data.month]} {data.year}
+            </Text>
+          </View>
+        </View>
+        {/**Chapter list */}
+        <Text
+          style={{
+            marginHorizontal: 15,
+            fontSize: 15,
+            color: Colors.gray,
+            textTransform: 'uppercase',
+          }}
+        >
+          Chapter list
+        </Text>
+        <ScrollView
+          style={{
+            maxHeight: 250,
+            minHeight: 200,
+            marginHorizontal: 15,
+            borderWidth: 1,
+            borderColor: Colors.black,
+            borderRadius: 10,
+            overflow: 'scroll',
+          }}
+        >
+          {chapterList &&
+            data &&
+            readStatus &&
+            chapterList.length > 0 &&
+            chapterList.map(({ title, description, _id }, index) => (
+              <ChapterItem
+                key={_id}
+                title={title}
+                onPress={() => {
+                  navigation.navigate('ChatRead', {
+                    storyName: data.title,
+                    storyId: storyId,
+                    chapterId: _id,
+                    chapterList: data.chapters,
+                    chapterIndex: index,
+                    readStatus: readStatus,
+                    setReadStatus: setReadStatus,
+                  });
+                }}
+                id={_id}
+                navigation={navigation}
+                onDelete={() => removeItemFromLists(id)}
+                index={index}
+                currentIndex={chapterIndex}
+                finished={readStatus.finished}
+                list={false}
+              />
+            ))}
+          {chapterList.length === 0 && (
+            <View
+              style={{
+                flex: 1,
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: Colors.gray,
+              }}
+            >
+              <Text>There are no chapters for this story!</Text>
+            </View>
+          )}
+        </ScrollView>
+        {/**Reviews */}
+        <Text
+          style={{
+            marginHorizontal: 15,
+            marginVertical: 15,
+            fontSize: 15,
+            color: Colors.gray,
+            textTransform: 'uppercase',
+          }}
+        >
+          Reviews
+        </Text>
+      </View>
       {error && !loading && (
         <View
           style={{
@@ -511,15 +498,15 @@ export default ({ navigation, route }) => {
           <Text> Try again later</Text>
         </View>
       )}
-      {loading && <LoadingScreen />}
     </ScrollView>
+  ) : (
+    <LoadingScreen />
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-
     backgroundColor: '#fff',
   },
   image: {

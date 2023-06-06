@@ -1,5 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { StyleSheet, View, FlatList, DEVICE_WIDTH, Text } from 'react-native';
+import {
+  StyleSheet,
+  View,
+  Animated,
+  FlatList,
+  DEVICE_WIDTH,
+  Text,
+} from 'react-native';
 import {
   ScrollView,
   TouchableHighlight,
@@ -13,21 +20,26 @@ import ChapterApi from '../api/chapter';
 import StoryApi from '../api/story';
 import ReadStatusApi from '../api/readstatus';
 import * as Haptics from 'expo-haptics';
+import Countdown from '../components/Countdown';
 
 export default ({ navigation, route }) => {
   const [messages, setMessages] = useState(null);
+  const [choices, setChoices] = useState(null);
   const [characterList, setCharacterList] = useState(null);
   const [readingMessages, setReadingMessages] = useState([]);
   const [readingIndex, setReadingIndex] = useState(0);
   const [finished, setFinished] = useState(false);
   const [nextChapterId, setNextChapterId] = useState('');
   const [isEnded, setIsEnded] = useState(true);
-
+  const [selectedChoice, setSelectedChoice] = useState(null);
+  const scaleValue1 = useRef(new Animated.Value(1)).current;
+  const scaleValue2 = useRef(new Animated.Value(1)).current;
+  const scaleSelectedValue = useRef(new Animated.Value(1)).current;
   const { readStatus } = route.params;
 
   useEffect(() => {
     console.log(readStatus);
-  }, readStatus);
+  }, [readStatus]);
 
   const nextChapter = () => {
     const { chapterList, chapterIndex, readStatus } = route.params;
@@ -79,6 +91,58 @@ export default ({ navigation, route }) => {
 
   const scrollViewRef = useRef();
 
+  useEffect(() => {
+    if (selectedChoice) {
+      const scaleAnimation = Animated.spring(scaleSelectedValue, {
+        toValue: 1.5,
+        useNativeDriver: true,
+      });
+
+      scaleAnimation.start();
+
+      return () => {
+        scaleAnimation.stop();
+      };
+    }
+  }, [scaleSelectedValue, selectedChoice]);
+
+  useEffect(() => {
+    const oscillateAnimation = Animated.loop(
+      Animated.parallel([
+        Animated.sequence([
+          Animated.timing(scaleValue1, {
+            toValue: 1.05,
+            duration: 1000,
+            useNativeDriver: true,
+          }),
+          Animated.timing(scaleValue1, {
+            toValue: 1,
+            duration: 1000,
+            useNativeDriver: true,
+          }),
+        ]),
+        Animated.sequence([
+          Animated.timing(scaleValue2, {
+            toValue: 0.95,
+            duration: 1000,
+            useNativeDriver: true,
+          }),
+          Animated.timing(scaleValue2, {
+            toValue: 1,
+            duration: 1000,
+            useNativeDriver: true,
+          }),
+        ]),
+      ]),
+      { iterations: -1 }
+    );
+
+    oscillateAnimation.start();
+
+    return () => {
+      oscillateAnimation.stop();
+    };
+  }, [scaleValue1, scaleValue2]);
   /**Getting the characters from the db */
   useEffect(() => {
     if (route.params && route.params.storyId && !characterList) {
@@ -97,9 +161,35 @@ export default ({ navigation, route }) => {
     if (route.params && route.params.chapterId && !messages) {
       ChapterApi.getChapterById(route.params.chapterId).then((response) => {
         setMessages(response.messages);
+        if (response.choices.length > 0) {
+          setChoices(response.choices);
+          console.log('There are choices');
+          console.log(response.choices);
+        }
       });
     }
   });
+
+  const nextChapterFromChoice = (choice) => {
+    const { setReadStatus } = route.params;
+    const updatedReadStatus = {
+      ...readStatus,
+      previousChapter: route.params.chapterId,
+      nextChapter: choice.nextChapter,
+      finished: false,
+    };
+
+    ReadStatusApi.updateReadStatusById(readStatus._id, updatedReadStatus)
+      .then((response) => {
+        console.log(response);
+        // Update the readStatus object in the parent component's state
+        setReadStatus(updatedReadStatus);
+      })
+      .catch((error) => {
+        console.error(error);
+        // Handle error
+      });
+  };
 
   const updateReadingMessages = () => {
     if (!finished) {
@@ -109,10 +199,21 @@ export default ({ navigation, route }) => {
         temp_readMessages.push(messages[readingIndex]);
         setReadingMessages(temp_readMessages);
         setReadingIndex(readingIndex + 1);
-      } else if (messages && messages.length === readingMessages.length) {
+      } else if (
+        messages &&
+        messages.length === readingMessages.length &&
+        !choices
+      ) {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
         setFinished(true);
         nextChapter();
+      } else if (
+        messages &&
+        messages.length === readingMessages.length &&
+        choices
+      ) {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+        setFinished(true);
       }
     }
   };
@@ -150,7 +251,7 @@ export default ({ navigation, route }) => {
             />
           ))}
 
-          {finished && (
+          {finished && !choices && (
             <View
               style={{
                 marginVertical: 20,
@@ -192,6 +293,83 @@ export default ({ navigation, route }) => {
                     });
                   }}
                 />
+              )}
+            </View>
+          )}
+          {finished && choices && (
+            <View
+              style={{
+                flex: 1,
+                justifyContent: 'center',
+
+                alignItems: 'center',
+                marginTop: 30,
+              }}
+            >
+              {!selectedChoice && (
+                <View>
+                  <Animated.View
+                    style={{ transform: [{ scale: scaleValue1 }] }}
+                  >
+                    <TouchableOpacity
+                      onPress={() => {
+                        setSelectedChoice(choices[0]);
+                        nextChapterFromChoice(choices[0]);
+                      }}
+                    >
+                      <MessageBubble
+                        messageBody={choices[0]?.text}
+                        customStyles={{ alignSelf: 'center' }}
+                        customColor={Colors.green}
+                      />
+                    </TouchableOpacity>
+                  </Animated.View>
+
+                  <Animated.View
+                    style={{ transform: [{ scale: scaleValue2 }] }}
+                  >
+                    <TouchableOpacity
+                      onPress={() => {
+                        setSelectedChoice(choices[1]);
+                        nextChapterFromChoice(choices[1]);
+                      }}
+                    >
+                      <MessageBubble
+                        messageBody={choices[1]?.text}
+                        customStyles={{ alignSelf: 'center' }}
+                        customColor={Colors.red}
+                      />
+                    </TouchableOpacity>
+                  </Animated.View>
+                </View>
+              )}
+              {selectedChoice && (
+                <Animated.View
+                  style={{
+                    transform: [{ scale: scaleSelectedValue }],
+                    marginTop: 25,
+                  }}
+                >
+                  <MessageBubble
+                    messageBody={selectedChoice?.text}
+                    customStyles={{ alignSelf: 'center' }}
+                  />
+
+                  <Countdown
+                    initialCount={5}
+                    handleTimeout={() =>
+                      navigation.replace('ChatRead', {
+                        storyName: route.params.storyName,
+                        chapterIndex: route.params.chapterIndex + 1,
+                        storyId: route.params.storyId,
+                        chapterId: selectedChoice.nextChapter,
+                        chapterList: route.params.chapterList,
+                        readStatus: route.params.readStatus,
+                        setReadStatus: route.params.setReadStatus,
+                      })
+                    }
+                  />
+                </Animated.View>
               )}
             </View>
           )}

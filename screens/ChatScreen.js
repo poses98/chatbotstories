@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import { moderateScale } from 'react-native-size-matters';
 import {
   StyleSheet,
+  Text,
+  Button,
   View,
   TouchableOpacity,
   FlatList,
@@ -11,7 +13,7 @@ import {
 } from 'react-native';
 import Colors from '../constants/Colors';
 import Ionicons from '@expo/vector-icons/Ionicons';
-
+import CustomModal from '../components/CustomModal';
 import { ScrollView, TextInput } from 'react-native-gesture-handler';
 import { MessageBubble } from '../components/MessageBubble';
 import { AuthorButtonSelector } from '../components/ChatScreen/AuthorButtonSelector';
@@ -21,9 +23,13 @@ import StoryApi from '../api/story';
 import SwipeableComponent from '../components/misc/SwipeableComponent';
 import ChapterApi from '../api/chapter';
 import * as Haptics from 'expo-haptics';
+import ChoicesEditor from '../components/ChoicesEditor';
+import LoadingScreen from './LoadingScreen';
 
 export default ({ navigation, route }) => {
+  const [choices, setChoices] = useState([]);
   const [messages, setMessages] = useState([]);
+  const [chapters, setChapters] = useState(null);
   const [refreshChat, setRefreshChat] = useState(false);
   const [characterList, setCharacterList] = useState(null);
   const [senderId, setSenderId] = useState('');
@@ -31,46 +37,18 @@ export default ({ navigation, route }) => {
   const [messageEditId, setMessageEditId] = useState('');
   const [messageEditIndex, setMessageEditIndex] = useState(0);
   const [messageEditMode, setMessageEditMode] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [loading, setLoading] = useState(true);
   const { storyId, chapterId } = route.params;
   const scrollViewRef = useRef();
   const textInputRef = useRef(null);
 
-  /** Rendering the top bar icons */
-  const renderStackBarIconRight = () => {
-    return (
-      <View style={{ flexDirection: 'row' }}>
-        <TouchableOpacity
-          onPress={() => {
-            navigation.navigate('ChapterDetails', {
-              storyId: storyId,
-              chapterId: chapterId,
-            });
-          }}
-          style={{ paddingRight: 8 }}
-        >
-          <Ionicons name="settings-outline" size={26} color={Colors.black} />
-        </TouchableOpacity>
-      </View>
-    );
-  };
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      headerRight: () => renderStackBarIconRight(),
-      headerRightContainerStyle: {
-        paddingRight: 10,
-      },
-    });
-  });
-
-  const handleKeyboardShow = () => {
-    // Keyboard is shown
-  };
-
   /**Getting the characters from the db */
   useEffect(() => {
-    StoryApi.getStoryById(storyId)
+    StoryApi.getStoryAndChaptersById(storyId)
       .then((response) => {
         const characterListTmp = response.characters;
+        setChapters(response.chapters);
         setCharacterList(characterListTmp);
         setRefreshChat(false);
       })
@@ -83,9 +61,72 @@ export default ({ navigation, route }) => {
   useEffect(() => {
     ChapterApi.getChapterById(chapterId).then((response) => {
       setMessages(response.messages);
+      if (response.choices) {
+        setChoices(response.choices);
+        console.log(response.choices);
+      }
       setRefreshChat(false);
     });
   }, [refreshChat]);
+
+  useEffect(() => {
+    if (choices && characterList && chapters && messages) {
+      setLoading(false);
+    }
+  }, [choices, chapters, characterList, messages]);
+
+  /** Rendering the top bar icons */
+  const renderStackBarIconRight = () => {
+    return (
+      !loading && (
+        <View style={{ flexDirection: 'row' }}>
+          <TouchableOpacity
+            onPress={() => {
+              handleOpenModal();
+            }}
+            style={{ paddingRight: 8 }}
+          >
+            <Ionicons
+              name="git-network-outline"
+              size={26}
+              color={choices.length === 2 ? Colors.green : Colors.red}
+            />
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => {
+              navigation.navigate('ChapterDetails', {
+                storyId: storyId,
+                chapterId: chapterId,
+              });
+            }}
+            style={{ paddingRight: 8 }}
+          >
+            <Ionicons name="settings-outline" size={26} color={Colors.black} />
+          </TouchableOpacity>
+        </View>
+      )
+    );
+  };
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => renderStackBarIconRight(),
+      headerRightContainerStyle: {
+        paddingRight: 10,
+      },
+    });
+  });
+
+  const handleOpenModal = () => {
+    setModalVisible(true);
+  };
+
+  const handleCloseModal = () => {
+    setModalVisible(false);
+  };
+
+  const handleKeyboardShow = () => {
+    // Keyboard is shown
+  };
 
   const getCanBeMain = () => {
     characterList.forEach((element) => {
@@ -161,10 +202,6 @@ export default ({ navigation, route }) => {
       });
   };
 
-  useEffect(() => {
-    if (messages) console.log(messages);
-  }, [messages]);
-
   const addMessageToList = ({ messageBody, sender }) => {
     const index =
       messages.length >= 1 ? messages[messages.length - 1].index + 1 : 0;
@@ -174,10 +211,34 @@ export default ({ navigation, route }) => {
     });
   };
 
-  const removeMessage = ({ id }) => {};
+  const updateChoices = (choices) => {
+    if (choices.length === 2) {
+      setChoices(choices);
+      ChapterApi.updateChapter(chapterId, { choices }).then((response) => {
+        console.log(response);
+        handleCloseModal();
+      });
+    }
+  };
 
-  return (
-    <View style={{ flex: 1, backgroundColor: '#fafafa' }}>
+  const removeMessage = (id) => {
+    MessageApi.deleteMessage(chapterId, id).then((response) => {
+      console.log(response);
+      setMessages(response.messages);
+    });
+  };
+
+  return !loading ? (
+    <View style={{ flex: 1 }}>
+      <CustomModal visible={modalVisible} onClose={handleCloseModal}>
+        {chapters && (
+          <ChoicesEditor
+            chapters={chapters}
+            onUpdate={updateChoices}
+            choices={choices}
+          />
+        )}
+      </CustomModal>
       {/**MESSAGE SCROLLVIEW */}
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -201,7 +262,27 @@ export default ({ navigation, route }) => {
                   setMessageEdit(body);
                   setSenderId(sender);
                 }}
-                leftSwipeComponent={<Ionicons name="create" size={24} />}
+                leftSwipeComponent={
+                  <View
+                    style={{
+                      backgroundColor: Colors.orange,
+                      flex: 1,
+                      width: '100%',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      position: 'relative',
+                      height: '100%',
+                    }}
+                  >
+                    <Ionicons name="create-outline" size={24} />
+                  </View>
+                }
+                onLeftSwipe={() => {
+                  removeMessage(_id);
+                }}
+                rightSwipeComponent={
+                  <Ionicons name="trash-outline" size={24} />
+                }
               >
                 <MessageBubble
                   key={_id.toString()}
@@ -320,6 +401,8 @@ export default ({ navigation, route }) => {
         </View>
       </KeyboardAvoidingView>
     </View>
+  ) : (
+    <LoadingScreen />
   );
 };
 

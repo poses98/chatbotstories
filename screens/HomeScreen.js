@@ -43,20 +43,20 @@ export default ({ route, navigation }) => {
       setLoading(false);
     }
   }, [feed]);
-  return (
+  return !loading ? (
     <ScrollView>
       {feed &&
-        !loading &&
         feed.map((section) => {
-          const str = 'g-';
-          console.log(/^g-/.test(section.sectionTitle));
+          const str = /^g-/;
+          console.log(str.test(section.sectionTitle));
 
-          section.name = /^g-/.test(section.sectionTitle)
+          section.name = str.test(section.sectionTitle)
             ? 'Genero'
             : section.name;
           return (
             section.stories.length > 0 && (
               <StoriesLibraryView
+                key={section.sectionTitle}
                 libraryTitle={
                   /^g-/.test(section.sectionTitle)
                     ? GENRES[section.sectionTitle.split('g-')[1]].name
@@ -68,8 +68,8 @@ export default ({ route, navigation }) => {
             )
           );
         })}
-
-      {!feed && <LoadingScreen />}
     </ScrollView>
+  ) : (
+    <LoadingScreen />
   );
 };

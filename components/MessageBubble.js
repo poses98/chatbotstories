@@ -3,10 +3,16 @@ import { moderateScale } from 'react-native-size-matters';
 import { StyleSheet, Text, View } from 'react-native';
 import Colors from '../constants/Colors';
 
-export const MessageBubble = ({ messageBody, sender, characterList }) => {
+export const MessageBubble = ({
+  messageBody,
+  sender,
+  characterList,
+  customStyles,
+  customColor,
+}) => {
   const [verboseName, setVerboseName] = useState('');
   const [characterColor, setCharacterColor] = useState('');
-  const [main, setMain] = useState(false);
+  const [main, setMain] = useState(true);
   useEffect(() => {
     if (characterList) {
       characterList.forEach((element) => {
@@ -24,11 +30,23 @@ export const MessageBubble = ({ messageBody, sender, characterList }) => {
   }, [characterList]);
 
   return (
-    <View style={[styles.item, verboseName ? styles.itemIn : styles.itemOut]}>
+    <View
+      style={[
+        styles.item,
+        verboseName ? styles.itemIn : styles.itemOut,
+        customStyles,
+      ]}
+    >
       <View
         style={[
           styles.balloon,
-          { backgroundColor: verboseName ? '#075E54' : '#1084ff' },
+          {
+            backgroundColor: !customColor
+              ? verboseName
+                ? '#075E54'
+                : '#1084ff'
+              : customColor,
+          },
         ]}
       >
         {!main && (

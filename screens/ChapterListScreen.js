@@ -12,6 +12,7 @@ import { ScrollView } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import ChapterApi from '../api/chapter';
 import { ChapterItem } from '../components/ChapterItem';
+import LoadingScreen from './LoadingScreen';
 
 export default ({ navigation, route }) => {
   const [chapterList, setChapterList] = useState([]);
@@ -67,7 +68,7 @@ export default ({ navigation, route }) => {
     });
   });
 
-  return (
+  return chapterList ? (
     <View style={styles.container}>
       <FlatList
         data={chapterList}
@@ -94,6 +95,8 @@ export default ({ navigation, route }) => {
         }}
       />
     </View>
+  ) : (
+    <LoadingScreen />
   );
 };
 

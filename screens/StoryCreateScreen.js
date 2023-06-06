@@ -95,53 +95,6 @@ const GenreBubble = React.memo(
   }
 );
 
-const GenreList_Old = ({ GENRES, setcategoryMain, categoryMain }) => {
-  return (
-    <FlatList
-      horizontal
-      showsHorizontalScrollIndicator={false}
-      data={GENRES}
-      keyExtractor={(item) => item.genreKey.toString()}
-      renderItem={({ item: { image, verboseName, genreKey } }) => (
-        <GenreBubble_Old
-          verboseName={verboseName}
-          image={image}
-          genreKey={genreKey}
-          setcategoryMain={setcategoryMain}
-          categoryMain={categoryMain}
-        />
-      )}
-    />
-  );
-};
-
-const GenreBubble_Old = React.memo(
-  ({ image, verboseName, genreKey, setcategoryMain, categoryMain }) => {
-    const imageSource = useMemo(() => image, [image]);
-
-    return (
-      <View style={{ flex: 1, flexDirection: 'row', marginHorizontal: 10 }}>
-        <TouchableOpacity
-          style={styles.genreContainer}
-          onPress={() => {
-            setcategoryMain(genreKey);
-          }}
-        >
-          <Image
-            style={
-              genreKey === categoryMain
-                ? styles.genrePicSelected
-                : styles.genrePic
-            }
-            source={imageSource}
-          />
-          <Text style={styles.genreText}>{verboseName}</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  }
-);
-
 export default ({ route, navigation }) => {
   /** STORY ID IN CASE IS UPDATE MODE */
   const [storyId, setStoryId] = useState(

@@ -249,6 +249,7 @@ export const UserStackScreen = () => {
         options={({ route }) => {
           return {
             title: route.params.storyName,
+            setReadStatus: route.params.setReadStatus,
           };
         }}
       />
