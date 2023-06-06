@@ -8,7 +8,6 @@ export const FirebaseContext = createContext();
 const FirebaseProvider = ({ children }) => {
   const [user, setUser] = useState(getAuth().currentUser || null);
   const [idToken, setIdToken] = useState(user ? getIdToken(user) : null);
-
   // initialize Firebase authentication
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {

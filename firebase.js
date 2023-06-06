@@ -2,16 +2,15 @@ import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 
 const firebaseConfig = {
-  apiKey:
-    process.env.REACT_APP_FIREBASE_API_KEY ||
-    'AIzaSyCpitxa6of07zmFhubpG6AH1o9BcGWI4GQ',
-  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.REACT_APP_FIREBASE_APP_ID,
-  measurementId: process.env.REACT_APP_FIREBASE_MEASUREMENT_ID,
+  apiKey: 'AIzaSyCpitxa6of07zmFhubpG6AH1o9BcGWI4GQ',
+  authDomain: 'chatbotstories.firebaseapp.com',
+  projectId: 'chatbotstories',
+  storageBucket: 'chatbotstories.appspot.com',
+  messagingSenderId: '355055867626',
+  appId: '1:355055867626:web:b192912fd935da751be993',
+  measurementId: 'G-H9MZ3606L3',
 };
 
-const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
+export const app =
+  getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 export const auth = getAuth(app);

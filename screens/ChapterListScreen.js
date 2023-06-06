@@ -20,7 +20,6 @@ export default ({ navigation, route }) => {
   // get chapters api
   useEffect(() => {
     ChapterApi.getChaptersForStory(route.params.storyId).then((response) => {
-      console.log(response);
       setChapterList(response);
     });
   }, [newItem, shouldRefresh]);
@@ -72,10 +71,18 @@ export default ({ navigation, route }) => {
     <View style={styles.container}>
       <FlatList
         data={chapterList}
-        renderItem={({ item: { title, description, _id }, index }) => {
+        renderItem={({ item: { title, description, _id, choices }, index }) => {
+          const choiceTexts = choices.map((choice) => {
+            const nextChapter = chapterList.find(
+              (chapter) => chapter._id === choice.nextChapter
+            );
+            return nextChapter ? nextChapter.title : '';
+          });
+          console.log(choiceTexts);
           return (
             <ChapterItem
               title={title}
+              choices={choiceTexts}
               onPress={() => {
                 navigation.navigate('Chat', {
                   chapterId: _id,

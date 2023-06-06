@@ -48,7 +48,6 @@ export default ({ route, navigation }) => {
       {feed &&
         feed.map((section) => {
           const str = /^g-/;
-          console.log(str.test(section.sectionTitle));
 
           section.name = str.test(section.sectionTitle)
             ? 'Genero'

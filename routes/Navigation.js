@@ -262,6 +262,16 @@ export const UserStackScreen = () => {
           };
         }}
       />
+      <UserStack.Screen
+        name="UserProfile"
+        component={ProfileScreen}
+        options={({ route }) => {
+          return {
+            title: `${route.params.username}`,
+            uid: route.params.uid,
+          };
+        }}
+      />
     </UserStack.Navigator>
   );
 };

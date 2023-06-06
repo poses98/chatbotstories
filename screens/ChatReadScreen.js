@@ -94,7 +94,7 @@ export default ({ navigation, route }) => {
   useEffect(() => {
     if (selectedChoice) {
       const scaleAnimation = Animated.spring(scaleSelectedValue, {
-        toValue: 1.5,
+        toValue: 1.3,
         useNativeDriver: true,
       });
 

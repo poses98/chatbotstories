@@ -144,7 +144,7 @@ export default ({ navigation, route }) => {
             {owned && (
               <TouchableOpacity
                 onPress={() => {
-                  navigation.navigate('StorySettings', { storyId: storyId });
+                  navigation.push('StorySettings', { storyId: storyId });
                 }}
                 style={{ paddingRight: 8 }}
               >
@@ -270,6 +270,14 @@ export default ({ navigation, route }) => {
     }
   }, [readStatus, data]);
 
+  const navigateToAuthorProfile = () => {
+    if (data.author) {
+      navigation.push('UserProfile', {
+        uid: data.author,
+        username: authorUserName,
+      });
+    }
+  };
   /**Review list */
   const [reviewList, setReviewList] = useState([]);
   /**Check if loaded */
@@ -291,14 +299,16 @@ export default ({ navigation, route }) => {
             {/**STORY NAME */}
             <Text style={styles.storyTitle}>{data.title} </Text>
             {/**STORY AUTHOR */}
-            <Text
-              style={[
-                styles.storyDescription,
-                { fontStyle: 'italic', fontSize: 12, marginBottom: 5 },
-              ]}
-            >
-              Written by {authorUserName}
-            </Text>
+            <TouchableOpacity onPress={navigateToAuthorProfile}>
+              <Text
+                style={[
+                  styles.storyDescription,
+                  { fontStyle: 'italic', fontSize: 12, marginBottom: 5 },
+                ]}
+              >
+                Written by {authorUserName}
+              </Text>
+            </TouchableOpacity>
             {/**STORY STATUS */}
 
             {/**STORY STATS */}

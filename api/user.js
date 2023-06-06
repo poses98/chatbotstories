@@ -72,6 +72,18 @@ class UserApi {
 
     return response;
   }
+
+  static async followUser(followUserId, userId, action) {
+    const response = await fetchWithAuth(
+      `${BASE_PATH}/${API_VERSION}/user/${followUserId}/follow?action=${action}`,
+      {
+        method: 'POST',
+        body: JSON.stringify({ userId, action }),
+        headers: { 'Content-Type': 'application/json' },
+      }
+    );
+    return response;
+  }
 }
 
 export default UserApi;

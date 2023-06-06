@@ -7,8 +7,22 @@ export const AuthContext = createContext();
 const AuthProvider = ({ children }) => {
   const [authUser, setAuthUser] = useState(null);
   const { user } = useFirebase();
+
+  const fetchUser = () => {
+    if (user) {
+      UserApi.getUserById(user.uid)
+        .then((response) => {
+          setAuthUser(response);
+        })
+        .catch((err) => {
+          /**TODO Handle error */
+          console.log(err);
+        });
+    }
+  };
+
   useEffect(() => {
-    if (!authUser && user) {
+    if (user) {
       UserApi.getUserById(user.uid)
         .then((response) => {
           setAuthUser(response);
@@ -21,7 +35,9 @@ const AuthProvider = ({ children }) => {
   }, [user]);
 
   return (
-    <AuthContext.Provider value={{ authUser }}>{children}</AuthContext.Provider>
+    <AuthContext.Provider value={{ authUser, fetchUser }}>
+      {children}
+    </AuthContext.Provider>
   );
 };
 

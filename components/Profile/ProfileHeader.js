@@ -2,17 +2,20 @@ import * as React from 'react';
 import { View, Text, StyleSheet, Image } from 'react-native';
 import A from 'react-native-a';
 import Button from '../Button';
-
+import app from '../../firebase';
 export default ({
   profilePic,
   name,
   web,
   description,
   posts,
-  followers,
-  following,
+  followersStats,
+  followingStats,
   image,
   navigation,
+  owned,
+  following,
+  followUser,
   ...data
 }) => {
   const EditProfileButton = () => {
@@ -23,6 +26,16 @@ export default ({
         onPress={() => {
           navigation.navigate('ProfileEdit');
         }}
+        buttonStyle={{ marginTop: 10 }}
+      />
+    );
+  };
+  const FollowButton = () => {
+    return (
+      <Button
+        text={following ? 'Unfollow' : 'Follow'}
+        textStyle={{ fontWeight: 'bold' }}
+        onPress={followUser}
         buttonStyle={{ marginTop: 10 }}
       />
     );
@@ -53,11 +66,11 @@ export default ({
           <Text style={styles.textInfo}>Stories</Text>
         </View>
         <View style={styles.infoBox}>
-          <Text style={styles.numberInfo}>{followers}</Text>
+          <Text style={styles.numberInfo}>{followersStats}</Text>
           <Text style={styles.textInfo}>Followers</Text>
         </View>
         <View style={styles.infoBox}>
-          <Text style={styles.numberInfo}>{following}</Text>
+          <Text style={styles.numberInfo}>{followingStats}</Text>
           <Text style={styles.textInfo}>Following</Text>
         </View>
       </View>
@@ -74,7 +87,7 @@ export default ({
         {description != '' && (
           <Text style={styles.profileDescription}>{description}</Text>
         )}
-        <EditProfileButton />
+        {owned ? <EditProfileButton /> : <FollowButton />}
       </View>
     </View>
   );

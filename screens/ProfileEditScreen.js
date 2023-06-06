@@ -7,29 +7,24 @@ import {
   TouchableOpacity,
   ScrollView,
   Alert,
+  Platform,
 } from 'react-native';
+import LabeledInput from '../components/LabeledInput';
 import { CommonActions } from '@react-navigation/native';
 import Colors from '../constants/Colors';
-import A from 'react-native-a';
-import LabeledInput from '../components/LabeledInput';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import * as ImagePicker from 'expo-image-picker';
 import UserApi from '../api/user';
 import useAuth from '../hooks/useAuth';
+import { getStorage, ref, uploadBytes } from 'firebase/storage';
 
 export default ({ navigation }) => {
-  const { authUser } = useAuth();
+  const { authUser, fetchUser } = useAuth();
   const [hasBeenChanges, setHasBeenChanges] = useState(false);
-  const [data, setData] = useState({
-    username: {
-      errorMessage: '',
-    },
-  });
+  const [data, setData] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
-  const [loading, setloading] = useState(false);
-  /**
-   * Getting the user data to show in the form
-   */
+  const [loading, setLoading] = useState(false);
+
   useEffect(() => {
     if (authUser) {
       UserApi.getUserById(authUser._id)
@@ -37,24 +32,17 @@ export default ({ navigation }) => {
           setData(response);
         })
         .catch((err) => {
-          /** TODO handle error */
+          console.error(err);
         });
     }
   }, [authUser]);
-  /**
-   * This function renders the icons in headerbar
-   */
+
   useLayoutEffect(() => {
     const renderStackBarIconRight = () => {
       return (
         <View style={{ flexDirection: 'row' }}>
           <TouchableOpacity
             onPress={async () => {
-              /* data.description = data.description
-                ? data.description.replace(/\r?\n|\r/, '').trim()
-                : '';
-              setData({ ...data, description }); */
-
               let usernameAvailable = true;
 
               if (data.username !== authUser.username) {
@@ -63,11 +51,12 @@ export default ({ navigation }) => {
               if (!usernameAvailable.exists) {
                 UserApi.updateUser(authUser._id, data)
                   .then((response) => {
-                    console.log(response);
-                    navigation.navigator.dispatch(CommonActions.goBack);
+                    fetchUser();
+                    uploadImage();
+                    navigation.navigate('Profile');
                   })
                   .catch((err) => {
-                    /** TODO handle error */
+                    console.error(err);
                   });
               } else {
                 setErrorMessage('Username is taken');
@@ -80,6 +69,7 @@ export default ({ navigation }) => {
         </View>
       );
     };
+
     const backButtonProfileEdit = () => {
       return (
         <View style={{ flexDirection: 'row' }}>
@@ -98,6 +88,7 @@ export default ({ navigation }) => {
         </View>
       );
     };
+
     navigation.setOptions({
       headerRight: renderStackBarIconRight,
       headerLeft: backButtonProfileEdit,
@@ -105,11 +96,8 @@ export default ({ navigation }) => {
         paddingRight: 10,
       },
     });
-  }, []);
+  }, [data, navigation, authUser, hasBeenChanges]);
 
-  /**
-   * This functioin shows an alert box alerting that changes won't be saved
-   */
   const changesWillNotBeSavedAlert = () =>
     Alert.alert(
       'Changes will not be saved',
@@ -129,9 +117,7 @@ export default ({ navigation }) => {
       ],
       { cancelable: true }
     );
-  //State variable for the image that will be uploaded to firebase storage
-  const [image, setImage] = useState(null);
-  //Checking for the media permission
+
   useEffect(() => {
     (async () => {
       if (Platform.OS !== 'web') {
@@ -143,33 +129,28 @@ export default ({ navigation }) => {
       }
     })();
   }, []);
+
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images, //type of media that is uploading
-      allowsEditing: true, //Only android iOS default 1:1
-      aspect: [1, 1], //aspect ratio for the pic.
-      quality: 0.1, //from 0 to 1 where 1 is max. quality
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.1,
       allowsMultipleSelection: false,
     });
 
-    console.log(result);
-
     if (!result.cancelled) {
-      setImage(result.uri);
+      setData({ ...data, image: result.uri });
       setHasBeenChanges(true);
     }
   };
 
   const uploadImage = () => {
-    uploadImageAsync(image, auth().currentUser.uid);
+    uploadImageAsync(data.image, authUser._id);
     navigation.dispatch(CommonActions.goBack());
   };
-  useEffect(() => {
-    console.log(data);
-  }, [data]);
+
   async function uploadImageAsync(uri, name) {
-    // Why are we using XMLHttpRequest? See:
-    // https://github.com/expo/expo/issues/2402#issuecomment-443726662
     const blob = await new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest();
       xhr.onload = function () {
@@ -183,61 +164,18 @@ export default ({ navigation }) => {
       xhr.open('GET', uri, true);
       xhr.send(null);
     });
-
-    const ref = firebase
-      .storage()
-      .ref()
-      .child('profilePictures/' + name);
-    const snapshot = await ref.put(blob);
+    const storage = getStorage();
+    const ref = ref(storage, 'profilePictures/' + name);
+    console.log(ref);
+    const snapshot = await uploadBytes(ref, blob);
 
     console.log('state: ' + snapshot.state);
-    // update user lastUpdate
-    // We're done with the blob, close and release it
+
     blob.close();
 
     return await snapshot.ref.getDownloadURL();
   }
 
-  /* async function downloadImage(userId) {
-    const ref = firebase
-      .storage()
-      .ref()
-      .child('profilePictures/' + userId);
-
-    await ref
-      .getDownloadURL()
-      .then(function (url) {
-        setImage(url);
-        setloading(false);
-      })
-      .catch(function (error) {
-        setloading(false);
-        // A full list of error codes is available at
-        // https://firebase.google.com/docs/storage/web/handle-errors
-        switch (error.code) {
-          case 'storage/object-not-found':
-            console.log("ERROR GETTING IMAGE: Storage doesn't exist");
-            break;
-
-          case 'storage/unauthorized':
-            // User doesn't have permission to access the object
-            console.log(
-              "ERROR GETTING IMAGE: User doesn't have permission to access the file."
-            );
-            break;
-
-          case 'storage/canceled':
-            // User canceled the upload
-            console.log('ERROR GETTING IMAGE: User cancelled operation');
-            break;
-
-          case 'storage/unknown':
-            // Unknown error occurred, inspect the server response
-            console.log('ERROR GETTING IMAGE: Unkwon error occurred');
-            break;
-        }
-      });
-  } */
   return (
     <ScrollView style={styles.container}>
       {!loading && data && (
@@ -245,21 +183,16 @@ export default ({ navigation }) => {
           <Image
             style={styles.profilePic}
             source={
-              image
-                ? { uri: image }
+              data.image
+                ? { uri: data.image }
                 : require('../assets/profilepicplaceholder.png')
             }
           />
-          <TouchableOpacity
-            onPress={() => {
-              pickImage();
-            }}
-          >
+          <TouchableOpacity onPress={pickImage}>
             <Text style={styles.changeProfilePicText}>
               Change profile picture
             </Text>
           </TouchableOpacity>
-
           <LabeledInput
             label="Name"
             text={data.name}
@@ -314,6 +247,7 @@ export default ({ navigation }) => {
             maxHeight={120}
             inputStyle={{ padding: 7.9, textAlignVertical: 'top' }}
           />
+          {/* Rest of the code remains the same */}
         </View>
       )}
       {loading && (

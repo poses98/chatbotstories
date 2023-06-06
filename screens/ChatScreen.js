@@ -212,13 +212,11 @@ export default ({ navigation, route }) => {
   };
 
   const updateChoices = (choices) => {
-    if (choices.length === 2) {
-      setChoices(choices);
-      ChapterApi.updateChapter(chapterId, { choices }).then((response) => {
-        console.log(response);
-        handleCloseModal();
-      });
-    }
+    setChoices(choices);
+    ChapterApi.updateChapter(chapterId, { choices }).then((response) => {
+      console.log(response);
+      handleCloseModal();
+    });
   };
 
   const removeMessage = (id) => {

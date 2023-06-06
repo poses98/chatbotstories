@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Animated } from 'react-native';
+import { View, Text, StyleSheet, Animated, Button } from 'react-native';
 import Colors from '../constants/Colors';
 
 const Countdown = ({ initialCount, handleTimeout }) => {
@@ -20,7 +20,6 @@ const Countdown = ({ initialCount, handleTimeout }) => {
         setCount((prevCount) => prevCount - 1);
         animation.start();
       }, 1000);
-      console.log(count);
       return () => {
         clearTimeout(timer);
       };
@@ -29,7 +28,7 @@ const Countdown = ({ initialCount, handleTimeout }) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.countdownText}>Next chapter</Text>
+      <Button title="Next story" />
       <View style={styles.progressBarContainer}>
         <Animated.View
           style={[

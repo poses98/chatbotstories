@@ -5,63 +5,113 @@ import StoryContainer from '../components/StoryContainer';
 import Colors from '../constants/Colors';
 import UserApi from '../api/user';
 import StoryApi from '../api/story';
-import useFirebase from '../hooks/useFirebase';
 import useAuth from '../hooks/useAuth';
 import useStories from '../hooks/useStories';
 
-const images = {
-  terror: require('../assets/terror.jpg'),
-  adventure: require('../assets/adventure.jpg'),
-  drama: require('../assets/drama.jpg'),
-  snow: require('../assets/snow.jpg'),
-};
-
 export default ({ route, navigation }) => {
-  // TODO isLoading for every single item from DB to be totally loaded!
-  const testId = '';
-  const TEST = false;
-  const { authUser } = useAuth();
+  const { authUser, fetchUser } = useAuth();
   const { userStories } = useStories();
-  const [owned, setOwned] = useState(false);
+  const [owned, setOwned] = useState(null);
   const [stories, setStories] = useState(null);
-  const [reloadStories, setReloadStories] = useState(false);
-  const [storyCont, setStoryCont] = useState(0);
   const [data, setData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [image, setImage] = useState(null);
+  const [following, setFollowing] = useState(false);
+
   //Get user information
   useEffect(() => {
-    if (!data && authUser) {
+    if (authUser && owned) {
       setData(authUser);
     }
-  }, [authUser]);
-
-  /*   useEffect(() => {
-    if (authUser) {
-      console.log(authUser._id);
-      StoryApi.getUserStories(authUser._id)
-        .then((response) => {
-          console.log(stories);
-          setStories(response);
-        })
-        .catch((err) => {
-          console.log(err);
-          
-        });
-    }
-  }, [authUser, route.params]);  */
+  }, [authUser, owned]);
 
   useEffect(() => {
-    if (userStories) {
+    if (userStories && owned) {
       setStories(userStories);
     }
-  }, [userStories]);
+  }, [userStories, owned]);
 
   useEffect(() => {
     if (data && stories) {
       setIsLoading(false);
     }
-  }, [data, stories]);
+  }, [data, stories, owned]);
+
+  useEffect(() => {
+    if (owned === false) {
+      StoryApi.getUserStories(route.params.uid).then((response) => {
+        setStories(response);
+      });
+      UserApi.getUserById(route.params.uid).then((response) => {
+        setData(response);
+      });
+    }
+  }, [owned]);
+
+  useEffect(() => {
+    console.log('Checking params');
+    if (route.params?.uid !== null && route.params?.uid !== undefined) {
+      console.log('Route params not empty..');
+      if (route.params.uid !== authUser._id) {
+        console.log('Not owned profile');
+        setOwned(false);
+      } else {
+        console.log('Owned profile');
+        setOwned(true);
+      }
+    } else {
+      setOwned(true);
+    }
+
+    return () => {
+      setOwned(null);
+    };
+  }, [route.params?.uid, authUser._id]);
+
+  useEffect(() => {
+    if (!owned) {
+      authUser.following.forEach((follow) => {
+        if (follow.user === route.params?.uid) {
+          setFollowing(true);
+        }
+      });
+    }
+    return () => {
+      setFollowing(false);
+    };
+  }, [owned]);
+
+  const handleFollow = async () => {
+    if (!owned) {
+      let t_followers = [];
+      if (data.followers.length > 0) {
+        data.followers.forEach((follow) => {
+          if (follow.user !== authUser._id && following) {
+            t_followers.push(follow);
+          }
+        });
+      } else {
+        t_followers.push({ user: authUser._id });
+      }
+
+      setData({ ...data, followers: t_followers });
+      console.log('Hey');
+      setFollowing(!following);
+      UserApi.followUser(
+        route.params.uid,
+        authUser._id,
+        following ? 'unfollow' : 'follow'
+      )
+        .then((response) => {
+          fetchUser();
+          console.log(response);
+        })
+        .catch((err) => {
+          setFollowing(!following);
+          console.error(err);
+        });
+    }
+  };
 
   async function downloadImage(userId) {
     const ref = firebase
@@ -114,11 +164,14 @@ export default ({ route, navigation }) => {
               web={data.website || ''}
               description={data.description || ''}
               posts={stories.length || 0}
-              followers={data.followers || 0}
-              following={data.following || 0}
+              followersStats={data.followers.length || 0}
+              followingStats={data.following.length || 0}
               navigation={navigation}
               userId={data.userId}
               image={image}
+              owned={owned}
+              followUser={handleFollow}
+              following={following}
             />
             {stories &&
               stories.map((item) => (
@@ -133,7 +186,7 @@ export default ({ route, navigation }) => {
                   likes={item.likes.count}
                   views="0"
                   onPress={() => {
-                    navigation.navigate('StoryInfo', {
+                    navigation.push('StoryInfo', {
                       title: item.title,
                       storyId: item._id,
                       username: item.author,

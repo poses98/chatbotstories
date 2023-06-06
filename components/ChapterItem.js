@@ -12,6 +12,7 @@ export const ChapterItem = ({
   currentIndex,
   finished,
   list,
+  choices,
 }) => {
   return (
     <View

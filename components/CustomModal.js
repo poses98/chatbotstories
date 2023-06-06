@@ -34,7 +34,6 @@ const CustomModal = ({ visible, onClose, children }) => {
           keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0}
         >
           {children}
-          <Button title="Close" onPress={onClose} />
         </KeyboardAvoidingView>
       </ScrollView>
     </Modal>
