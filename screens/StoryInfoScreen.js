@@ -18,6 +18,7 @@ import LoadingScreen from './LoadingScreen';
 import LikeButton from '../components/LikeButton';
 import ReviewBox from '../components/ReviewBox';
 import CustomModal from '../components/CustomModal';
+import ReviewForm from '../components/ReviewForm';
 
 export default ({ navigation, route }) => {
   const [isSaved, setIsSaved] = useState(false);
@@ -288,7 +289,7 @@ export default ({ navigation, route }) => {
   return !loading ? (
     <ScrollView style={styles.container}>
       <CustomModal visible={modalVisible} onClose={handleCloseModal}>
-        <Text>TODO</Text>
+        <ReviewForm storyId={storyId} handleFormSubmit={handleCloseModal} />
       </CustomModal>
       <View>
         {/**HEADER */}
