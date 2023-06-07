@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { View, TouchableOpacity, Text, Animated } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import Colors from '../constants/Colors';
@@ -9,6 +9,8 @@ export default function ReviewBox({
   date,
   body,
   handleReport,
+  handleProfileNavigate,
+  navigation,
 }) {
   const [rotationUp, setRotationUp] = useState(new Animated.Value(0));
   const [rotationDown, setRotationDown] = useState(new Animated.Value(0));
@@ -42,13 +44,26 @@ export default function ReviewBox({
     inputRange: [0, 1],
     outputRange: ['0deg', '-360deg'],
   });
+
+  const navigateToAuthorProfile = () => {
+    if (authorId) {
+      navigation.push('UserProfile', {
+        uid: authorId,
+        username: username,
+      });
+    }
+  };
+
+  function humanizeDate(dateString) {
+    const date = new Date(dateString);
+    return date.toLocaleString();
+  }
   return (
     <View
       style={{
         width: '95%',
         padding: 20,
         marginLeft: '2.5%',
-        borderWidth: 1,
       }}
     >
       <View
@@ -61,7 +76,10 @@ export default function ReviewBox({
         }}
       >
         <TouchableOpacity>
-          <Text style={{ fontSize: 19, color: Colors.blueGray }}>
+          <Text
+            style={{ fontSize: 19, color: Colors.blueGray }}
+            onPress={navigateToAuthorProfile}
+          >
             {username}
           </Text>
         </TouchableOpacity>
@@ -78,7 +96,7 @@ export default function ReviewBox({
               color: Colors.gray,
             }}
           >
-            {date}
+            {humanizeDate(date)}
           </Text>
         </View>
       </View>

@@ -270,13 +270,47 @@ export default ({ navigation, route }) => {
     }
   };
   /**Review list */
-  const [reviewList, setReviewList] = useState([]);
+  const [reviewList, setReviewList] = useState(null);
   /**Check if loaded */
   useEffect(() => {
     if (data && chapterList && authorUserName) {
       setloading(false);
     }
   }, [data, chapterList, readStatus, authorUserName]);
+
+  useEffect(() => {
+    if (data && chapterList && authorUserName) {
+      StoryApi.getReviews(storyId)
+        .then((response) => {
+          setReviewList(response.data.reviews);
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+    }
+  }, [data, chapterList, readStatus, authorUserName]);
+
+  const [hasWrittenReview, setHasWrittenReview] = useState(false);
+  const [reviewIndex, setReviewIndex] = useState(null);
+  useEffect(() => {
+    if (reviewList?.length > 0) {
+      const hasUserWrittenReview = reviewList.some(
+        (review) => review.user._id === authUser._id && review.story === storyId
+      );
+      setHasWrittenReview(hasUserWrittenReview);
+    } else {
+      setHasWrittenReview(false);
+    }
+  }, [reviewList]);
+
+  useEffect(() => {
+    if (hasWrittenReview) {
+      const index = reviewList.findIndex(
+        (review) => review.user._id === authUser._id && review.story === storyId
+      );
+      setReviewIndex(index);
+    }
+  }, [hasWrittenReview]);
 
   const handleOpenModal = () => {
     setModalVisible(true);
@@ -424,19 +458,21 @@ export default ({ navigation, route }) => {
         <Text
           style={{
             marginHorizontal: 15,
-            fontSize: 15,
+            fontSize: 23,
+            fontWeight: 200,
+            marginTop: 10,
             color: Colors.gray,
             textTransform: 'uppercase',
           }}
         >
           Chapter list
         </Text>
+
         <ScrollView
           style={{
             maxHeight: 250,
-            minHeight: 200,
             marginHorizontal: 15,
-            borderWidth: 1,
+            borderWidth: 0.5,
             borderColor: Colors.black,
             borderRadius: 10,
             overflow: 'scroll',
@@ -483,30 +519,98 @@ export default ({ navigation, route }) => {
             </View>
           )}
         </ScrollView>
+
         {/**Reviews */}
         <View
-          style={{ flex: 1, flexDirection: 'row', justifyContent: 'center' }}
+          style={{
+            flex: 1,
+            flexDirection: 'row',
+            justifyContent: 'self-start',
+            marginTop: 0,
+          }}
         >
           <Text
             style={{
-              marginHorizontal: 15,
-              marginVertical: 15,
-              fontSize: 15,
+              marginLeft: 15,
+              marginRight: 5,
+              fontSize: 23,
+              fontWeight: 200,
+              marginTop: 10,
               color: Colors.gray,
               textTransform: 'uppercase',
             }}
           >
             Reviews
           </Text>
-          <View style={{ flex: 1, alignSelf: 'center' }}>
-            <TouchableOpacity onPress={handleOpenModal}>
-              <Ionicons
-                name="add-circle-outline"
-                size={26}
-                color={Colors.gray}
-              />
-            </TouchableOpacity>
-          </View>
+        </View>
+
+        <View
+          style={{
+            marginBottom: 50,
+            width: '100%',
+            borderWidth: 0.75,
+            borderColor: Colors.lightGray,
+          }}
+        >
+          {/**Add review button */}
+          {!hasWrittenReview && reviewList && (
+            <View
+              style={{
+                flex: 1,
+                alignSelf: 'center',
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}
+            >
+              <TouchableOpacity
+                onPress={handleOpenModal}
+                style={{
+                  flex: 1,
+                  flexDirection: 'row',
+                  justifyContent: 'center',
+                  alignContent: 'center',
+                  borderWidth: 1,
+                  borderRadius: 10,
+                  marginVertical: 15,
+                  borderColor: Colors.gray,
+                  padding: 8,
+                  paddingHorizontal: 15,
+                }}
+              >
+                <Ionicons
+                  name="add-circle-outline"
+                  size={15}
+                  color={Colors.gray}
+                  style={{ alignSelf: 'center' }}
+                />
+                <Text
+                  style={{
+                    alignSelf: 'center',
+                    fontSize: 15,
+                    color: Colors.gray,
+                  }}
+                >
+                  Add review
+                </Text>
+              </TouchableOpacity>
+            </View>
+          )}
+          {reviewList?.length > 0 &&
+            reviewList.map((review, index) => (
+              <React.Fragment key={review._id}>
+                <ReviewBox
+                  navigation={navigation}
+                  username={review.user.username}
+                  body={review.body}
+                  date={review.lastUpdate.toLocaleString()}
+                  authorId={review.user._id}
+                />
+                {index < reviewList.length - 1 && (
+                  <View style={styles.separator} />
+                )}
+              </React.Fragment>
+            ))}
+          {!reviewList && <LoadingScreen small />}
         </View>
       </View>
       {error && !loading && (
@@ -576,5 +680,10 @@ const styles = StyleSheet.create({
   storyStats: {
     flexDirection: 'row',
     alignItems: 'center',
+  },
+  separator: {
+    borderBottomWidth: 0.75,
+    borderBottomColor: Colors.lightGray,
+    marginVertical: 10,
   },
 });

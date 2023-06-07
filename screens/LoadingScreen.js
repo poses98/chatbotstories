@@ -2,12 +2,13 @@ import React, { useRef, useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
 import LottieView from 'lottie-react-native';
 
-export default () => {
+export default ({ small }) => {
   const animation = useRef(null);
-  useEffect(() => {
-    // You can control the ref programmatically, rather than using autoPlay
-    // animation.current?.play();
-  }, []);
+
+  const lottieSource = small
+    ? require('../assets/lottie/99589-small-loader.json')
+    : require('../assets/lottie/29311-chat-loader.json');
+
   return (
     <View style={styles.container}>
       <LottieView
@@ -17,7 +18,7 @@ export default () => {
           width: 130,
           height: 130,
         }}
-        source={require('../assets/lottie/29311-chat-loader.json')}
+        source={lottieSource}
       />
     </View>
   );

@@ -17,7 +17,7 @@ export const ChapterItem = ({
   return (
     <View
       style={{
-        borderTopWidth: !list && !(index === 0) ? 1 : 0,
+        borderTopWidth: !list && !(index === 0) ? 0.55 : 0,
         borderColor: Colors.gray,
       }}
     >
@@ -91,7 +91,7 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     fontSize: 17,
-    fontWeight: 'normal',
+    fontWeight: 300,
     paddingLeft: 15,
   },
   settingsButton: {

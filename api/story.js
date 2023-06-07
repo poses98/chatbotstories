@@ -24,6 +24,16 @@ class StoryApi {
     return response;
   }
 
+  static async getReviews(storyId) {
+    const response = await fetchWithAuth(
+      `${BASE_PATH}/${API_VERSION}/stories/${storyId}/reviews`,
+      {
+        method: 'GET',
+      }
+    );
+    return response;
+  }
+
   static async updateStory(storyId, updatedStory) {
     console.log(updatedStory);
     const response = await fetchWithAuth(
