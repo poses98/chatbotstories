@@ -158,17 +158,27 @@ export default ({ navigation, route }) => {
   });
   /**Getting the messages from the db */
   useEffect(() => {
+    console.log('Fetching messages');
     if (route.params && route.params.chapterId && !messages) {
-      ChapterApi.getChapterById(route.params.chapterId).then((response) => {
-        setMessages(response.messages);
-        if (response.choices.length > 0) {
-          setChoices(response.choices);
-          console.log('There are choices');
-          console.log(response.choices);
-        }
-      });
+      ChapterApi.getChapterById(route.params.chapterId)
+        .then((response) => {
+          console.log('Chapter fetch');
+          setMessages(response.messages);
+          if (response.choices.length > 0) {
+            setChoices(response.choices);
+            console.log('There are choices');
+            console.log(response.choices);
+          }
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+    } else {
+      if (!route.params) console.log('No route params!');
+      if (!route.params?.chapterId) console.log('No route params chapterId');
+      if (messages) console.log('Messages not empty!');
     }
-  });
+  }, [route.params, messages]);
 
   const nextChapterFromChoice = (choice) => {
     const { setReadStatus } = route.params;
@@ -192,6 +202,8 @@ export default ({ navigation, route }) => {
   };
 
   const updateReadingMessages = () => {
+    console.log('Updating reading messages..');
+    console.log(messages);
     if (!finished) {
       if (messages && messages.length > readingIndex) {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -215,6 +227,8 @@ export default ({ navigation, route }) => {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
         setFinished(true);
       }
+    } else {
+      console.log('Finished');
     }
   };
   return (
